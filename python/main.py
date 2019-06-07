@@ -20,7 +20,6 @@ import IPython.display as ipd
 import librosa.display
 
 import plotly.offline as py
-py.init_notebook_mode(connected=True)
 import plotly.graph_objs as go
 import plotly.tools as tls
 import pandas as pd
@@ -45,17 +44,14 @@ for filename in glob.glob(os.path.join(path, '*.wav')):
         file_names.append(filename)
         sample_rate, sample = wavfile.read(filename)
         sample = sample[:, 0]
-
         for i in xrange(0,len(sample)-30000,10000):
             samp0=sample[i:i+30000]
             lab=2
             if (np.max(abs(samp0)) < 500.0):
                 lab=0
-
             samples.append(samp0)
             sample_rates.append(sample_rate)
             labels.append(lab)
-
     except:
         pass
 
