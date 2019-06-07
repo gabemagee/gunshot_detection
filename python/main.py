@@ -35,7 +35,6 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras import Input, layers
 from tensorflow.keras import backend as K
 
-%matplotlib inline
 path = "data/gunshot"
 files = os.listdir(path)
 samples=[]
@@ -95,7 +94,7 @@ def log_specgram(audio, sample_rate, window_size=20,step_size=10, eps=1e-10):
                                     noverlap=noverlap,
                                     detrend=False)
     return freqs, times, np.log(spec.T.astype(np.float32) + eps)
-    
+
 i=15
 samp=samples[i]
 sr=sample_rates[i]
