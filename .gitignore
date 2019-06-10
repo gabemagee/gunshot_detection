@@ -92,6 +92,7 @@ venv.bak/
 
 #data
 REU_data/
+.REU_data
 
 # Spyder project settings
 .spyderproject
