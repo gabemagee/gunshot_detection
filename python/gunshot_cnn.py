@@ -45,7 +45,7 @@ sample_slice_iteration = 0
 gunshot_aggregator = {}
 glassbreak_aggregator = {}
 
-gunshot_sound_dir = "~/Datasets/gunshot_data/gunshot/"
+gunshot_sound_dir = "/home/amorehe/Datasets/gunshot_data/gunshot/"
 
 for file in os.listdir(gunshot_sound_dir):
     if file.endswith(".wav"):
@@ -67,7 +67,7 @@ for file in os.listdir(gunshot_sound_dir):
             #print("Gunshot sound unrecognized by Librosa:", sample)
             pass
         
-gunshot_sound_dir = "~/Datasets/gunshot_data/glassbreak/"
+gunshot_sound_dir = "/home/amorehe/Datasets/gunshot_data/glassbreak/"
 
 print("...Switching to glassbreak sounds...")
 
