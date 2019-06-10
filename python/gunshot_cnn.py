@@ -21,7 +21,6 @@ from sklearn.decomposition import PCA
 
 # Visualization
 import IPython.display as ipd
-import librosa.display
 import plotly.offline as py
 import plotly.graph_objs as go
 import plotly.tools as tls
