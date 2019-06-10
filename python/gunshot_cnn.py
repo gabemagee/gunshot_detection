@@ -14,7 +14,6 @@ from pathlib import Path
 import numpy as np
 from scipy.fftpack import fft
 from scipy import signal
-from scipy.io import wavfile
 import librosa
 
 # Dimension Reduction
@@ -31,6 +30,7 @@ import plotly.tools as tls
 
 # Data Pre-processing
 import pandas as pd
+import soundfile
 from sklearn.model_selection import KFold
 
 # Deep Learning
@@ -52,47 +52,78 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 samples=[]
 sample_rates=[]
 labels = []
+sample_slice_iteration = 0
+gunshot_aggregator = {}
+glassbreak_aggregator = {}
 
 gunshot_sound_dir = "/home/alexm/Datasets/gunshot_data/gunshot/"
 
 for file in os.listdir(gunshot_sound_dir):
     if file.endswith(".wav"):
         try:
-            sample_rate, sample = wavfile.read(gunshot_sound_dir + file)
-            sample = sample[:,0]
-            for i in range(0, sample.size - 30000, 10000):
-                sample_slice = sample[i : i + 30000]
+            sample, sample_rate = librosa.load(gunshot_sound_dir + file)
+            for i in range(0, sample.size - 44100, 44100):
+                sample_slice = sample[i : i + 44100]
                 label = 2
-                if np.max(abs(sample_slice)) < 500.0:
+                gunshot_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
+                sample_slice_iteration += 1
+                if np.max(abs(sample_slice)) < 0.25:
                     label = 0
 
                 samples.append(sample_slice)
                 sample_rates.append(sample_rate)
                 labels.append(label)
         except:
+            sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
+            #print("Gunshot sound unrecognized by Librosa:", sample)
             pass
         
 glassbreak_sound_dir = "/home/alexm/Datasets/gunshot_data/glassbreak/"
 
+print("...Switching to glassbreak sounds...")
+
 for file in os.listdir(glassbreak_sound_dir):
     if file.endswith(".wav"):
         try:
-            sample_rate, sample = wavfile.read(glassbreak_sound_dir + file)
-            sample = sample[:,0]
-            for i in range(0, sample.size - 30000, 10000):
-                sample_slice = sample[i : i + 30000]
+            sample, sample_rate = librosa.load(glassbreak_sound_dir + file)
+            for i in range(0, sample.size - 44100, 44100):
+                sample_slice = sample[i : i + 44100]
                 label = 1
-                if np.max(abs(sample_slice)) < 500.0:
+                glassbreak_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
+                sample_slice_iteration += 1
+                if np.max(abs(sample_slice)) < 0.5:
                     label = 0
 
                 samples.append(sample_slice)
                 sample_rates.append(sample_rate)
                 labels.append(label)
         except:
+            sample, sample_rate = soundfile.read(glassbreak_sound_dir + file)
+            print("Glassbreak sound unrecognized by Librosa:", sample)
             pass
 
 
 # In[3]:
+
+
+glassbreak_aggregator_inverted = dict([[v, k] for k, v in glassbreak_aggregator.items()])
+for sl in sorted(glassbreak_aggregator.values(), reverse=True):
+    print("Max value for slice #" + str(glassbreak_aggregator_inverted[sl]) + " is " + str(sl))
+
+
+# In[4]:
+
+
+print(len(samples))
+i=744
+samp=samples[i]
+sr=sample_rates[i]
+print(np.max(abs(samp)))
+print(labels[i])
+ipd.Audio(samp, rate=sr)
+
+
+# In[5]:
 
 
 def log_specgram(audio, sample_rate, window_size=20,
@@ -108,7 +139,7 @@ def log_specgram(audio, sample_rate, window_size=20,
     return freqs, times, np.log(spec.T.astype(np.float32) + eps)
 
 
-# In[4]:
+# In[6]:
 
 
 i=15
@@ -133,17 +164,7 @@ ax2.set_ylabel('Freqs in Hz')
 ax2.set_xlabel('Seconds')
 
 
-# In[5]:
-
-
-i=2
-samp=samples[i]
-sr=sample_rates[i]
-print(labels[i])
-ipd.Audio(samp, rate=sr)
-
-
-# In[6]:
+# In[7]:
 
 
 kf = KFold(n_splits=3, shuffle=True)
@@ -155,7 +176,7 @@ for train_index, test_index in kf.split(samples):
     train_label, test_label = labels[train_index], labels[test_index]
 
 
-# In[7]:
+# In[10]:
 
 
 # Parameters
@@ -164,28 +185,28 @@ generations = 20000
 num_gens_to_wait = 250
 batch_size = 256
 drop_out_rate = 0.2
-input_shape = (30000,1)
+input_shape = (44100,1)
 
 
-# In[8]:
+# In[11]:
 
 
 #For Conv1D add Channel
 train_wav = np.array(train_wav)
 test_wav = np.array(test_wav)
-train_wav = train_wav.reshape(-1,30000,1)
-test_wav = test_wav.reshape(-1,30000,1)
+train_wav = train_wav.reshape(-1,44100,1)
+test_wav = test_wav.reshape(-1,44100,1)
 train_label = keras.utils.to_categorical(train_label, 3)
 test_label = keras.utils.to_categorical(test_label, 3)
 
 
-# In[9]:
+# In[13]:
 
 
 print(train_wav.shape)
 
 
-# In[10]:
+# In[14]:
 
 
 input_tensor = Input(shape=input_shape)
@@ -217,13 +238,13 @@ model.compile(loss=keras.losses.categorical_crossentropy,
              metrics=['accuracy'])
 
 
-# In[11]:
+# In[15]:
 
 
 model.summary()
 
 
-# In[12]:
+# In[16]:
 
 
 model.fit(train_wav, train_label, 
@@ -233,36 +254,36 @@ model.fit(train_wav, train_label,
           verbose=1)
 
 
-# In[20]:
+# In[26]:
 
 
 Y_test_pred = model.predict(test_wav)
-y_classes = Y_test_pred.argmax(axis=-1)
-y_test= test_label.argmax(axis=-1)
-wrong_examples = np.nonzero(y_classes != y_test)
+y_predicted_classes_test = Y_test_pred.argmax(axis=-1)
+y_actual_classes_test= test_label.argmax(axis=-1)
+wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
 
 
-# In[21]:
+# In[18]:
 
 
 print(wrong_examples)
 
 
-# In[15]:
+# In[19]:
 
 
-i=2
-samp=np.reshape(test_wav[i],30000,)
+i=1
+samp=np.reshape(test_wav[i],44100,)
 sr=sample_rates[i]
 print(y_test[i],Y_test_pred[i])
 ipd.Audio(samp, rate=sr)
 
 
-# In[16]:
+# In[ ]:
 
 
-i=10
-samp=np.reshape(test_wav[i],30000,)
+i=5
+samp=np.reshape(test_wav[i],44100,)
 sr=sample_rates[i]
 print(y_test[i],Y_test_pred[i])
 ipd.Audio(samp, rate=sr)
@@ -271,8 +292,8 @@ ipd.Audio(samp, rate=sr)
 # In[17]:
 
 
-i=44
-samp=np.reshape(test_wav[i],30000,)
+i=19
+samp=np.reshape(test_wav[i],44100,)
 sr=sample_rates[i]
 print(y_test[i],Y_test_pred[i])
 ipd.Audio(samp, rate=sr)
@@ -281,8 +302,8 @@ ipd.Audio(samp, rate=sr)
 # In[18]:
 
 
-i=60
-samp=np.reshape(test_wav[i],30000,)
+i=41
+samp=np.reshape(test_wav[i],44100,)
 sr=sample_rates[i]
 print(y_test[i],Y_test_pred[i])
 ipd.Audio(samp, rate=sr)
@@ -291,8 +312,8 @@ ipd.Audio(samp, rate=sr)
 # In[19]:
 
 
-i=20
-samp=np.reshape(test_wav[i],30000,)
+i=50
+samp=np.reshape(test_wav[i],44100,)
 sr=sample_rates[i]
 print(y_test[i],Y_test_pred[i])
 ipd.Audio(samp, rate=sr)
