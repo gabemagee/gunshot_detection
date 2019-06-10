@@ -21,9 +21,6 @@ from sklearn.decomposition import PCA
 
 # Visualization
 import IPython.display as ipd
-import plotly.offline as py
-import plotly.graph_objs as go
-import plotly.tools as tls
 
 # Data Pre-processing
 import pandas as pd
@@ -36,11 +33,6 @@ import tensorflow.keras as keras
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras import Input, layers
 from tensorflow.keras import backend as K
-
-# Configuration
-py.init_notebook_mode(connected=True)
-
-get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 # In[2]:
