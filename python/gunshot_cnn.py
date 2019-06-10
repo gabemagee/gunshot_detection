@@ -20,7 +20,6 @@ import librosa
 from sklearn.decomposition import PCA
 
 # Visualization
-import matplotlib.pyplot as plt
 import seaborn as sns
 import IPython.display as ipd
 import librosa.display
@@ -148,13 +147,13 @@ sr=sample_rates[i]
 
 freqs, times, spectrogram = log_specgram(samp, sr)
 
-fig = plt.figure(figsize=(14, 8))
-ax1 = fig.add_subplot(211)
+# fig = plt.figure(figsize=(14, 8))
+# ax1 = fig.add_subplot(211)
 ax1.set_title('Raw wave of ' + file)
 ax1.set_ylabel('Amplitude')
 ax1.plot(np.linspace(0, 1,samp.size), samp)
 
-ax2 = fig.add_subplot(212)
+# ax2 = fig.add_subplot(212)
 ax2.imshow(spectrogram.T, aspect='auto', origin='lower', 
            extent=[times.min(), times.max(), freqs.min(), freqs.max()])
 ax2.set_yticks(freqs[::16])
