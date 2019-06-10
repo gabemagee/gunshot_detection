@@ -67,7 +67,7 @@ for file in os.listdir(gunshot_sound_dir):
             #print("Gunshot sound unrecognized by Librosa:", sample)
             pass
         
-gunshot_sound_dir = "/home/amorehe/Datasets/gunshot_data/glassbreak/"
+glassbreak_sound_dir = "/home/amorehe/Datasets/gunshot_data/glassbreak/"
 
 print("...Switching to glassbreak sounds...")
 
