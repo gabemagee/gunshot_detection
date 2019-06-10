@@ -20,7 +20,6 @@ import librosa
 from sklearn.decomposition import PCA
 
 # Visualization
-import seaborn as sns
 import IPython.display as ipd
 import librosa.display
 import plotly.offline as py
