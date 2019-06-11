@@ -137,7 +137,7 @@ print(sound_types.loc[0,'Class'])
 urban_aggregator = {}
 j=0
 #read in all of the wav files similar to above
-urban_sound_dir = "/REU_Data/GUNWAV"
+urban_sound_dir = "/REU_Data/Train/"
 print(os.listdir(urban_sound_dir))
 
 for file in os.listdir(urban_sound_dir):
