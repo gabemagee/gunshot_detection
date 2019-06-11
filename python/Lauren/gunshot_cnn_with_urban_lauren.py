@@ -105,7 +105,7 @@ for file in os.listdir(gunshot_sound_dir):
             print("Gunshot sound unrecognized by Librosa:" + file)
             pass
         
-print("size of samples currently = " + len(samples))
+print("size of samples currently = " + str(len(samples)))
 #glassbreak_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/glassbreak/"
 glassbreak_sound_dir = "/home/lauogden/data/glassbreak/"
 
@@ -134,7 +134,7 @@ for file in os.listdir(glassbreak_sound_dir):
             print("Glassbreak sound unrecognized by Librosa:" + file)
             pass
 
-print("size of samples is now: " + len(samples))
+print("size of samples is now: " + str(len(samples)))
 
 
 # In[ ]:
@@ -181,6 +181,8 @@ for file in os.listdir(urban_sound_dir):
             #sample, sample_rate = soundfile.read(urban_sound_dir + file)
             print("Urban sound unrecognized by Librosa:" + file)
             pass
+
+print("size of samples: " + str(len(samples)))
 
 
 # In[23]:
