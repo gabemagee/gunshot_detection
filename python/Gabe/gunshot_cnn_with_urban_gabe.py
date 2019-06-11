@@ -47,6 +47,9 @@ from tensorflow.keras import backend as K
 
 # In[ ]:
 
+cwd = os.getcwd()
+print(cwd)
+
 with tf.device('/cpu:0'):
     print("__1")
     a = tf.test.is_gpu_available()
