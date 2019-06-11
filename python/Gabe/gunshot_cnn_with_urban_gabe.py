@@ -52,6 +52,7 @@ def get_available_gpus():
 
 
 # In[ ]:
+print(tf.test.gpu_device_name())
 print(get_available_gpus())
 cwd = os.getcwd()+"/REU_Data/"
 print(cwd)
