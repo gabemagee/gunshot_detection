@@ -31,7 +31,7 @@ import plotly.tools as tls
 # Data Pre-processing
 import pandas as pd
 from sklearn.model_selection import KFold
-import soundfile
+#import soundfile
 
 # Deep Learning
 import tensorflow as tf
@@ -47,7 +47,7 @@ py.init_notebook_mode(connected=True)
 #%matplotlib inline
 
 
-# In[18]:
+# In[19]:
 
 
 # EDITED TO HAVE ONLY 2 LABELS: 1 for gunshot, 0 for everything else
@@ -60,7 +60,7 @@ gunshot_aggregator = {}
 glassbreak_aggregator = {}
 
 gunshot_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/gunshot/"
-#gunshot_sound_dir = "/home/lauogden/data/gunshot/"
+# gunshot_sound_dir = "/home/lauogden/data/gunshot/"
 
 for file in os.listdir(gunshot_sound_dir):
     if file.endswith(".wav"):
@@ -73,10 +73,8 @@ for file in os.listdir(gunshot_sound_dir):
         if len(sample) < 44100:
             sample_slice = np.zeros((44100,))
             sample_slice = sample[0 : sample.size]
-            
             samples.append(sample_slice)
             sample_rates.append(sample_rate)
-            
             label = 1
             gunshot_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
             sample_slice_iteration += 1
@@ -106,9 +104,8 @@ for file in os.listdir(gunshot_sound_dir):
             #sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
             #print("Gunshot sound unrecognized by Librosa:", sample)
             #pass
-
-print(len(samples))
         
+print("size of samples currently = " + len(samples))
 glassbreak_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/glassbreak/"
 #glassbreak_sound_dir = "/home/lauogden/data/glassbreak/"
 
@@ -118,10 +115,10 @@ for file in os.listdir(glassbreak_sound_dir):
     if file.endswith(".wav"):
         try:
             sample, sample_rate = librosa.load(glassbreak_sound_dir + file)
-            #print("    read the file" + file)
+            print("    read the file" + file)
             for i in range(0, sample.size - 44100, 44100):
                 sample_slice = sample[i : i + 44100]
-                #print("    sliced the file" + file)
+                print("    sliced the file" + file)
                 label = 0
                 glassbreak_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
                 sample_slice_iteration += 1
@@ -136,6 +133,8 @@ for file in os.listdir(glassbreak_sound_dir):
             sample, sample_rate = soundfile.read(glassbreak_sound_dir + file)
             print("Glassbreak sound unrecognized by Librosa:", sample)
             pass
+
+print("size of samples is now: " + len(samples))
 
 
 # In[ ]:
