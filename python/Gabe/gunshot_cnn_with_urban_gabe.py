@@ -47,7 +47,7 @@ from tensorflow.keras import backend as K
 
 # In[ ]:
 
-cwd = os.getcwd()
+cwd = os.getcwd()+"/REU_Data/"
 print(cwd)
 
 with tf.device('/cpu:0'):
