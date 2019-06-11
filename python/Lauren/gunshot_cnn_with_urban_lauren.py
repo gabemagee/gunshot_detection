@@ -47,7 +47,7 @@ py.init_notebook_mode(connected=True)
 #%matplotlib inline
 
 
-# In[7]:
+# In[18]:
 
 
 # EDITED TO HAVE ONLY 2 LABELS: 1 for gunshot, 0 for everything else
@@ -60,27 +60,36 @@ gunshot_aggregator = {}
 glassbreak_aggregator = {}
 
 gunshot_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/gunshot/"
-# gunshot_sound_dir = "/home/lauogden/data/gunshot/"
+#gunshot_sound_dir = "/home/lauogden/data/gunshot/"
 
 for file in os.listdir(gunshot_sound_dir):
     if file.endswith(".wav"):
         #try:
-        print("FILENAME: " + gunshot_sound_dir + file)
+        #print("FILENAME: " + gunshot_sound_dir + file)
         sample, sample_rate = librosa.load(gunshot_sound_dir + file)
-        print("    read the file " + file)
+        #print("    read the file " + file)
 
         #add the 2 second long samples to the list of sample slices
-        if len(sample) == 44100:
+        if len(sample) < 44100:
+            sample_slice = np.zeros((44100,))
+            sample_slice = sample[0 : sample.size]
+            
             samples.append(sample_slice)
             sample_rates.append(sample_rate)
+            
+            label = 1
+            gunshot_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
+            sample_slice_iteration += 1
+            if np.max(abs(sample_slice)) < 0.25:
+                label = 0
             labels.append(label)
-            print("    appended the slice")
-            print("    size of samples is: " + str(len(samples)))
+            #print("    appended the slice")
+            #print("    size of samples is: " + str(len(samples)))
 
         #slice clips longer than 2 seconds long
         for i in range(0, sample.size - 44100, 44100):
             sample_slice = sample[i : i + 44100]
-            print("    sliced the file " + file)
+            #print("    sliced the file " + file)
             label = 1
             gunshot_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
             sample_slice_iteration += 1
@@ -90,13 +99,15 @@ for file in os.listdir(gunshot_sound_dir):
             samples.append(sample_slice)
             sample_rates.append(sample_rate)
             labels.append(label)
-            print("    appended the slice")
-            print("    size of samples is: " + str(len(samples)))
+            #print("    appended the slice")
+            #print("    size of samples is: " + str(len(samples)))
 
         #except:
             #sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
             #print("Gunshot sound unrecognized by Librosa:", sample)
             #pass
+
+print(len(samples))
         
 glassbreak_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/glassbreak/"
 #glassbreak_sound_dir = "/home/lauogden/data/glassbreak/"
@@ -107,10 +118,10 @@ for file in os.listdir(glassbreak_sound_dir):
     if file.endswith(".wav"):
         try:
             sample, sample_rate = librosa.load(glassbreak_sound_dir + file)
-            print("    read the file" + file)
+            #print("    read the file" + file)
             for i in range(0, sample.size - 44100, 44100):
                 sample_slice = sample[i : i + 44100]
-                print("    sliced the file" + file)
+                #print("    sliced the file" + file)
                 label = 0
                 glassbreak_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
                 sample_slice_iteration += 1
@@ -120,7 +131,7 @@ for file in os.listdir(glassbreak_sound_dir):
                 samples.append(sample_slice)
                 sample_rates.append(sample_rate)
                 labels.append(label)
-                print("    appended the slice")
+                #print("    appended the slice")
         except:
             sample, sample_rate = soundfile.read(glassbreak_sound_dir + file)
             print("Glassbreak sound unrecognized by Librosa:", sample)
