@@ -20,13 +20,7 @@ import librosa
 from sklearn.decomposition import PCA
 
 # Visualization
-import matplotlib.pyplot as plt
-import seaborn as sns
 import IPython.display as ipd
-import librosa.display
-import plotly.offline as py
-import plotly.graph_objs as go
-import plotly.tools as tls
 
 # Data Pre-processing
 import pandas as pd
@@ -40,11 +34,6 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras import Input, layers
 from tensorflow.keras import backend as K
 
-# Configuration
-py.init_notebook_mode(connected=True)
-
-get_ipython().run_line_magic('matplotlib', 'inline')
-
 
 # In[2]:
 
@@ -56,7 +45,7 @@ sample_slice_iteration = 0
 gunshot_aggregator = {}
 glassbreak_aggregator = {}
 
-gunshot_sound_dir = "/home/alexm/Datasets/gunshot_data/gunshot/"
+gunshot_sound_dir = "/home/amorehe/Datasets/gunshot_data/gunshot/"
 
 for file in os.listdir(gunshot_sound_dir):
     if file.endswith(".wav"):
@@ -75,12 +64,12 @@ for file in os.listdir(gunshot_sound_dir):
                 labels.append(label)
         except:
             sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
-            #print("Gunshot sound unrecognized by Librosa:", sample)
+            print("Gunshot sound unrecognized by Librosa:", sample)
             pass
         
-glassbreak_sound_dir = "/home/alexm/Datasets/gunshot_data/glassbreak/"
+glassbreak_sound_dir = "/home/amorehe/Datasets/gunshot_data/glassbreak/"
 
-print("...Switching to glassbreak sounds...")
+print("...\nSwitching to glassbreak sounds\n...")
 
 for file in os.listdir(glassbreak_sound_dir):
     if file.endswith(".wav"):
@@ -137,31 +126,6 @@ def log_specgram(audio, sample_rate, window_size=20,
                                     noverlap=noverlap,
                                     detrend=False)
     return freqs, times, np.log(spec.T.astype(np.float32) + eps)
-
-
-# In[6]:
-
-
-i=15
-samp=samples[i]
-sr=sample_rates[i]
-
-freqs, times, spectrogram = log_specgram(samp, sr)
-
-fig = plt.figure(figsize=(14, 8))
-ax1 = fig.add_subplot(211)
-ax1.set_title('Raw wave of ' + file)
-ax1.set_ylabel('Amplitude')
-ax1.plot(np.linspace(0, 1,samp.size), samp)
-
-ax2 = fig.add_subplot(212)
-ax2.imshow(spectrogram.T, aspect='auto', origin='lower', 
-           extent=[times.min(), times.max(), freqs.min(), freqs.max()])
-ax2.set_yticks(freqs[::16])
-ax2.set_xticks(times[::16])
-ax2.set_title('Spectrogram of ' + file)
-ax2.set_ylabel('Freqs in Hz')
-ax2.set_xlabel('Seconds')
 
 
 # In[7]:
@@ -275,7 +239,7 @@ print(wrong_examples)
 i=1
 samp=np.reshape(test_wav[i],44100,)
 sr=sample_rates[i]
-print(y_test[i],Y_test_pred[i])
+print(y_actual_classes_test[i],y_predicted_classes_test[i])
 ipd.Audio(samp, rate=sr)
 
 
@@ -285,7 +249,7 @@ ipd.Audio(samp, rate=sr)
 i=5
 samp=np.reshape(test_wav[i],44100,)
 sr=sample_rates[i]
-print(y_test[i],Y_test_pred[i])
+print(y_actual_classes_test[i],y_predicted_classes_test[i])
 ipd.Audio(samp, rate=sr)
 
 
@@ -295,7 +259,7 @@ ipd.Audio(samp, rate=sr)
 i=19
 samp=np.reshape(test_wav[i],44100,)
 sr=sample_rates[i]
-print(y_test[i],Y_test_pred[i])
+print(y_actual_classes_test[i],y_predicted_classes_test[i])
 ipd.Audio(samp, rate=sr)
 
 
@@ -305,7 +269,7 @@ ipd.Audio(samp, rate=sr)
 i=41
 samp=np.reshape(test_wav[i],44100,)
 sr=sample_rates[i]
-print(y_test[i],Y_test_pred[i])
+print(y_actual_classes_test[i],y_predicted_classes_test[i])
 ipd.Audio(samp, rate=sr)
 
 
@@ -315,18 +279,6 @@ ipd.Audio(samp, rate=sr)
 i=50
 samp=np.reshape(test_wav[i],44100,)
 sr=sample_rates[i]
-print(y_test[i],Y_test_pred[i])
+print(y_actual_classes_test[i],y_predicted_classes_test[i])
 ipd.Audio(samp, rate=sr)
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
 
