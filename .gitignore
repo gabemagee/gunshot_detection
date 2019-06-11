@@ -94,6 +94,9 @@ venv.bak/
 REU_Data/
 .REU_Data
 
+#Mac
+.DS_Store
+
 # Spyder project settings
 .spyderproject
 .spyproject
