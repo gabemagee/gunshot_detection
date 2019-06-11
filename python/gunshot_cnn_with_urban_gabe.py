@@ -54,7 +54,7 @@ with tf.device('/cpu:0'):
 
 with tf.device("/device:GPU:0"):
     print("__2")
-    a = tf.test.is_gpu_available()
+    a = tf.test.is_gpu_available(cuda_only=False)
     print(a)
 
 
