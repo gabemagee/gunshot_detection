@@ -1,14 +1,9 @@
-<<<<<<< HEAD
 
-=======
-#!/usr/bin/env python
->>>>>>> 62fc1caead4cfbb5a56689dcc41edfb65815105e
-# coding: utf-8
 
 # In[1]:
 
 
-# File Directory 
+# File Directory
 import glob
 import os
 from os.path import isdir, join
@@ -96,7 +91,7 @@ for file in os.listdir(gunshot_sound_dir):
             sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
             #print("Gunshot sound unrecognized by Librosa:", sample)
             pass
-        
+
 glassbreak_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/glassbreak/"
 
 print("...Switching to glassbreak sounds...")
@@ -220,7 +215,7 @@ ax1.set_ylabel('Amplitude')
 ax1.plot(np.linspace(0, 1,samp.size), samp)
 
 ax2 = fig.add_subplot(212)
-ax2.imshow(spectrogram.T, aspect='auto', origin='lower', 
+ax2.imshow(spectrogram.T, aspect='auto', origin='lower',
            extent=[times.min(), times.max(), freqs.min(), freqs.max()])
 ax2.set_yticks(freqs[::16])
 ax2.set_xticks(times[::16])
@@ -313,9 +308,9 @@ model.summary()
 # In[16]:
 
 
-model.fit(train_wav, train_label, 
+model.fit(train_wav, train_label,
           validation_data=[test_wav, test_label],
-          batch_size=batch_size, 
+          batch_size=batch_size,
           epochs=50,
           verbose=1)
 
