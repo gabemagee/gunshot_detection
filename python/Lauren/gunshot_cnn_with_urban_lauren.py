@@ -59,55 +59,55 @@ sample_slice_iteration = 0
 gunshot_aggregator = {}
 glassbreak_aggregator = {}
 
-gunshot_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/gunshot/"
-# gunshot_sound_dir = "/home/lauogden/data/gunshot/"
+#gunshot_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/gunshot/"
+gunshot_sound_dir = "/home/lauogden/data/gunshot/"
 
 for file in os.listdir(gunshot_sound_dir):
     if file.endswith(".wav"):
-        #try:
-        #print("FILENAME: " + gunshot_sound_dir + file)
-        sample, sample_rate = librosa.load(gunshot_sound_dir + file)
-        #print("    read the file " + file)
+        try:
+            #print("FILENAME: " + gunshot_sound_dir + file)
+            sample, sample_rate = librosa.load(gunshot_sound_dir + file)
+            #print("    read the file " + file)
 
-        #add the 2 second long samples to the list of sample slices
-        if len(sample) < 44100:
-            sample_slice = np.zeros((44100,))
-            sample_slice = sample[0 : sample.size]
-            samples.append(sample_slice)
-            sample_rates.append(sample_rate)
-            label = 1
-            gunshot_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
-            sample_slice_iteration += 1
-            if np.max(abs(sample_slice)) < 0.25:
-                label = 0
-            labels.append(label)
-            #print("    appended the slice")
-            #print("    size of samples is: " + str(len(samples)))
+            #add the 2 second long samples to the list of sample slices
+            if len(sample) < 44100:
+                sample_slice = np.zeros((44100,))
+                sample_slice = sample[0 : sample.size]
+                samples.append(sample_slice)
+                sample_rates.append(sample_rate)
+                label = 1
+                gunshot_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
+                sample_slice_iteration += 1
+                if np.max(abs(sample_slice)) < 0.25:
+                    label = 0
+                labels.append(label)
+                #print("    appended the slice")
+                #print("    size of samples is: " + str(len(samples)))
 
-        #slice clips longer than 2 seconds long
-        for i in range(0, sample.size - 44100, 44100):
-            sample_slice = sample[i : i + 44100]
-            #print("    sliced the file " + file)
-            label = 1
-            gunshot_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
-            sample_slice_iteration += 1
-            if np.max(abs(sample_slice)) < 0.25:
-                label = 0
+            #slice clips longer than 2 seconds long
+            for i in range(0, sample.size - 44100, 44100):
+                sample_slice = sample[i : i + 44100]
+                #print("    sliced the file " + file)
+                label = 1
+                gunshot_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
+                sample_slice_iteration += 1
+                if np.max(abs(sample_slice)) < 0.25:
+                    label = 0
 
-            samples.append(sample_slice)
-            sample_rates.append(sample_rate)
-            labels.append(label)
-            #print("    appended the slice")
-            #print("    size of samples is: " + str(len(samples)))
+                samples.append(sample_slice)
+                sample_rates.append(sample_rate)
+                labels.append(label)
+                #print("    appended the slice")
+                #print("    size of samples is: " + str(len(samples)))
 
-        #except:
-            #sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
-            #print("Gunshot sound unrecognized by Librosa:", sample)
-            #pass
+        except:
+            sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
+            print("Gunshot sound unrecognized by Librosa:", sample)
+            pass
         
 print("size of samples currently = " + len(samples))
-glassbreak_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/glassbreak/"
-#glassbreak_sound_dir = "/home/lauogden/data/glassbreak/"
+#glassbreak_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/glassbreak/"
+glassbreak_sound_dir = "/home/lauogden/data/glassbreak/"
 
 print("...Switching to glassbreak sounds...")
 
@@ -141,8 +141,8 @@ print("size of samples is now: " + len(samples))
 
 
 #read in the csv file of descriptors for all other urban sounds
-sound_types = pd.read_csv("/Users/laurenogden/school/iupui/gunshot/data/train/train.csv")
-#sound_types = pd.read_csv("/home/lauogden/data/train/train.csv")
+#sound_types = pd.read_csv("/Users/laurenogden/school/iupui/gunshot/data/train/train.csv")
+sound_types = pd.read_csv("/home/lauogden/data/train/train.csv")
 print(sound_types.loc[0,'Class'])
 
 
@@ -150,8 +150,8 @@ print(sound_types.loc[0,'Class'])
 urban_aggregator = {}
 j=0
 #read in all of the wav files similar to above
-urban_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/train/Train/"
-#urban_sound_dir = "/home/lauogden/data/train/Train/"
+#urban_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/train/Train/"
+urban_sound_dir = "/home/lauogden/data/train/Train/"
 
 print(os.listdir(urban_sound_dir))
 
