@@ -101,8 +101,8 @@ for file in os.listdir(gunshot_sound_dir):
                 #print("    size of samples is: " + str(len(samples)))
 
         except:
-            sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
-            print("Gunshot sound unrecognized by Librosa:", sample)
+            #sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
+            print("Gunshot sound unrecognized by Librosa:" + file)
             pass
         
 print("size of samples currently = " + len(samples))
@@ -130,8 +130,8 @@ for file in os.listdir(glassbreak_sound_dir):
                 labels.append(label)
                 #print("    appended the slice")
         except:
-            sample, sample_rate = soundfile.read(glassbreak_sound_dir + file)
-            print("Glassbreak sound unrecognized by Librosa:", sample)
+            #sample, sample_rate = soundfile.read(glassbreak_sound_dir + file)
+            print("Glassbreak sound unrecognized by Librosa:" + file)
             pass
 
 print("size of samples is now: " + len(samples))
@@ -178,8 +178,8 @@ for file in os.listdir(urban_sound_dir):
                 print("    appended the slice")
             j +=1
         except:
-            sample, sample_rate = soundfile.read(urban_sound_dir + file)
-            print("Urban sound unrecognized by Librosa:", sample)
+            #sample, sample_rate = soundfile.read(urban_sound_dir + file)
+            print("Urban sound unrecognized by Librosa:" + file)
             pass
 
 
