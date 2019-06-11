@@ -39,6 +39,12 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras import Input, layers
 from tensorflow.keras import backend as K
 
+from tensorflow.python.client import device_lib
+
+def get_available_gpus():
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos if x.device_type == 'GPU']
+
 # Configuration
 #py.init_notebook_mode(connected=True)
 #get_ipython().magic(u'matplotlib inline')
@@ -46,7 +52,7 @@ from tensorflow.keras import backend as K
 
 
 # In[ ]:
-
+print(get_available_gpus())
 cwd = os.getcwd()+"/REU_Data/"
 print(cwd)
 
