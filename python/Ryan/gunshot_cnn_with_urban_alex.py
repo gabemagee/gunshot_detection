@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[7]:
 
 
 # File Directory 
@@ -31,7 +31,7 @@ import plotly.tools as tls
 # Data Pre-processing
 import pandas as pd
 from sklearn.model_selection import KFold
-#import soundfile
+import soundfile
 
 # Deep Learning
 import tensorflow as tf
@@ -39,18 +39,15 @@ import tensorflow.keras as keras
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras import Input, layers
 from tensorflow.keras import backend as K
-from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 
 # Configuration
 py.init_notebook_mode(connected=True)
 
-#%matplotlib inline
+get_ipython().run_line_magic('matplotlib', 'inline')
 
 
-# In[19]:
+# In[8]:
 
-
-# EDITED TO HAVE ONLY 2 LABELS: 1 for gunshot, 0 for everything else
 
 samples=[]
 sample_rates=[]
@@ -59,36 +56,15 @@ sample_slice_iteration = 0
 gunshot_aggregator = {}
 glassbreak_aggregator = {}
 
-#gunshot_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/gunshot/"
-gunshot_sound_dir = "/home/lauogden/data/gunshot/"
+gunshot_sound_dir = "/home/amorehe/Datasets/gunshot_data/gunshot/"
 
 for file in os.listdir(gunshot_sound_dir):
     if file.endswith(".wav"):
         try:
-            #print("FILENAME: " + gunshot_sound_dir + file)
             sample, sample_rate = librosa.load(gunshot_sound_dir + file)
-            #print("    read the file " + file)
-
-            #add the 2 second long samples to the list of sample slices
-            if len(sample) < 44100:
-                sample_slice = np.zeros((44100,))
-                sample_slice = sample[0 : sample.size]
-                samples.append(sample_slice)
-                sample_rates.append(sample_rate)
-                label = 1
-                gunshot_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
-                sample_slice_iteration += 1
-                if np.max(abs(sample_slice)) < 0.25:
-                    label = 0
-                labels.append(label)
-                #print("    appended the slice")
-                #print("    size of samples is: " + str(len(samples)))
-
-            #slice clips longer than 2 seconds long
             for i in range(0, sample.size - 44100, 44100):
                 sample_slice = sample[i : i + 44100]
-                #print("    sliced the file " + file)
-                label = 1
+                label = 2
                 gunshot_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
                 sample_slice_iteration += 1
                 if np.max(abs(sample_slice)) < 0.25:
@@ -97,17 +73,12 @@ for file in os.listdir(gunshot_sound_dir):
                 samples.append(sample_slice)
                 sample_rates.append(sample_rate)
                 labels.append(label)
-                #print("    appended the slice")
-                #print("    size of samples is: " + str(len(samples)))
-
         except:
-            #sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
-            print("Gunshot sound unrecognized by Librosa:" + file)
+            sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
+            #print("Gunshot sound unrecognized by Librosa:", sample)
             pass
         
-print("size of samples currently = " + len(samples))
-#glassbreak_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/glassbreak/"
-glassbreak_sound_dir = "/home/lauogden/data/glassbreak/"
+glassbreak_sound_dir = "/home/amorehe/Datasets/gunshot_data/glassbreak/"
 
 print("...Switching to glassbreak sounds...")
 
@@ -115,56 +86,45 @@ for file in os.listdir(glassbreak_sound_dir):
     if file.endswith(".wav"):
         try:
             sample, sample_rate = librosa.load(glassbreak_sound_dir + file)
-            print("    read the file" + file)
             for i in range(0, sample.size - 44100, 44100):
                 sample_slice = sample[i : i + 44100]
-                print("    sliced the file" + file)
-                label = 0
+                label = 1
                 glassbreak_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
                 sample_slice_iteration += 1
-                # if np.max(abs(sample_slice)) < 0.5:
-                    # label = 0
+                if np.max(abs(sample_slice)) < 0.5:
+                    label = 0
 
                 samples.append(sample_slice)
                 sample_rates.append(sample_rate)
                 labels.append(label)
-                #print("    appended the slice")
         except:
-            #sample, sample_rate = soundfile.read(glassbreak_sound_dir + file)
-            print("Glassbreak sound unrecognized by Librosa:" + file)
+            sample, sample_rate = soundfile.read(glassbreak_sound_dir + file)
+            print("Glassbreak sound unrecognized by Librosa:", sample)
             pass
 
-print("size of samples is now: " + len(samples))
 
-
-# In[ ]:
+# In[6]:
 
 
 #read in the csv file of descriptors for all other urban sounds
-#sound_types = pd.read_csv("/Users/laurenogden/school/iupui/gunshot/data/train/train.csv")
-sound_types = pd.read_csv("/home/lauogden/data/train/train.csv")
+sound_types = pd.read_csv("/home/amorehe/Datasets/urban_sound_labels.csv")
 print(sound_types.loc[0,'Class'])
-
-
 
 urban_aggregator = {}
 j=0
 #read in all of the wav files similar to above
-#urban_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/train/Train/"
-urban_sound_dir = "/home/lauogden/data/train/Train/"
-
+urban_sound_dir = "/home/amorehe/Datasets/urban_sounds/"
 print(os.listdir(urban_sound_dir))
 
 for file in os.listdir(urban_sound_dir):
     if file.endswith(".wav"):
         try:
             sample, sample_rate = librosa.load(urban_sound_dir + file)
-            print("    read the file" + file)
+            print("librosa read the file ok #" + str(j))
             for i in range(0, sample.size - 44100, 44100):
                 sample_slice = sample[i : i + 44100]
-                print("    sliced the file" + file)
                 if(sound_types.loc[j, 'Class'] == "gun_shot"):
-                    label = 1
+                    label = 2
                 else:
                     label = 0
                 urban_aggregator[sample_slice_iteration] = np.max(abs(sample_slice))
@@ -175,11 +135,10 @@ for file in os.listdir(urban_sound_dir):
                 samples.append(sample_slice)
                 sample_rates.append(sample_rate)
                 labels.append(label)
-                print("    appended the slice")
             j +=1
         except:
-            #sample, sample_rate = soundfile.read(urban_sound_dir + file)
-            print("Urban sound unrecognized by Librosa:" + file)
+            sample, sample_rate = soundfile.read(urban_sound_dir + file)
+            print("Urban sound unrecognized by Librosa:", sample)
             pass
 
 
@@ -196,16 +155,13 @@ for sl in sorted(glassbreak_aggregator.values(), reverse=True):
 # In[24]:
 
 
-print("number of samples: ")
 print(len(samples))
-'''
 i=744
 samp=samples[i]
 sr=sample_rates[i]
 print(np.max(abs(samp)))
 print(labels[i])
 ipd.Audio(samp, rate=sr)
-'''
 
 
 # In[25]:
@@ -333,24 +289,6 @@ model.compile(loss=keras.losses.categorical_crossentropy,
 model.summary()
 
 
-# In[ ]:
-
-
-# add callbacks to stop early if it stops improving
-model_filename = 'cnnmodel_w_urban.pkl' 
-callbacks = [
-    EarlyStopping(monitor='val_acc',
-                  patience=10,
-                  verbose=1,
-                  mode='auto'),
-    
-    ModelCheckpoint(model_filename, monitor='val_acc',
-                    verbose=1,
-                    save_best_only=True,
-                    mode='auto'),
-]
-
-
 # In[16]:
 
 
@@ -376,9 +314,64 @@ wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
 print(wrong_examples)
 
 
+# In[19]:
+
+
+i=1
+samp=np.reshape(test_wav[i],44100,)
+sr=sample_rates[i]
+print(y_test[i],Y_test_pred[i])
+ipd.Audio(samp, rate=sr)
+
+
 # In[ ]:
 
 
-# save the model
-model.save("model_w_urban.h5")
+i=5
+samp=np.reshape(test_wav[i],44100,)
+sr=sample_rates[i]
+print(y_test[i],Y_test_pred[i])
+ipd.Audio(samp, rate=sr)
+
+
+# In[17]:
+
+
+i=19
+samp=np.reshape(test_wav[i],44100,)
+sr=sample_rates[i]
+print(y_test[i],Y_test_pred[i])
+ipd.Audio(samp, rate=sr)
+
+
+# In[18]:
+
+
+i=41
+samp=np.reshape(test_wav[i],44100,)
+sr=sample_rates[i]
+print(y_test[i],Y_test_pred[i])
+ipd.Audio(samp, rate=sr)
+
+
+# In[19]:
+
+
+i=50
+samp=np.reshape(test_wav[i],44100,)
+sr=sample_rates[i]
+print(y_test[i],Y_test_pred[i])
+ipd.Audio(samp, rate=sr)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
 
