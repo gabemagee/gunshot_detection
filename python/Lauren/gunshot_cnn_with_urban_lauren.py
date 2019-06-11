@@ -65,6 +65,7 @@ gunshot_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/gunshot/"
 for file in os.listdir(gunshot_sound_dir):
     if file.endswith(".wav"):
         #try:
+        print("FILENAME: " + gunshot_sound_dir + file)
         sample, sample_rate = librosa.load(gunshot_sound_dir + file)
         print("    read the file " + file)
 
