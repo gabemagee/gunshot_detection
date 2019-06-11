@@ -52,6 +52,7 @@ def get_available_gpus():
 
 
 # In[ ]:
+print(tf.test.gpu_device_name())
 print(get_available_gpus())
 cwd = os.getcwd()+"/REU_Data/"
 print(cwd)
@@ -77,7 +78,7 @@ sample_slice_iteration = 0
 gunshot_aggregator = {}
 glassbreak_aggregator = {}
 
-gunshot_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/gunshot/"
+gunshot_sound_dir = "/REU_Data/gunshot_data/gunshot/"
 
 for file in os.listdir(gunshot_sound_dir):
     if file.endswith(".wav"):
@@ -99,7 +100,7 @@ for file in os.listdir(gunshot_sound_dir):
             #print("Gunshot sound unrecognized by Librosa:", sample)
             pass
 
-glassbreak_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/glassbreak/"
+glassbreak_sound_dir = "/REU_Data/gunshot_data/glassbreak/"
 
 print("...Switching to glassbreak sounds...")
 
@@ -128,7 +129,7 @@ for file in os.listdir(glassbreak_sound_dir):
 
 
 #read in the csv file of descriptors for all other urban sounds
-sound_types = pd.read_csv("/Users/laurenogden/school/iupui/gunshot/data/train/train.csv")
+sound_types = pd.read_csv("/REU_Data/train.csv")
 print(sound_types.loc[0,'Class'])
 
 
@@ -136,7 +137,7 @@ print(sound_types.loc[0,'Class'])
 urban_aggregator = {}
 j=0
 #read in all of the wav files similar to above
-urban_sound_dir = "/Users/laurenogden/school/iupui/gunshot/data/train/Train/"
+urban_sound_dir = "/REU_Data/GUNWAV"
 print(os.listdir(urban_sound_dir))
 
 for file in os.listdir(urban_sound_dir):
