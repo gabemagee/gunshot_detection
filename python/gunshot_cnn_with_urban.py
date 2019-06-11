@@ -41,21 +41,14 @@ from tensorflow.keras import backend as K
 
 # Configuration
 py.init_notebook_mode(connected=True)
-
-<<<<<<< HEAD
 get_ipython().magic(u'matplotlib inline')
-=======
 get_ipython().run_line_magic('matplotlib', 'inline')
->>>>>>> 62fc1caead4cfbb5a56689dcc41edfb65815105e
 
 
 # In[ ]:
 
 
-<<<<<<< HEAD
-=======
 print("hi")
->>>>>>> 62fc1caead4cfbb5a56689dcc41edfb65815105e
 a = tf.test.is_gpu_available()
 print(a)
 
@@ -378,9 +371,6 @@ samp=np.reshape(test_wav[i],44100,)
 sr=sample_rates[i]
 print(y_test[i],Y_test_pred[i])
 ipd.Audio(samp, rate=sr)
-
-<<<<<<< HEAD
-=======
 
 # In[ ]:
 
