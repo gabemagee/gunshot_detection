@@ -1,9 +1,10 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[7]:
 
 
-# In[1]:
-
-
-# File Directory
+# File Directory 
 import glob
 import os
 from os.path import isdir, join
@@ -39,36 +40,13 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras import Input, layers
 from tensorflow.keras import backend as K
 
-from tensorflow.python.client import device_lib
-
-def get_available_gpus():
-    local_device_protos = device_lib.list_local_devices()
-    return [x.name for x in local_device_protos if x.device_type == 'GPU']
-
 # Configuration
-#py.init_notebook_mode(connected=True)
-#get_ipython().magic(u'matplotlib inline')
-#get_ipython().run_line_magic('matplotlib', 'inline')
+py.init_notebook_mode(connected=True)
+
+get_ipython().run_line_magic('matplotlib', 'inline')
 
 
-# In[ ]:
-print(tf.test.gpu_device_name())
-print(get_available_gpus())
-cwd = os.getcwd()+"/REU_Data/"
-print(cwd)
-
-with tf.device('/cpu:0'):
-    print("__1")
-    a = tf.test.is_gpu_available()
-    print(a)
-
-with tf.device("/device:GPU:0"):
-    print("__2")
-    a = tf.test.is_gpu_available()
-    print(a)
-
-
-# In[2]:
+# In[8]:
 
 
 samples=[]
@@ -78,7 +56,7 @@ sample_slice_iteration = 0
 gunshot_aggregator = {}
 glassbreak_aggregator = {}
 
-gunshot_sound_dir = "/REU_Data/gunshot_data/gunshot/"
+gunshot_sound_dir = "/home/amorehe/Datasets/gunshot_data/gunshot/"
 
 for file in os.listdir(gunshot_sound_dir):
     if file.endswith(".wav"):
@@ -99,8 +77,8 @@ for file in os.listdir(gunshot_sound_dir):
             sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
             #print("Gunshot sound unrecognized by Librosa:", sample)
             pass
-
-glassbreak_sound_dir = "/REU_Data/gunshot_data/glassbreak/"
+        
+glassbreak_sound_dir = "/home/amorehe/Datasets/gunshot_data/glassbreak/"
 
 print("...Switching to glassbreak sounds...")
 
@@ -125,19 +103,17 @@ for file in os.listdir(glassbreak_sound_dir):
             pass
 
 
-# In[ ]:
+# In[6]:
 
 
 #read in the csv file of descriptors for all other urban sounds
-sound_types = pd.read_csv("/REU_Data/train.csv")
+sound_types = pd.read_csv("/home/amorehe/Datasets/urban_sound_labels.csv")
 print(sound_types.loc[0,'Class'])
-
-
 
 urban_aggregator = {}
 j=0
 #read in all of the wav files similar to above
-urban_sound_dir = "/REU_Data/Train/"
+urban_sound_dir = "/home/amorehe/Datasets/urban_sounds/"
 print(os.listdir(urban_sound_dir))
 
 for file in os.listdir(urban_sound_dir):
@@ -223,7 +199,7 @@ ax1.set_ylabel('Amplitude')
 ax1.plot(np.linspace(0, 1,samp.size), samp)
 
 ax2 = fig.add_subplot(212)
-ax2.imshow(spectrogram.T, aspect='auto', origin='lower',
+ax2.imshow(spectrogram.T, aspect='auto', origin='lower', 
            extent=[times.min(), times.max(), freqs.min(), freqs.max()])
 ax2.set_yticks(freqs[::16])
 ax2.set_xticks(times[::16])
@@ -316,9 +292,9 @@ model.summary()
 # In[16]:
 
 
-model.fit(train_wav, train_label,
+model.fit(train_wav, train_label, 
           validation_data=[test_wav, test_label],
-          batch_size=batch_size,
+          batch_size=batch_size, 
           epochs=50,
           verbose=1)
 
@@ -387,10 +363,15 @@ sr=sample_rates[i]
 print(y_test[i],Y_test_pred[i])
 ipd.Audio(samp, rate=sr)
 
+
+# In[ ]:
+
+
+
+
+
 # In[ ]:
 
 
 
 
-
-# In[ ]:
