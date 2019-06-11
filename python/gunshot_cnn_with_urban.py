@@ -40,9 +40,9 @@ from tensorflow.keras import Input, layers
 from tensorflow.keras import backend as K
 
 # Configuration
-py.init_notebook_mode(connected=True)
-get_ipython().magic(u'matplotlib inline')
-get_ipython().run_line_magic('matplotlib', 'inline')
+#py.init_notebook_mode(connected=True)
+#get_ipython().magic(u'matplotlib inline')
+#get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 # In[ ]:
