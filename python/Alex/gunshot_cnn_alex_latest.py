@@ -34,9 +34,6 @@ import plotly.tools as tls
 
 
 import pandas as pd
-import librosa
-import soundfile
-import re
 from sklearn.model_selection import KFold
 
 
@@ -70,7 +67,6 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
 py.init_notebook_mode(connected=True)
-get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 # # Initialization of Variables
@@ -84,172 +80,13 @@ sampling_rate_per_two_seconds = 44100
 input_shape = (sampling_rate_per_two_seconds, 1)
 
 
-# # Data Pre-Processing
-
-# ## Acquiring gunshot sound data
-
-# In[ ]:
-
-
-gunshot_sound_dir = "/home/alexm/Datasets/gunshot_data/gunshot/"
-print("...Parsing gunshot sounds...")
-
-for file in os.listdir(gunshot_sound_dir):
-    if file.endswith(".wav"):
-        try:
-            #### Adding 2 second-long samples to the list of samples
-            sample, sample_rate = librosa.load(gunshot_sound_dir + file)
-            
-            if len(sample) <= sampling_rate_per_two_seconds:
-                label = 1
-                number_of_missing_hertz = sampling_rate_per_two_seconds - len(sample)
-                padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
-                if np.max(abs(sample)) < 0.25:
-                    label = 0
-                    
-                samples.append(padded_sample)
-                labels.append(label)
-            else:
-                for i in range(0, sample.size - sampling_rate_per_two_seconds, sampling_rate_per_two_seconds):
-                    sample_slice = sample[i : i + sampling_rate_per_two_seconds]
-                    label = 1
-                    if np.max(abs(sample_slice)) < 0.25:
-                        label = 0
-                        
-                    samples.append(sample_slice)
-                    labels.append(label)
-        except:
-            sample, sample_rate = soundfile.read(gunshot_sound_dir + file)
-            print("Gunshot sound unrecognized by Librosa:", sample)
-            pass
-
-print("The number of samples of available for training is currently " + str(len(samples)) + '.')
-print("The number of labels of available for training is currently " + str(len(labels)) + '.')
-
-
-# ## Acquiring sound data from examples of glass breaking
-
-# In[ ]:
-
-
-glassbreak_sound_dir = "/home/alexm/Datasets/gunshot_data/glassbreak/"
-print("...Parsing sounds of glass breaking...")
-
-for file in os.listdir(glassbreak_sound_dir):
-    if file.endswith(".wav"):
-        try:
-            #### Adding 2 second-long samples to the list of samples
-            sample, sample_rate = librosa.load(glassbreak_sound_dir + file)
-            
-            if len(sample) <= sampling_rate_per_two_seconds:
-                label = 0
-                number_of_missing_hertz = sampling_rate_per_two_seconds - len(sample)
-                padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
-
-                samples.append(padded_sample)
-                labels.append(label)
-            else:
-                for i in range(0, sample.size - sampling_rate_per_two_seconds, sampling_rate_per_two_seconds):
-                    sample_slice = sample[i : i + sampling_rate_per_two_seconds]
-                    label = 0
-
-                    samples.append(sample_slice)
-                    labels.append(label)
-        except:
-            sample, sample_rate = soundfile.read(glassbreak_sound_dir + file)
-            print("Glassbreak sound unrecognized by Librosa:", sample)
-            pass
-
-print("The number of samples of available for training is currently " + str(len(samples)) + '.')
-print("The number of labels of available for training is currently " + str(len(labels)) + '.')
-
-
-# ## Reading in the CSV file of descriptors for all other kinds of urban sounds
-
-# In[ ]:
-
-
-sound_types = pd.read_csv("/home/alexm/Datasets/urban_sound_labels.csv")
-
-
-# ## Reading in all of the urban sound data WAV files
-
-# In[ ]:
-
-
-urban_sound_dir = "/home/alexm/Datasets/urban_sounds/"
-print("...Parsing urban sounds...")
-urban_sound_iterator = 0
-
-for file in sorted(os.listdir(urban_sound_dir)):
-    if file.endswith(".wav"):
-        try:
-            # Adding 2 second-long samples to the list of samples
-            urban_sound_iterator = int(re.search(r'\d+', file).group())
-            sample, sample_rate = librosa.load(urban_sound_dir + file)
-            prescribed_label = sound_types.loc[sound_types["ID"] == urban_sound_iterator, "Class"].values[0]
-            
-            if len(sample) <= sampling_rate_per_two_seconds:
-                label = 1
-                number_of_missing_hertz = sampling_rate_per_two_seconds - len(sample)
-                padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
-                if prescribed_label != "gun_shot":
-                    label = 0
-                elif np.max(abs(sample)) < 0.25:
-                    label = 0
-
-                samples.append(padded_sample)
-                labels.append(label)
-            else:
-                for i in range(0, sample.size - sampling_rate_per_two_seconds, sampling_rate_per_two_seconds):
-                    sample_slice = sample[i : i + sampling_rate_per_two_seconds]
-                    if prescribed_label != "gun_shot":
-                        label = 0
-                    elif np.max(abs(sample_slice)) < 0.25:
-                        label = 0
-
-                    samples.append(sample_slice)
-                    labels.append(label)
-
-        except:
-            sample, sample_rate = soundfile.read(urban_sound_dir + file)
-            print("Urban sound not recognized by Librosa:", file)
-            pass
-
-print("The number of samples of available for training is currently " + str(len(samples)) + '.')
-print("The number of labels of available for training is currently " + str(len(labels)) + '.')
-
-
-# ## Saving samples and labels as numpy array files
-
-# In[ ]:
-
-
-np.save("/home/alexm/Datasets/gunshot_sound_samples.npy", samples)
-np.save("/home/alexm/Datasets/gunshot_sound_labels.npy", labels)
-
-
 # ## Loading sample file and label file as numpy arrays
 
 # In[ ]:
 
 
-samples = np.load("/home/alexm/Datasets/gunshot_sound_samples.npy")
-labels = np.load("/home/alexm/Datasets/gunshot_sound_labels.npy")
-
-
-# ### Optional debugging after processing the data
-
-# In[ ]:
-
-
-i = 0  # You can change the value of 'i' to adjust which sample is being inspected.
-sample=samples[i]
-sample_rate=22050
-print("The number of samples available to the model for training is " + str(len(samples)) + '.')
-print("The maximum frequency value in sample slice #" + str(i) + " is " + str(np.max(abs(sample))) + '.')
-print("The label associated with sample slice #" + str(i) + " is " + str(labels[i]) + '.')
-ipd.Audio(sample, rate=sample_rate)
+samples = np.load("/home/amorehe/Datasets/gunshot_sound_samples.npy")
+labels = np.load("/home/amorehe/Datasets/gunshot_sound_labels.npy")
 
 
 # ## Arranging the data
@@ -291,7 +128,7 @@ print(train_wav.shape)
 # In[ ]:
 
 
-model = load_model("/home/alexm/Datasets/gunshot_sound_full_model.h5")
+model = load_model("/home/amorehe/Datasets/gunshot_sound_full_model.h5")
 
 
 # ## Model Parameters
@@ -344,7 +181,7 @@ model.compile(loss=keras.losses.binary_crossentropy,
 # In[ ]:
 
 
-model_filename = '/home/alexm/Datasets/gunshot_sound_model.pkl'
+model_filename = '/home/amorehe/Datasets/gunshot_sound_model.pkl'
 
 model_callbacks = [
     EarlyStopping(monitor='val_acc',
@@ -380,35 +217,7 @@ History = model.fit(train_wav, train_label,
           batch_size=batch_size,
           shuffle=True)
 
-model.save("/home/alexm/Datasets/gunshot_sound_full_model.h5")
-
-
-# ## Summarizing history for accuracy
-
-# In[ ]:
-
-
-plt.plot(History.history['acc'])
-plt.plot(History.history['val_acc'])
-plt.title('Model Accuracy')
-plt.ylabel('Accuracy')
-plt.xlabel('Epoch')
-plt.legend(['Train', 'Test'], loc='upper left')
-plt.show()
-
-
-# ## Summarizing history for loss
-
-# In[ ]:
-
-
-plt.plot(History.history['loss'])
-plt.plot(History.history['val_loss'])
-plt.title('Model Loss')
-plt.ylabel('Loss')
-plt.xlabel('Epoch')
-plt.legend(['Train', 'Test'], loc='upper left')
-plt.show()
+model.save("/home/amorehe/Datasets/gunshot_sound_full_model.h5")
 
 
 # ### Optional debugging of incorrectly-labeled examples
@@ -421,16 +230,3 @@ y_predicted_classes_test = y_test_pred.argmax(axis=-1)
 y_actual_classes_test= test_label.argmax(axis=-1)
 wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
 print(wrong_examples)
-
-
-# ### Optional debugging of an individual incorrectly-labeled example
-
-# In[ ]:
-
-
-i = 323
-sample = np.reshape(test_wav[i], sampling_rate_per_two_seconds, )
-sample_rate = 22050
-print(y_actual_classes_test[i], y_predicted_classes_test[i])
-ipd.Audio(sample, rate=sample_rate)
-
