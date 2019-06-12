@@ -5,7 +5,7 @@
 
 # ### File Directory Packages
 
-# In[ ]:
+# In[1]:
 
 
 import glob
@@ -16,7 +16,7 @@ from pathlib import Path
 
 # ### Math Libraries
 
-# In[ ]:
+# In[2]:
 
 
 import numpy as np
@@ -30,18 +30,19 @@ import plotly.tools as tls
 
 # ### Data Pre-Processing Libraries
 
-# In[ ]:
+# In[3]:
 
 
 import pandas as pd
 import librosa
 import soundfile
+import re
 from sklearn.model_selection import KFold
 
 
 # ### Visualization Libraries
 
-# In[ ]:
+# In[4]:
 
 
 import seaborn as sns
@@ -51,9 +52,10 @@ import librosa.display
 
 # ### Deep Learning Libraries
 
-# In[ ]:
+# In[5]:
 
 
+import cv2
 import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras import Input, layers
@@ -64,7 +66,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 # ### Configuration of Libraries
 
-# In[ ]:
+# In[6]:
 
 
 py.init_notebook_mode(connected=True)
@@ -73,7 +75,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 
 # # Initialization of Variables
 
-# In[2]:
+# In[7]:
 
 
 samples=[]
@@ -84,7 +86,7 @@ input_shape = (sampling_rate_per_two_seconds, 1)
 
 # # Classes
 
-# In[4]:
+# In[8]:
 
 
 class DataGenerator(keras.utils.Sequence):
@@ -130,12 +132,12 @@ class DataGenerator(keras.utils.Sequence):
         X = np.empty((self.batch_size, *self.dim, self.n_channels))
         y = np.empty((self.batch_size), dtype=int)
         
-        ### Generate data
+        # Generate data
         for i, ID in enumerate(list_IDs_temp):
-            #### Store sample
+            # Store sample
             image = cv2.imread('path to spectrograms' + ID)
-            #gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            #X[i,] = gray.reshape((224,230,1))
+            # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            # X[i,] = gray.reshape((224,230,1))
             X[i,] = image
             X[i,] /= 255
             
@@ -146,7 +148,7 @@ class DataGenerator(keras.utils.Sequence):
 
 # ## Acquiring gunshot sound data
 
-# In[ ]:
+# In[9]:
 
 
 gunshot_sound_dir = "/home/alexm/Datasets/gunshot_data/gunshot/"
@@ -187,7 +189,7 @@ print("The number of labels of available for training is currently " + str(len(l
 
 # ## Acquiring sound data from examples of glass breaking
 
-# In[ ]:
+# In[10]:
 
 
 glassbreak_sound_dir = "/home/alexm/Datasets/gunshot_data/glassbreak/"
@@ -228,7 +230,7 @@ print("The number of labels of available for training is currently " + str(len(l
 
 # ## Reading in the CSV file of descriptors for all other kinds of urban sounds
 
-# In[ ]:
+# In[11]:
 
 
 sound_types = pd.read_csv("/home/alexm/Datasets/urban_sound_labels.csv")
@@ -236,24 +238,26 @@ sound_types = pd.read_csv("/home/alexm/Datasets/urban_sound_labels.csv")
 
 # ## Reading in all of the urban sound data WAV files
 
-# In[ ]:
+# In[12]:
 
 
 urban_sound_dir = "/home/alexm/Datasets/urban_sounds/"
 print("...Parsing urban sounds...")
 urban_sound_iterator = 0
 
-for file in os.listdir(urban_sound_dir):
+for file in sorted(os.listdir(urban_sound_dir)):
     if file.endswith(".wav"):
         try:
             # Adding 2 second-long samples to the list of samples
+            urban_sound_iterator = int(re.search(r'\d+', file).group())
             sample, sample_rate = librosa.load(urban_sound_dir + file)
+            prescribed_label = sound_types.loc[sound_types["ID"] == urban_sound_iterator, "Class"].values[0]
             
             if len(sample) <= sampling_rate_per_two_seconds:
                 label = 1
                 number_of_missing_hertz = sampling_rate_per_two_seconds - len(sample)
                 padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
-                if sound_types.loc[urban_sound_iterator, 'Class'] != "gun_shot":
+                if prescribed_label != "gun_shot":
                     label = 0
                 elif np.max(abs(sample)) < 0.25:
                     label = 0
@@ -263,18 +267,17 @@ for file in os.listdir(urban_sound_dir):
             else:
                 for i in range(0, sample.size - sampling_rate_per_two_seconds, sampling_rate_per_two_seconds):
                     sample_slice = sample[i : i + sampling_rate_per_two_seconds]
-                    if sound_types.loc[urban_sound_iterator, 'Class'] != "gun_shot":
+                    if prescribed_label != "gun_shot":
                         label = 0
                     elif np.max(abs(sample_slice)) < 0.25:
                         label = 0
 
                     samples.append(sample_slice)
                     labels.append(label)
-                    
-            urban_sound_iterator += 1
+
         except:
             sample, sample_rate = soundfile.read(urban_sound_dir + file)
-            print("Urban sound not recognized by Librosa:", sample)
+            print("Urban sound not recognized by Librosa:", file)
             pass
 
 print("The number of samples of available for training is currently " + str(len(samples)) + '.')
@@ -286,22 +289,22 @@ print("The number of labels of available for training is currently " + str(len(l
 # In[ ]:
 
 
-np.save("/home/alexm/Datasets/gunshot_sound_samples.npy", samples)
+# np.save("/home/alexm/Datasets/gunshot_sound_samples.npy", samples)
 np.save("/home/alexm/Datasets/gunshot_sound_labels.npy", labels)
 
 
 # ## Loading sample file and label file as numpy arrays
 
-# In[5]:
+# In[ ]:
 
 
-xsamples = np.load("/home/alexm/Datasets/gunshot_sound_samples.npy")
-labels = np.load("/home/alexm/Datasets/gunshot_sound_labels.npy")
+# samples = np.load("/home/alexm/Datasets/gunshot_sound_samples.npy")
+# labels = np.load("/home/alexm/Datasets/gunshot_sound_labels.npy")
 
 
 # ### Optional debugging after processing the data
 
-# In[6]:
+# In[ ]:
 
 
 i = 0  # You can change the value of 'i' to adjust which sample is being inspected.
@@ -315,7 +318,7 @@ ipd.Audio(sample, rate=sample_rate)
 
 # ## Arranging the data
 
-# In[7]:
+# In[ ]:
 
 
 kf = KFold(n_splits=3, shuffle=True)
@@ -328,10 +331,10 @@ for train_index, test_index in kf.split(samples):
 
 # ## Reshaping/restructuring the data
 
-# In[9]:
+# In[ ]:
 
 
-xtrain_wav = train_wav.reshape(-1, sampling_rate_per_two_seconds, 1)
+train_wav = train_wav.reshape(-1, sampling_rate_per_two_seconds, 1)
 test_wav = test_wav.reshape(-1, sampling_rate_per_two_seconds, 1)
 train_label = keras.utils.to_categorical(train_label, 2)
 test_label = keras.utils.to_categorical(test_label, 2)
@@ -339,7 +342,7 @@ test_label = keras.utils.to_categorical(test_label, 2)
 
 # ### Optional debugging of the training data's shape
 
-# In[10]:
+# In[ ]:
 
 
 print(train_wav.shape)
@@ -349,7 +352,7 @@ print(train_wav.shape)
 
 # ## Model Parameters
 
-# In[8]:
+# In[ ]:
 
 
 learning_rate = 0.001
@@ -359,7 +362,7 @@ drop_out_rate = 0.2
 
 # ## Model Architecture
 
-# In[11]:
+# In[ ]:
 
 
 input_tensor = Input(shape=input_shape)
@@ -383,7 +386,7 @@ x = layers.Dense(50, activation='relu')(x)
 x = layers.Dropout(drop_out_rate)(x)
 x = layers.Dense(20, activation='relu')(x)
 
-output_tensor = layers.Dense(3, activation='softmax')(x)
+output_tensor = layers.Dense(2, activation='softmax')(x)
 
 model = tf.keras.Model(input_tensor, output_tensor)
 
@@ -394,7 +397,7 @@ model.compile(loss=keras.losses.binary_crossentropy,
 
 # ## Configuring model properties
 
-# In[12]:
+# In[ ]:
 
 
 model_filename = 'gunshot_sound_model.pkl'
@@ -425,17 +428,17 @@ model.summary()
 
 # ## Training & caching the model
 
-# In[13]:
+# In[ ]:
 
 
-model.fit_generator(generator = training_generator,
-                                validation_data = validation_generator,
-                                epochs = 50,
-                                callbacks = model_callbacks,
-                                verbose = 1,
-                                shuffle = True)
+model.fit(train_wav, train_label, 
+          validation_data=[test_wav, test_label],
+          batch_size=batch_size, 
+          epochs=50,
+          callbacks=model_callbacks,
+          verbose=1)
 
-model.load_weights("gunshot_sound_model.h5")
+# model.load_weights("gunshot_sound_model.h5")
 y_pred = np.round(model.predict(X_test))
 print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
 model.save_weights("gunshot_sound_model.h5")
