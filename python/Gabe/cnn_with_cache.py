@@ -25,6 +25,7 @@ import soundfile
 import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras.layers import Dense, Dropout, Flatten
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras import Input, layers
 from tensorflow.keras import backend as K
 
