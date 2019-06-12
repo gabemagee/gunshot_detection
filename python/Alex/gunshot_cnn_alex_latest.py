@@ -5,7 +5,7 @@
 
 # ### File Directory Packages
 
-# In[ ]:
+# In[1]:
 
 
 import glob
@@ -16,7 +16,7 @@ from pathlib import Path
 
 # ### Math Libraries
 
-# In[ ]:
+# In[2]:
 
 
 import numpy as np
@@ -30,7 +30,7 @@ import plotly.tools as tls
 
 # ### Data Pre-Processing Libraries
 
-# In[ ]:
+# In[3]:
 
 
 import pandas as pd
@@ -42,7 +42,7 @@ from sklearn.model_selection import KFold
 
 # ### Visualization Libraries
 
-# In[ ]:
+# In[4]:
 
 
 import seaborn as sns
@@ -52,7 +52,7 @@ import librosa.display
 
 # ### Deep Learning Libraries
 
-# In[ ]:
+# In[5]:
 
 
 import cv2
@@ -66,7 +66,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 # ### Configuration of Libraries
 
-# In[ ]:
+# In[6]:
 
 
 py.init_notebook_mode(connected=True)
@@ -75,7 +75,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 
 # # Initialization of Variables
 
-# In[ ]:
+# In[7]:
 
 
 samples=[]
@@ -86,7 +86,7 @@ input_shape = (sampling_rate_per_two_seconds, 1)
 
 # # Classes
 
-# In[ ]:
+# In[8]:
 
 
 class DataGenerator(keras.utils.Sequence):
@@ -148,7 +148,7 @@ class DataGenerator(keras.utils.Sequence):
 
 # ## Acquiring gunshot sound data
 
-# In[ ]:
+# In[9]:
 
 
 gunshot_sound_dir = "/home/alexm/Datasets/gunshot_data/gunshot/"
@@ -189,7 +189,7 @@ print("The number of labels of available for training is currently " + str(len(l
 
 # ## Acquiring sound data from examples of glass breaking
 
-# In[ ]:
+# In[10]:
 
 
 glassbreak_sound_dir = "/home/alexm/Datasets/gunshot_data/glassbreak/"
@@ -230,7 +230,7 @@ print("The number of labels of available for training is currently " + str(len(l
 
 # ## Reading in the CSV file of descriptors for all other kinds of urban sounds
 
-# In[ ]:
+# In[11]:
 
 
 sound_types = pd.read_csv("/home/alexm/Datasets/urban_sound_labels.csv")
@@ -238,25 +238,26 @@ sound_types = pd.read_csv("/home/alexm/Datasets/urban_sound_labels.csv")
 
 # ## Reading in all of the urban sound data WAV files
 
-# In[ ]:
+# In[12]:
 
 
 urban_sound_dir = "/home/alexm/Datasets/urban_sounds/"
 print("...Parsing urban sounds...")
 urban_sound_iterator = 0
 
-for file in os.listdir(urban_sound_dir):
+for file in sorted(os.listdir(urban_sound_dir)):
     if file.endswith(".wav"):
         try:
             # Adding 2 second-long samples to the list of samples
             urban_sound_iterator = int(re.search(r'\d+', file).group())
             sample, sample_rate = librosa.load(urban_sound_dir + file)
+            prescribed_label = sound_types.loc[sound_types["ID"] == urban_sound_iterator, "Class"].values[0]
             
             if len(sample) <= sampling_rate_per_two_seconds:
                 label = 1
                 number_of_missing_hertz = sampling_rate_per_two_seconds - len(sample)
                 padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
-                if sound_types.loc[urban_sound_iterator, 'Class'] != "gun_shot":
+                if prescribed_label != "gun_shot":
                     label = 0
                 elif np.max(abs(sample)) < 0.25:
                     label = 0
@@ -266,7 +267,7 @@ for file in os.listdir(urban_sound_dir):
             else:
                 for i in range(0, sample.size - sampling_rate_per_two_seconds, sampling_rate_per_two_seconds):
                     sample_slice = sample[i : i + sampling_rate_per_two_seconds]
-                    if sound_types.loc[urban_sound_iterator, 'Class'] != "gun_shot":
+                    if prescribed_label != "gun_shot":
                         label = 0
                     elif np.max(abs(sample_slice)) < 0.25:
                         label = 0
@@ -276,7 +277,7 @@ for file in os.listdir(urban_sound_dir):
 
         except:
             sample, sample_rate = soundfile.read(urban_sound_dir + file)
-            print("Urban sound not recognized by Librosa:", sample)
+            print("Urban sound not recognized by Librosa:", file)
             pass
 
 print("The number of samples of available for training is currently " + str(len(samples)) + '.')
@@ -288,7 +289,7 @@ print("The number of labels of available for training is currently " + str(len(l
 # In[ ]:
 
 
-np.save("/home/alexm/Datasets/gunshot_sound_samples.npy", samples)
+# np.save("/home/alexm/Datasets/gunshot_sound_samples.npy", samples)
 np.save("/home/alexm/Datasets/gunshot_sound_labels.npy", labels)
 
 
@@ -297,8 +298,8 @@ np.save("/home/alexm/Datasets/gunshot_sound_labels.npy", labels)
 # In[ ]:
 
 
-samples = np.load("/home/alexm/Datasets/gunshot_sound_samples.npy")
-labels = np.load("/home/alexm/Datasets/gunshot_sound_labels.npy")
+# samples = np.load("/home/alexm/Datasets/gunshot_sound_samples.npy")
+# labels = np.load("/home/alexm/Datasets/gunshot_sound_labels.npy")
 
 
 # ### Optional debugging after processing the data
