@@ -185,12 +185,12 @@ model.load("/home/lauogden/gunshot_cnn_model.h5")
 
 #FIT IT
 model.fit(train_wav, train_label, 
-          validation_data = [test_wav, test_label],
-          epochs = 50,
-          callbacks = model_callbacks
-          verbose = 1,
-         batch_size = batch_size,
-         shuffle = True)
+          validation_data=[test_wav, test_label],
+          epochs=50,
+          callbacks=model_callbacks
+          verbose=1,
+         batch_size=batch_size,
+         shuffle=True)
 
 model.save("/home/lauogden/gunshot_cnn_model.h5")
 
