@@ -125,7 +125,7 @@ with tf.device("/gpu:0"):
     x = layers.Dropout(drop_out_rate)(x)
     x = layers.Dense(20, activation='relu')(x)
 
-    output_tensor = layers.Dense(3, activation='softmax')(x)
+    output_tensor = layers.Dense(2, activation='softmax')(x)
 
     model = tf.keras.Model(input_tensor, output_tensor)
 
