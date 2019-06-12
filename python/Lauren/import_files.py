@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[17]:
 
 
 import numpy as np
@@ -36,30 +36,37 @@ from tensorflow.keras import Input, layers
 from tensorflow.keras import backend as K
 
 from tensorflow.python.client import device_lib
+import re
 
 
-# In[ ]:
+# In[18]:
 
 
 #read the csv file of all data labels
 
-sound_types = pd.read_csv("/home/lauogden/data/REU_data_organized/train.csv")
+sound_types = pd.read_csv("/home/lauogden/data/REU_Data_organized/train.csv")
 
 
-# In[ ]:
+# In[19]:
 
 
-urban_sound_dir = "/home/lauogden/data/REU_data_organized/Train/"
+urban_sound_dir = "/home/lauogden/data/REU_Data_organized/Train/"
 urban_sound_iterator = 0
+sampling_rate_per_two_seconds = 44100
+samples = []
+labels = []
 
-for file in sorted(os.listdir(urban_sound_dir)):
+all_files = os.listdir(urban_sound_dir)
+all_files.sort()
+
+for file in all_files:
     if file.endswith(".wav"):
         try:
             # Adding 2 second-long samples to the list of samples
             urban_sound_iterator = int(re.search(r'\d+', file).group())
             sample, sample_rate = librosa.load(urban_sound_dir + file)
             prescribed_label = sound_types.loc[sound_types["ID"] == urban_sound_iterator, "Class"].values[0]
-            
+
             if len(sample) <= sampling_rate_per_two_seconds:
                 label = 1
                 number_of_missing_hertz = sampling_rate_per_two_seconds - len(sample)
@@ -81,11 +88,11 @@ for file in sorted(os.listdir(urban_sound_dir)):
 
                     samples.append(sample_slice)
                     labels.append(label)
-
         except:
-            sample, sample_rate = soundfile.read(urban_sound_dir + file)
-            print("sound not recognized by Librosa:", file)
+            print("sound not recognized by Librosa:" + file)
             pass
+
+       
 
 print("The number of samples of available for training is currently " + str(len(samples)) + '.')
 print("The number of labels of available for training is currently " + str(len(labels)) + '.')
@@ -95,6 +102,6 @@ print("The number of labels of available for training is currently " + str(len(l
 
 
 #save it
-np.save("/home/lauogden/data/sound_samples.npy", samples)
-np.save("/home/lauogden/data/sound_labels.npy", labels)
+np.save("/home/lauogden/data/sound_samples3.npy", samples)
+np.save("/home/lauogden/data/sound_labels3.npy", labels)
 
