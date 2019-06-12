@@ -225,66 +225,66 @@ with tf.device("/gpu:0"):
     # In[13]:
 
 
-    model.fit_generator(generator = training_generator,
-                                    validation_data = validation_generator,
-                                    epochs = 50,
-                                    callbacks = model_callbacks,
-                                    verbose = 1,
-                                    shuffle = True)
-
-    model.load_weights("gunshot_sound_model.h5")
-    y_pred = np.round(model.predict(X_test))
-    print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
-    model.save_weights("gunshot_sound_model.h5")
 
 
-# ## Summarizing history for accuracy
+    History = model.fit(train_wav, train_label,
+              validation_data=[test_wav, test_label],
+              epochs=50,
+              callbacks=model_callbacks,
+              verbose=1,
+              batch_size=batch_size,
+              shuffle=True)
 
-# In[ ]:
-
-
-plt.plot(History.history['acc'])
-plt.plot(History.history['val_acc'])
-plt.title('Model Accuracy')
-plt.ylabel('Accuracy')
-plt.xlabel('Epoch')
-plt.legend(['Train', 'Test'], loc='upper left')
-plt.show()
+    model.save("/home/alexm/Datasets/gunshot_sound_full_model.h5")
 
 
-# ## Summarizing history for loss
+    # ## Summarizing history for accuracy
 
-# In[ ]:
-
-
-plt.plot(History.history['loss'])
-plt.plot(History.history['val_loss'])
-plt.title('Model Loss')
-plt.ylabel('Loss')
-plt.xlabel('Epoch')
-plt.legend(['Train', 'Test'], loc='upper left')
-plt.show()
+    # In[ ]:
 
 
-# ### Optional debugging of incorrectly-labeled examples
-
-# In[ ]:
-
-
-Y_test_pred = model.predict(test_wav)
-y_predicted_classes_test = Y_test_pred.argmax(axis=-1)
-y_actual_classes_test= test_label.argmax(axis=-1)
-wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
-print(wrong_examples)
+    plt.plot(History.history['acc'])
+    plt.plot(History.history['val_acc'])
+    plt.title('Model Accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.show()
 
 
-# ### Optional debugging of an individual incorrectly-labeled example
+    # ## Summarizing history for loss
 
-# In[ ]:
+    # In[ ]:
 
 
-i = 0
-sample = np.reshape(test_wav[i], sampling_rate_per_two_seconds, )
-sample_rate = 22050
-print(y_test[i], Y_test_pred[i])
-ipd.Audio(sample, rate=sample_rate)
+    plt.plot(History.history['loss'])
+    plt.plot(History.history['val_loss'])
+    plt.title('Model Loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.show()
+
+
+    # ### Optional debugging of incorrectly-labeled examples
+
+    # In[ ]:
+
+
+    y_test_pred = model.predict(test_wav)
+    y_predicted_classes_test = y_test_pred.argmax(axis=-1)
+    y_actual_classes_test= test_label.argmax(axis=-1)
+    wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
+    print(wrong_examples)
+
+
+    # ### Optional debugging of an individual incorrectly-labeled example
+
+    # In[ ]:
+
+
+    i = 323
+    sample = np.reshape(test_wav[i], sampling_rate_per_two_seconds, )
+    sample_rate = 22050
+    print(y_actual_classes_test[i], y_predicted_classes_test[i])
+    ipd.Audio(sample, rate=sample_rate)
