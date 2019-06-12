@@ -31,6 +31,10 @@ from tensorflow.keras import backend as K
 from tensorflow.python.client import device_lib
 
 print(os.getcwd())
-cache_location = ""
+cache_location = "/home/gamagee/workspace/gunshot_detection/REU_Data/Cache"
 sample_file = cache_location+"/gunshot_sound_samples.npy"
 label_file = cache_location+"/gunshot_sound_labels.npy"
+
+samples = np.load(sample_file)
+labels = np.load(label_file)
+print("a")
