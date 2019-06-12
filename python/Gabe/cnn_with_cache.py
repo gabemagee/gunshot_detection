@@ -33,16 +33,12 @@ from tensorflow.python.client import device_lib
 
 sampling_rate_per_two_seconds = 44100
 input_shape = (sampling_rate_per_two_seconds, 1)
-
-
-print(os.getcwd())
 cache_location = "/home/gamagee/workspace/gunshot_detection/REU_Data/Cache"
 sample_file = cache_location+"/gunshot_sound_samples.npy"
 label_file = cache_location+"/gunshot_sound_labels.npy"
 
 samples = np.load(sample_file)
 labels = np.load(label_file)
-print("a")
 
 i = 0  # You can change the value of 'i' to adjust which sample is being inspected.
 sample=samples[i]
@@ -181,7 +177,7 @@ with tf.device("/gpu:0"):
               batch_size=batch_size,
               shuffle=True)
 
-    model.save("/home/alexm/Datasets/gunshot_sound_full_model.h5")
+    model.save("/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_full_model.h5")
 
 
     # ## Summarizing history for accuracy
