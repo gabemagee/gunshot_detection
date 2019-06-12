@@ -1,15 +1,8 @@
-
-# In[3]:
-
-
-# File Directory 
-import glob
-import os
-
-# Math
 import numpy as np
 from scipy.fftpack import fft
 from scipy import signal
+import librosa
+import os
 
 # Dimension Reduction
 from sklearn.decomposition import PCA
@@ -26,70 +19,59 @@ import plotly.tools as tls
 # Data Pre-processing
 import pandas as pd
 from sklearn.model_selection import KFold
-import librosa
 import soundfile
 
 # Deep Learning
 import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras.layers import Dense, Dropout, Flatten
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras import Input, layers
 from tensorflow.keras import backend as K
 
-
-
-from keras.activations import relu, softmax
-from keras.layers import (Convolution1D, Dense, Dropout, GlobalAveragePooling1D, 
-                          GlobalMaxPool1D, Input, MaxPool1D, concatenate)
-from keras import losses, models, optimizers
-from keras.callbacks import (EarlyStopping, LearningRateScheduler,
-                             ModelCheckpoint, TensorBoard, ReduceLROnPlateau)
-
-
-
-
-
-# # Data
-
-# In[4]:
-
+from tensorflow.python.client import device_lib
 
 sampling_rate_per_two_seconds = 44100
 input_shape = (sampling_rate_per_two_seconds, 1)
 
 
-# In[5]:
 
 
-#load the data from the files as numpy arrays
-samples = np.load("/home/lauogden/data/gunshot_sound_samples.npy")
-labels = np.load("/home/lauogden/data/gunshot_sound_labels.npy")
+
+print(os.getcwd())
+cache_location = "/home/lauogden/data"
+sample_file = cache_location+"/gunshot_sound_samples.npy"
+label_file = cache_location+"/gunshot_sound_labels.npy"
+
+samples = np.load(sample_file)
+labels = np.load(label_file)
+print("a")
+
+i = 0  # You can change the value of 'i' to adjust which sample is being inspected.
+sample=samples[i]
+sample_rate=22050
+print("The number of samples available to the model for training is " + str(len(samples)) + '.')
+print("The maximum frequency value in sample slice #" + str(i) + " is " + str(np.max(abs(sample))) + '.')
+print("The label associated with sample slice #" + str(i) + " is " + str(labels[i]) + '.')
+ipd.Audio(sample, rate=sample_rate)
 
 
-# In[ ]:
+# ## Arranging the data
+
+# In[7]:
 
 
-print("There are " + str(len(samples)) + " samples.")
-print("There are " + str(len(labels)) + " labels.")
 
 
-# # Split Data
 
-# In[6]:
+# ## Model Architecture
 
+# In[11]:
 
-#TEST IF GPU IS AVILABLE?
-print("TESTING IF GPU IS AVAILABLE:")
 print(tf.test.gpu_device_name())
 
 
-print(tf.Session())
-
-#USING THE GPU:
-
 with tf.device("/gpu:0"):
-    #train test split
-
     kf = KFold(n_splits=3, shuffle=True)
     samples = np.array(samples)
     labels = np.array(labels)
@@ -98,17 +80,20 @@ with tf.device("/gpu:0"):
         train_label, test_label = labels[train_index], labels[test_index]
 
 
+    # ## Reshaping/restructuring the data
+
     # In[9]:
 
 
-    #Reshape data
-    train_wav = train_wav.reshape(-1,44100,1)
-    test_wav = test_wav.reshape(-1,44100,1)
+    train_wav = train_wav.reshape(-1, sampling_rate_per_two_seconds, 1)
+    test_wav = test_wav.reshape(-1, sampling_rate_per_two_seconds, 1)
     train_label = keras.utils.to_categorical(train_label, 2)
     test_label = keras.utils.to_categorical(test_label, 2)
 
 
-    # In[ ]:
+    # ### Optional debugging of the training data's shape
+
+    # In[10]:
 
 
     print(train_wav.shape)
@@ -116,17 +101,14 @@ with tf.device("/gpu:0"):
 
     # # Model
 
-    # In[10]:
+    # ## Model Parameters
+
+    # In[8]:
 
 
-    # Parameters
-    lr = 0.001
+    learning_rate = 0.001
     batch_size = 32
     drop_out_rate = 0.2
-
-
-    # In[11]:
-
 
     input_tensor = Input(shape=input_shape)
 
@@ -148,23 +130,24 @@ with tf.device("/gpu:0"):
     x = layers.Dense(50, activation='relu')(x)
     x = layers.Dropout(drop_out_rate)(x)
     x = layers.Dense(20, activation='relu')(x)
+
     output_tensor = layers.Dense(2, activation='softmax')(x)
 
     model = tf.keras.Model(input_tensor, output_tensor)
 
-    model.compile(loss=keras.losses.categorical_crossentropy,
-                 optimizer=keras.optimizers.Adam(lr = lr),
+    model.compile(loss=keras.losses.binary_crossentropy,
+                 optimizer=keras.optimizers.Adam(lr = learning_rate),
                  metrics=['accuracy'])
 
 
-    # In[ ]:
+    # ## Configuring model properties
+
+    # In[12]:
 
 
-    model_filename = '/home/lauogden/gunshot_cnn_model.pkl' 
+    model_filename = 'gunshot_sound_model.pkl'
 
-    # add callbacks to stop early if it stops improving
-
-    callbacks = [
+    model_callbacks = [
         EarlyStopping(monitor='val_acc',
                       patience=10,
                       verbose=1,
@@ -177,19 +160,26 @@ with tf.device("/gpu:0"):
     ]
 
 
-    # In[15]:
+
+
+    # ### Optional debugging of the model's architecture
+
+    # In[ ]:
 
 
     model.summary()
 
 
-    # In[16]:
+    # ## Training & caching the model
+
+    # In[13]:
 
 
-    #model.load("/home/lauogden/gunshot_cnn_model.h5")
 
-    #FIT IT
-    History = model.fit(train_wav, train_label, 
+
+    print(train_wav.shape,train_label.shape,test_wav.shape,test_label.shape)
+
+    History = model.fit(train_wav, train_label,
               validation_data=[test_wav, test_label],
               epochs=50,
               callbacks=model_callbacks,
@@ -197,17 +187,57 @@ with tf.device("/gpu:0"):
               batch_size=batch_size,
               shuffle=True)
 
-    model.save("/home/lauogden/gunshot_cnn_model.h5")
+    model.save("/home/lauogden/gunshot_sound_full_model.h5")
 
 
-    # In[26]:
+    # ## Summarizing history for accuracy
+
+    # In[ ]:
 
 
-    #incorrectly predicted data samples
-    Y_test_pred = model.predict(test_wav)
+    plt.plot(History.history['acc'])
+    plt.plot(History.history['val_acc'])
+    plt.title('Model Accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.show()
+
+
+    # ## Summarizing history for loss
+
+    # In[ ]:
+
+
+    plt.plot(History.history['loss'])
+    plt.plot(History.history['val_loss'])
+    plt.title('Model Loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.show()
+
+
+    # ### Optional debugging of incorrectly-labeled examples
+
+    # In[ ]:
+
+
+    y_test_pred = model.predict(test_wav)
     y_predicted_classes_test = y_test_pred.argmax(axis=-1)
     y_actual_classes_test= test_label.argmax(axis=-1)
     wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
-    print("Wrong examples: ")
     print(wrong_examples)
+
+
+    # ### Optional debugging of an individual incorrectly-labeled example
+
+    # In[ ]:
+
+
+    i = 323
+    sample = np.reshape(test_wav[i], sampling_rate_per_two_seconds, )
+    sample_rate = 22050
+    print(y_actual_classes_test[i], y_predicted_classes_test[i])
+    ipd.Audio(sample, rate=sample_rate)
 
