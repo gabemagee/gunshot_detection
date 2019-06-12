@@ -30,6 +30,63 @@ from tensorflow.keras import backend as K
 
 from tensorflow.python.client import device_lib
 
+
+class DataGenerator(keras.utils.Sequence):
+    'Generates data for Keras'
+    def __init__(self, list_IDs, labels, batch_size = 40, dim = input_shape, n_channels = 3,
+                 n_classes = 10, shuffle = True):
+        'Initialization'
+        self.dim = dim
+        self.batch_size = batch_size
+        self.labels = labels
+        self.list_IDs = list_IDs
+        self.n_channels = n_channels
+        self.n_classes = n_classes
+        self.shuffle = shuffle
+        self.on_epoch_end()
+
+    def __len__(self):
+        'Denotes the number of batches per epoch'
+        return int(np.floor(len(self.list_IDs) / self.batch_size))
+
+    def __getitem__(self, index):
+        'Generate one batch of data'
+        ### Generate indexes of the batch
+        indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
+        ### Find list of IDs
+        list_IDs_temp = [self.list_IDs[k] for k in indexes]
+
+        ### Generate data
+        X = self.__data_generation(list_IDs_temp)
+
+        y = self.labels[indexes]
+        return X, y
+
+    def on_epoch_end(self):
+        'Updates indexes after each epoch'
+        self.indexes = np.arange(len(self.list_IDs))
+        if self.shuffle == True:
+            np.random.shuffle(self.indexes)
+
+    def __data_generation(self, list_IDs_temp):
+        'Generates data containing batch_size samples' # X : (n_samples, *dim, n_channels)
+        ### Initialization
+        X = np.empty((self.batch_size, *self.dim, self.n_channels))
+        y = np.empty((self.batch_size), dtype=int)
+
+        ### Generate data
+        for i, ID in enumerate(list_IDs_temp):
+            #### Store sample
+            image = cv2.imread('path to spectrograms' + ID)
+            #gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            #X[i,] = gray.reshape((224,230,1))
+            X[i,] = image
+            X[i,] /= 255
+
+        return X
+
+
+
 print(os.getcwd())
 cache_location = "/home/gamagee/workspace/gunshot_detection/REU_Data/Cache"
 sample_file = cache_location+"/gunshot_sound_samples.npy"
@@ -96,84 +153,84 @@ drop_out_rate = 0.2
 
 # In[11]:
 
+with tf.device("/gpu:0"):
+    input_tensor = Input(shape=input_shape)
 
-input_tensor = Input(shape=input_shape)
+    x = layers.Conv1D(8, 11, padding='valid', activation='relu', strides=1)(input_tensor)
+    x = layers.MaxPooling1D(2)(x)
+    x = layers.Conv1D(16, 7, padding='valid', activation='relu', strides=1)(x)
+    x = layers.MaxPooling1D(4)(x)
+    x = layers.Conv1D(32, 5, padding='valid', activation='relu', strides=1)(x)
+    x = layers.MaxPooling1D(4)(x)
+    x = layers.Conv1D(64, 5, padding='valid', activation='relu', strides=1)(x)
+    x = layers.MaxPooling1D(6)(x)
+    x = layers.Conv1D(128, 3, padding='valid', activation='relu', strides=1)(x)
+    x = layers.MaxPooling1D(6)(x)
+    x = layers.Conv1D(256, 3, padding='valid', activation='relu', strides=1)(x)
+    x = layers.MaxPooling1D(6)(x)
+    x = layers.Flatten()(x)
+    x = layers.Dense(100, activation='relu')(x)
+    x = layers.Dropout(drop_out_rate)(x)
+    x = layers.Dense(50, activation='relu')(x)
+    x = layers.Dropout(drop_out_rate)(x)
+    x = layers.Dense(20, activation='relu')(x)
 
-x = layers.Conv1D(8, 11, padding='valid', activation='relu', strides=1)(input_tensor)
-x = layers.MaxPooling1D(2)(x)
-x = layers.Conv1D(16, 7, padding='valid', activation='relu', strides=1)(x)
-x = layers.MaxPooling1D(4)(x)
-x = layers.Conv1D(32, 5, padding='valid', activation='relu', strides=1)(x)
-x = layers.MaxPooling1D(4)(x)
-x = layers.Conv1D(64, 5, padding='valid', activation='relu', strides=1)(x)
-x = layers.MaxPooling1D(6)(x)
-x = layers.Conv1D(128, 3, padding='valid', activation='relu', strides=1)(x)
-x = layers.MaxPooling1D(6)(x)
-x = layers.Conv1D(256, 3, padding='valid', activation='relu', strides=1)(x)
-x = layers.MaxPooling1D(6)(x)
-x = layers.Flatten()(x)
-x = layers.Dense(100, activation='relu')(x)
-x = layers.Dropout(drop_out_rate)(x)
-x = layers.Dense(50, activation='relu')(x)
-x = layers.Dropout(drop_out_rate)(x)
-x = layers.Dense(20, activation='relu')(x)
+    output_tensor = layers.Dense(3, activation='softmax')(x)
 
-output_tensor = layers.Dense(3, activation='softmax')(x)
+    model = tf.keras.Model(input_tensor, output_tensor)
 
-model = tf.keras.Model(input_tensor, output_tensor)
-
-model.compile(loss=keras.losses.binary_crossentropy,
-             optimizer=keras.optimizers.Adam(lr = learning_rate),
-             metrics=['accuracy'])
-
-
-# ## Configuring model properties
-
-# In[12]:
+    model.compile(loss=keras.losses.binary_crossentropy,
+                 optimizer=keras.optimizers.Adam(lr = learning_rate),
+                 metrics=['accuracy'])
 
 
-model_filename = 'gunshot_sound_model.pkl'
+    # ## Configuring model properties
 
-model_callbacks = [
-    EarlyStopping(monitor='val_acc',
-                  patience=10,
-                  verbose=1,
-                  mode='auto'),
-
-    ModelCheckpoint(model_filename, monitor='val_acc',
-                    verbose=1,
-                    save_best_only=True,
-                    mode='auto'),
-]
-
-training_generator = DataGenerator(train_wav, train_label)
-validation_generator = DataGenerator(test_wav, test_label)
+    # In[12]:
 
 
-# ### Optional debugging of the model's architecture
+    model_filename = 'gunshot_sound_model.pkl'
 
-# In[ ]:
+    model_callbacks = [
+        EarlyStopping(monitor='val_acc',
+                      patience=10,
+                      verbose=1,
+                      mode='auto'),
+
+        ModelCheckpoint(model_filename, monitor='val_acc',
+                        verbose=1,
+                        save_best_only=True,
+                        mode='auto'),
+    ]
+
+    training_generator = DataGenerator(train_wav, train_label)
+    validation_generator = DataGenerator(test_wav, test_label)
 
 
-model.summary()
+    # ### Optional debugging of the model's architecture
+
+    # In[ ]:
 
 
-# ## Training & caching the model
-
-# In[13]:
+    model.summary()
 
 
-model.fit_generator(generator = training_generator,
-                                validation_data = validation_generator,
-                                epochs = 50,
-                                callbacks = model_callbacks,
-                                verbose = 1,
-                                shuffle = True)
+    # ## Training & caching the model
 
-model.load_weights("gunshot_sound_model.h5")
-y_pred = np.round(model.predict(X_test))
-print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
-model.save_weights("gunshot_sound_model.h5")
+    # In[13]:
+
+
+    model.fit_generator(generator = training_generator,
+                                    validation_data = validation_generator,
+                                    epochs = 50,
+                                    callbacks = model_callbacks,
+                                    verbose = 1,
+                                    shuffle = True)
+
+    model.load_weights("gunshot_sound_model.h5")
+    y_pred = np.round(model.predict(X_test))
+    print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
+    model.save_weights("gunshot_sound_model.h5")
 
 
 # ## Summarizing history for accuracy
