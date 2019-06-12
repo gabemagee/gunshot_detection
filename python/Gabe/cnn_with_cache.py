@@ -110,43 +110,7 @@ ipd.Audio(sample, rate=sample_rate)
 # In[7]:
 
 
-kf = KFold(n_splits=3, shuffle=True)
-samples = np.array(samples)
-labels = np.array(labels)
-for train_index, test_index in kf.split(samples):
-    train_wav, test_wav = samples[train_index], samples[test_index]
-    train_label, test_label = labels[train_index], labels[test_index]
 
-
-# ## Reshaping/restructuring the data
-
-# In[9]:
-
-
-train_wav = train_wav.reshape(-1, sampling_rate_per_two_seconds, 1)
-test_wav = test_wav.reshape(-1, sampling_rate_per_two_seconds, 1)
-train_label = keras.utils.to_categorical(train_label, 2)
-test_label = keras.utils.to_categorical(test_label, 2)
-
-
-# ### Optional debugging of the training data's shape
-
-# In[10]:
-
-
-print(train_wav.shape)
-
-
-# # Model
-
-# ## Model Parameters
-
-# In[8]:
-
-
-learning_rate = 0.001
-batch_size = 32
-drop_out_rate = 0.2
 
 
 # ## Model Architecture
@@ -154,6 +118,45 @@ drop_out_rate = 0.2
 # In[11]:
 
 with tf.device("/gpu:0"):
+    kf = KFold(n_splits=3, shuffle=True)
+    samples = np.array(samples)
+    labels = np.array(labels)
+    for train_index, test_index in kf.split(samples):
+        train_wav, test_wav = samples[train_index], samples[test_index]
+        train_label, test_label = labels[train_index], labels[test_index]
+
+
+    # ## Reshaping/restructuring the data
+
+    # In[9]:
+
+
+    train_wav = train_wav.reshape(-1, sampling_rate_per_two_seconds, 1)
+    test_wav = test_wav.reshape(-1, sampling_rate_per_two_seconds, 1)
+    train_label = keras.utils.to_categorical(train_label, 2)
+    test_label = keras.utils.to_categorical(test_label, 2)
+
+
+    # ### Optional debugging of the training data's shape
+
+    # In[10]:
+
+
+    print(train_wav.shape)
+
+
+    # # Model
+
+    # ## Model Parameters
+
+    # In[8]:
+
+
+    learning_rate = 0.001
+    batch_size = 32
+    drop_out_rate = 0.2
+    sampling_rate_per_two_seconds = 44100
+    input_shape = (sampling_rate_per_two_seconds, 1)
     input_tensor = Input(shape=input_shape)
 
     x = layers.Conv1D(8, 11, padding='valid', activation='relu', strides=1)(input_tensor)
