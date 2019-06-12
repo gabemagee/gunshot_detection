@@ -30,6 +30,8 @@ from tensorflow.keras import backend as K
 
 from tensorflow.python.client import device_lib
 
+sampling_rate_per_two_seconds = 44100
+input_shape = (sampling_rate_per_two_seconds, 1)
 
 class DataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
@@ -155,8 +157,7 @@ with tf.device("/gpu:0"):
     learning_rate = 0.001
     batch_size = 32
     drop_out_rate = 0.2
-    sampling_rate_per_two_seconds = 44100
-    input_shape = (sampling_rate_per_two_seconds, 1)
+
     input_tensor = Input(shape=input_shape)
 
     x = layers.Conv1D(8, 11, padding='valid', activation='relu', strides=1)(input_tensor)
