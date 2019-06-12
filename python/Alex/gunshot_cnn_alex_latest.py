@@ -3,9 +3,9 @@
 
 # # Library Imports
 
-# ### File Directory Packages
+# ### File Directory Libraries
 
-# In[1]:
+# In[ ]:
 
 
 import glob
@@ -16,7 +16,7 @@ from pathlib import Path
 
 # ### Math Libraries
 
-# In[2]:
+# In[ ]:
 
 
 import numpy as np
@@ -30,7 +30,7 @@ import plotly.tools as tls
 
 # ### Data Pre-Processing Libraries
 
-# In[3]:
+# In[ ]:
 
 
 import pandas as pd
@@ -42,7 +42,7 @@ from sklearn.model_selection import KFold
 
 # ### Visualization Libraries
 
-# In[4]:
+# In[ ]:
 
 
 import seaborn as sns
@@ -52,21 +52,21 @@ import librosa.display
 
 # ### Deep Learning Libraries
 
-# In[5]:
+# In[ ]:
 
 
-import cv2
 import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras import Input, layers
 from tensorflow.keras import backend as K
+from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
-# ### Configuration of Libraries
+# ### Configuration of Imported Libraries
 
-# In[6]:
+# In[ ]:
 
 
 py.init_notebook_mode(connected=True)
@@ -75,7 +75,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 
 # # Initialization of Variables
 
-# In[7]:
+# In[ ]:
 
 
 samples=[]
@@ -84,71 +84,11 @@ sampling_rate_per_two_seconds = 44100
 input_shape = (sampling_rate_per_two_seconds, 1)
 
 
-# # Classes
-
-# In[8]:
-
-
-class DataGenerator(keras.utils.Sequence):
-    'Generates data for Keras'
-    def __init__(self, list_IDs, labels, batch_size = 40, dim = input_shape, n_channels = 3,
-                 n_classes = 10, shuffle = True):
-        'Initialization'
-        self.dim = dim
-        self.batch_size = batch_size
-        self.labels = labels
-        self.list_IDs = list_IDs
-        self.n_channels = n_channels
-        self.n_classes = n_classes
-        self.shuffle = shuffle
-        self.on_epoch_end()
-
-    def __len__(self):
-        'Denotes the number of batches per epoch'
-        return int(np.floor(len(self.list_IDs) / self.batch_size))
-
-    def __getitem__(self, index):
-        'Generate one batch of data'
-        ### Generate indexes of the batch
-        indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
-        ### Find list of IDs
-        list_IDs_temp = [self.list_IDs[k] for k in indexes]
-        
-        ### Generate data
-        X = self.__data_generation(list_IDs_temp)
-        
-        y = self.labels[indexes]
-        return X, y
-
-    def on_epoch_end(self):
-        'Updates indexes after each epoch'
-        self.indexes = np.arange(len(self.list_IDs))
-        if self.shuffle == True:
-            np.random.shuffle(self.indexes)
-
-    def __data_generation(self, list_IDs_temp):
-        'Generates data containing batch_size samples' # X : (n_samples, *dim, n_channels)
-        ### Initialization
-        X = np.empty((self.batch_size, *self.dim, self.n_channels))
-        y = np.empty((self.batch_size), dtype=int)
-        
-        # Generate data
-        for i, ID in enumerate(list_IDs_temp):
-            # Store sample
-            image = cv2.imread('path to spectrograms' + ID)
-            # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            # X[i,] = gray.reshape((224,230,1))
-            X[i,] = image
-            X[i,] /= 255
-            
-        return X
-
-
 # # Data Pre-Processing
 
 # ## Acquiring gunshot sound data
 
-# In[9]:
+# In[ ]:
 
 
 gunshot_sound_dir = "/home/alexm/Datasets/gunshot_data/gunshot/"
@@ -189,7 +129,7 @@ print("The number of labels of available for training is currently " + str(len(l
 
 # ## Acquiring sound data from examples of glass breaking
 
-# In[10]:
+# In[ ]:
 
 
 glassbreak_sound_dir = "/home/alexm/Datasets/gunshot_data/glassbreak/"
@@ -202,20 +142,16 @@ for file in os.listdir(glassbreak_sound_dir):
             sample, sample_rate = librosa.load(glassbreak_sound_dir + file)
             
             if len(sample) <= sampling_rate_per_two_seconds:
-                label = 1
+                label = 0
                 number_of_missing_hertz = sampling_rate_per_two_seconds - len(sample)
                 padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
-                if np.max(abs(sample)) < 0.25:
-                    label = 0
 
                 samples.append(padded_sample)
                 labels.append(label)
             else:
                 for i in range(0, sample.size - sampling_rate_per_two_seconds, sampling_rate_per_two_seconds):
                     sample_slice = sample[i : i + sampling_rate_per_two_seconds]
-                    label = 1
-                    if np.max(abs(sample_slice)) < 0.25:
-                        label = 0
+                    label = 0
 
                     samples.append(sample_slice)
                     labels.append(label)
@@ -230,7 +166,7 @@ print("The number of labels of available for training is currently " + str(len(l
 
 # ## Reading in the CSV file of descriptors for all other kinds of urban sounds
 
-# In[11]:
+# In[ ]:
 
 
 sound_types = pd.read_csv("/home/alexm/Datasets/urban_sound_labels.csv")
@@ -238,7 +174,7 @@ sound_types = pd.read_csv("/home/alexm/Datasets/urban_sound_labels.csv")
 
 # ## Reading in all of the urban sound data WAV files
 
-# In[12]:
+# In[ ]:
 
 
 urban_sound_dir = "/home/alexm/Datasets/urban_sounds/"
@@ -289,7 +225,7 @@ print("The number of labels of available for training is currently " + str(len(l
 # In[ ]:
 
 
-# np.save("/home/alexm/Datasets/gunshot_sound_samples.npy", samples)
+np.save("/home/alexm/Datasets/gunshot_sound_samples.npy", samples)
 np.save("/home/alexm/Datasets/gunshot_sound_labels.npy", labels)
 
 
@@ -298,8 +234,8 @@ np.save("/home/alexm/Datasets/gunshot_sound_labels.npy", labels)
 # In[ ]:
 
 
-# samples = np.load("/home/alexm/Datasets/gunshot_sound_samples.npy")
-# labels = np.load("/home/alexm/Datasets/gunshot_sound_labels.npy")
+samples = np.load("/home/alexm/Datasets/gunshot_sound_samples.npy")
+labels = np.load("/home/alexm/Datasets/gunshot_sound_labels.npy")
 
 
 # ### Optional debugging after processing the data
@@ -349,6 +285,14 @@ print(train_wav.shape)
 
 
 # # Model
+
+# ## Loading previous model
+
+# In[ ]:
+
+
+model = load_model("/home/alexm/Datasets/gunshot_sound_full_model.h5")
+
 
 # ## Model Parameters
 
@@ -400,7 +344,7 @@ model.compile(loss=keras.losses.binary_crossentropy,
 # In[ ]:
 
 
-model_filename = 'gunshot_sound_model.pkl'
+model_filename = '/home/alexm/Datasets/gunshot_sound_model.pkl'
 
 model_callbacks = [
     EarlyStopping(monitor='val_acc',
@@ -413,9 +357,6 @@ model_callbacks = [
                     save_best_only=True,
                     mode='auto'),
 ]
-
-training_generator = DataGenerator(train_wav, train_label)
-validation_generator = DataGenerator(test_wav, test_label)
 
 
 # ### Optional debugging of the model's architecture
@@ -431,17 +372,15 @@ model.summary()
 # In[ ]:
 
 
-model.fit(train_wav, train_label, 
+History = model.fit(train_wav, train_label, 
           validation_data=[test_wav, test_label],
-          batch_size=batch_size, 
           epochs=50,
           callbacks=model_callbacks,
-          verbose=1)
+          verbose=1,
+          batch_size=batch_size,
+          shuffle=True)
 
-# model.load_weights("gunshot_sound_model.h5")
-y_pred = np.round(model.predict(X_test))
-print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
-model.save_weights("gunshot_sound_model.h5")
+model.save("/home/alexm/Datasets/gunshot_sound_full_model.h5")
 
 
 # ## Summarizing history for accuracy
@@ -477,8 +416,8 @@ plt.show()
 # In[ ]:
 
 
-Y_test_pred = model.predict(test_wav)
-y_predicted_classes_test = Y_test_pred.argmax(axis=-1)
+y_test_pred = model.predict(test_wav)
+y_predicted_classes_test = y_test_pred.argmax(axis=-1)
 y_actual_classes_test= test_label.argmax(axis=-1)
 wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
 print(wrong_examples)
@@ -489,9 +428,9 @@ print(wrong_examples)
 # In[ ]:
 
 
-i = 0
+i = 323
 sample = np.reshape(test_wav[i], sampling_rate_per_two_seconds, )
 sample_rate = 22050
-print(y_test[i], Y_test_pred[i])
+print(y_actual_classes_test[i], y_predicted_classes_test[i])
 ipd.Audio(sample, rate=sample_rate)
 
