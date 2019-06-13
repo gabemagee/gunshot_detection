@@ -27,7 +27,7 @@ import plotly.tools as tls
 import pandas as pd
 from sklearn.model_selection import KFold
 import librosa
-import soundfile
+#import soundfile
 
 # Deep Learning
 import tensorflow as tf
@@ -38,11 +38,11 @@ from tensorflow.keras import backend as K
 
 
 
-from keras.activations import relu, softmax
-from keras.layers import (Convolution1D, Dense, Dropout, GlobalAveragePooling1D, 
+from tensorflow.keras.activations import relu, softmax
+from tensorflow.keras.layers import (Convolution1D, Dense, Dropout, GlobalAveragePooling1D, 
                           GlobalMaxPool1D, Input, MaxPool1D, concatenate)
-from keras import losses, models, optimizers
-from keras.callbacks import (EarlyStopping, LearningRateScheduler,
+from tensorflow.keras import losses, models, optimizers
+from tensorflow.keras.callbacks import (EarlyStopping, LearningRateScheduler,
                              ModelCheckpoint, TensorBoard, ReduceLROnPlateau)
 
 
@@ -164,7 +164,7 @@ with tf.device("/gpu:0"):
 
     # add callbacks to stop early if it stops improving
 
-    callbacks = [
+    model_callbacks = [
         EarlyStopping(monitor='val_acc',
                       patience=10,
                       verbose=1,
