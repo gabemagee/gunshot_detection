@@ -3,6 +3,8 @@
 
 # In[ ]:
 
+#Turns a .h5 model file into a TFLite flat buffer
+
 
 #see
     #https://www.tensorflow.org/lite/convert/python_api
@@ -12,21 +14,29 @@
 #imports
 
 import tensorflow as tf
+from tensorflow.keras.models import load_model
+import tensorflow.lite
 
 
-# In[ ]:
+#print("version of tensorflow:")
+#print(tf.__version__)
 
 
-#use the saved model (.h5 file)
+model_name = "/home/lauogden/models/gunshot_sound_model.h5"
 
-converter = tf.lite.TFLiteConverter.from_keras_model_file("/home/lauogden/data/gunshot_sound_model.h5")
+converter = tf.lite.TFLiteConverter.from_keras_model_file(model_name)
+print("\n made the converter using from_keras_model \n")
 
 #post-training quantization
 converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
+print(" did post training quantization \n")
 
 #convert
 tflite_model = converter.convert()
+print(" converted successfully \n")
 
 #save
-open("/home/lauogden/data/converted_model.tflite", "wb").write(tflite_model)
+open("/home/lauogden/models/converted_gunshot_model_ptq.tflite", "wb").write(tflite_model)
+print(" saved successfully \n")
+
 
