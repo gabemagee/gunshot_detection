@@ -197,12 +197,14 @@ with tf.device("/gpu:0"):
               batch_size=batch_size,
               shuffle=True)
 
-    model.save("/home/lauogden/gunshot_cnn_model.h5")
-
+    model.save("/home/lauogden/data/gunshot_cnn_model.h5")
+    print("\n \n saved model as gunshot_cnn_model.h5 \n \n")
+    
 
     # In[26]:
 
 
+    '''
     #incorrectly predicted data samples
     Y_test_pred = model.predict(test_wav)
     y_predicted_classes_test = y_test_pred.argmax(axis=-1)
@@ -210,4 +212,15 @@ with tf.device("/gpu:0"):
     wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
     print("Wrong examples: ")
     print(wrong_examples)
+    '''
+    
+    
+    #attempt to convert to tflite?
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    print("created convertor")
+    tflite_model = converter.convert()
+    print("converted the model to tf lite")
+    open("/home/lauogden/data/converted_model.tflite", "wb").write(tflite_model)
+    print("saved the tf lite model")
+    
 
