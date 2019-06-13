@@ -23,18 +23,17 @@ from tensorflow.keras import backend as K
 #print(tf.__version__)
 
 # custom metric: auc
-class AUC:
-    def auc(y_true, y_pred):
-        auc = tf.metrics.auc(y_true, y_pred)[1]
-        K.get_session().run(tf.local_variables_initializer())
-        return auc
+def auc(y_true, y_pred):
+    auc = tf.metrics.auc(y_true, y_pred)[1]
+    K.get_session().run(tf.local_variables_initializer())
+    return auc
 
 
 
 
 model_name = "/home/lauogden/models/gunshot_sound_model.h5"
 
-converter = tf.lite.TFLiteConverter.from_keras_model_file(model_name, custom_objects={'auc': AUC})
+converter = tf.lite.TFLiteConverter.from_keras_model_file(model_name, custom_objects={'auc': auc})
 print("\n made the converter using from_keras_model \n")
 
 #post-training quantization
