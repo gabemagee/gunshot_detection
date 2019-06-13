@@ -16,12 +16,14 @@
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 import tensorflow.lite
+from tensorflow.keras import backend as K
 
 
 #print("version of tensorflow:")
 #print(tf.__version__)
 
 # custom metric: auc
+
 def auc(y_true, y_pred):
     auc = tf.metrics.auc(y_true, y_pred)[1]
     K.get_session().run(tf.local_variables_initializer())
