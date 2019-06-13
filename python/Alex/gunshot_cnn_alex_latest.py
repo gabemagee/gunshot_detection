@@ -85,6 +85,24 @@ input_shape = (sampling_rate_per_two_seconds, 1)
 samples = np.load("/home/amorehe/Datasets/gunshot_augmented_sound_samples.npy")
 labels = np.load("/home/amorehe/Datasets/gunshot_augmented_sound_labels.npy")
 
+# ## Restructuring the label data
+
+
+# In[ ]:
+
+
+labels = keras.utils.to_categorical(labels, 2)
+
+
+# ### Optional debugging of the label data's shape
+
+
+# In[ ]:
+
+
+print(labels.shape)
+(21789, 2)
+
 
 # ## Arranging the data
 
@@ -106,8 +124,6 @@ for train_index, test_index in kf.split(samples):
 
 train_wav = train_wav.reshape(-1, sampling_rate_per_two_seconds, 1)
 test_wav = test_wav.reshape(-1, sampling_rate_per_two_seconds, 1)
-train_label = keras.utils.to_categorical(train_label, 2)
-test_label = keras.utils.to_categorical(test_label, 2)
 
 
 # ### Optional debugging of the training data's shape
