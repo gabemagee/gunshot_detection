@@ -52,6 +52,12 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
+
+def auc(y_true, y_pred):
+    auc = tf.metrics.auc(y_true, y_pred)[1]
+    K.get_session().run(tf.local_variables_initializer())
+    return auc
+
 print(os.getcwd())
 
 model_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_model.h5"
@@ -60,9 +66,52 @@ labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_s
 
 samples = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_samples.npy"
 
-model = keras.models.load_model(model_path)
+model = keras.models.load_model(model_path,custom_objects={'auc':auc})
 model.summary()
-#loss, acc = new_model.evaluate(test_images, test_labels)
-#print("Restored model, accuracy: {:5.2f}%".format(100*acc))
 
-label_np = np.open(labels)
+
+label_np = np.load(labels)
+label_index = 0
+gunshot_label_marker = 1
+gunshot_indexes = []
+non_gunshot_indexes = []
+for label in label_np:
+    if label==1.0:
+        gunshot_indexes.append(label_index)
+    else:
+        non_gunshot_indexes.append(label_index)
+    label_index = label_index + 1
+print(len(gunshot_indexes))
+print(len(non_gunshot_indexes))
+
+sub_sample_list_gs = []
+sub_sample_list_uk = []
+for i in range(number_of_desired_samples):
+    r = np.random.randint(0,len(gunshot_indexes))
+    while r in sub_sample_list_gs:
+        r = np.random.randint(0,len(gunshot_indexes))
+    sub_sample_list_gs.append(r)
+for i in range(number_of_desired_samples):
+    r = np.random.randint(0,len(non_gunshot_indexes))
+    while r in sub_sample_list_uk:
+        r = np.random.randint(0,len(non_gunshot_indexes))
+    sub_sample_list_uk.append(r)
+
+gunshot_samples = []
+other_samples = []
+sample_np = np.load(samples)
+for index in sub_sample_list_gs:
+    gunshot_samples.append(sample_np[index])
+for index in sub_sample_list_uk:
+    other_samples.append(sample_np[index])
+gunshot_samples = np.array(gunshot_samples)
+other_samples = np.array(other_samples)
+
+gunshots_correct = np.array([1]*number_of_desired_samples)
+other_correct = np.array([0]*number_of_desired_samples)
+
+loss, acc = new_model.evaluate(gunshot_samples, gunshots_correct)
+print("Restored model, accuracy on gunshots: {:5.2f}%".format(100*acc))
+
+loss, acc = new_model.evaluate(other_samples, other_correct)
+print("Restored model, accuracy on other: {:5.2f}%".format(100*acc))
