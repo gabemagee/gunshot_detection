@@ -35,9 +35,7 @@ import plotly.tools as tls
 
 import pandas as pd
 import librosa
-import soundfile
 import re
-import cv2
 from sklearn.model_selection import KFold
 
 
@@ -63,7 +61,6 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras import backend as K
 
 
 # # Initialization of Variables
@@ -87,20 +84,6 @@ input_shape = (sampling_rate_per_two_seconds, 1)
 
 samples = np.load("/home/amorehe/Datasets/gunshot_augmented_sound_samples.npy")
 labels = np.load("/home/amorehe/Datasets/gunshot_augmented_sound_labels.npy")
-
-
-# ### Optional debugging after processing the data
-
-# In[ ]:
-
-
-i = 0  # You can change the value of 'i' to adjust which sample is being inspected.
-sample=samples[i]
-sample_rate=22050
-print("The number of samples available to the model for training is " + str(len(samples)) + '.')
-print("The maximum frequency value in sample slice #" + str(i) + " is " + str(np.max(abs(sample))) + '.')
-print("The label associated with sample slice #" + str(i) + " is " + str(labels[i]) + '.')
-ipd.Audio(sample, rate=sample_rate)
 
 
 # ## Arranging the data
@@ -196,7 +179,7 @@ model = tf.keras.Model(input_tensor, output_tensor)
 
 optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
 
-model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=[auc])
+model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=["accuracy", auc])
 
 
 # ## Configuring model properties
@@ -232,7 +215,7 @@ model.summary()
 # In[ ]:
 
 
-History = model.fit(train_wav, train_label, 
+model.fit(train_wav, train_label, 
           validation_data=[test_wav, test_label],
           epochs=number_of_epochs,
           callbacks=model_callbacks,
