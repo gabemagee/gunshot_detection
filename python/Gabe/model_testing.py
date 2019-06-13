@@ -54,4 +54,15 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 print(os.getcwd())
 
-model_path = ""
+model_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_model.h5"
+
+labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_labels.npy"
+
+samples = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_samples.npy"
+
+model = keras.models.load_model(model_path)
+model.summary()
+#loss, acc = new_model.evaluate(test_images, test_labels)
+#print("Restored model, accuracy: {:5.2f}%".format(100*acc))
+
+label_np = np.open(labels)
