@@ -60,6 +60,8 @@ def auc(y_true, y_pred):
 
 print(os.getcwd())
 
+number_of_desired_samples = 250
+
 model_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_model.h5"
 
 labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_labels.npy"
@@ -110,8 +112,8 @@ other_samples = np.array(other_samples)
 gunshots_correct = np.array([1]*number_of_desired_samples)
 other_correct = np.array([0]*number_of_desired_samples)
 
-loss, acc = new_model.evaluate(gunshot_samples, gunshots_correct)
+loss, acc = model.evaluate(gunshot_samples, gunshots_correct)
 print("Restored model, accuracy on gunshots: {:5.2f}%".format(100*acc))
 
-loss, acc = new_model.evaluate(other_samples, other_correct)
+loss, acc = model.evaluate(other_samples, other_correct)
 print("Restored model, accuracy on other: {:5.2f}%".format(100*acc))
