@@ -73,12 +73,13 @@ model.summary()
 
 
 label_np = np.load(labels)
+label_np = keras.utils.to_categorical(label_np, 2)
 label_index = 0
 gunshot_label_marker = 1
 gunshot_indexes = []
 non_gunshot_indexes = []
 for label in label_np:
-    if label==1.0:
+    if label[1]==1.0:
         gunshot_indexes.append(label_index)
     else:
         non_gunshot_indexes.append(label_index)
@@ -106,11 +107,19 @@ for index in sub_sample_list_gs:
     gunshot_samples.append(sample_np[index])
 for index in sub_sample_list_uk:
     other_samples.append(sample_np[index])
-gunshot_samples = np.array(gunshot_samples)
-other_samples = np.array(other_samples)
+sampling_rate_per_two_seconds = 44100
 
-gunshots_correct = np.array([1]*number_of_desired_samples)
-other_correct = np.array([0]*number_of_desired_samples)
+gunshot_samples = np.array(gunshot_samples)
+gunshot_samples = gunshot_samples.reshape(-1, sampling_rate_per_two_seconds, 1)
+
+other_samples = np.array(other_samples)
+other_samples = other_samples.reshape(-1, sampling_rate_per_two_seconds, 1)
+
+gunshots_correct = np.array((0,1)*number_of_desired_samples).reshape(-1,2,1)
+other_correct = np.array((1,0)*number_of_desired_samples).reshape(-1,2,1)
+
+print(gunshot_samples.shape)
+print(gunshots_correct.shape)
 
 loss, acc = model.evaluate(gunshot_samples, gunshots_correct)
 print("Restored model, accuracy on gunshots: {:5.2f}%".format(100*acc))
