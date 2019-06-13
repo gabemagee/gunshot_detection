@@ -12,14 +12,26 @@
 #imports
 
 import tensorflow as tf
-
+#import tensorflow.keras as keras
+from tensorflow.keras.models import load_model
 
 # In[ ]:
+
+print("version of tensorflow:")
+print(tf.__version__)
+
+
+model = load_model("/home/lauogden/gunshot_sound_full_model.h5")
 
 
 #use the saved model (.h5 file)
 
-converter = tf.lite.TFLiteConverter.from_keras_model_file("/home/lauogden/data/gunshot_sound_model.h5")
+
+
+
+
+
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
 
 #post-training quantization
 converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
