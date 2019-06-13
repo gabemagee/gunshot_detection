@@ -5,7 +5,7 @@
 
 # ### File Directory Libraries
 
-# In[ ]:
+# In[1]:
 
 
 import glob
@@ -16,7 +16,7 @@ from pathlib import Path
 
 # ### Math Libraries
 
-# In[ ]:
+# In[2]:
 
 
 import numpy as np
@@ -30,16 +30,20 @@ import plotly.tools as tls
 
 # ### Data Pre-Processing Libraries
 
-# In[ ]:
+# In[3]:
 
 
 import pandas as pd
+import librosa
+import soundfile
+import re
+import cv2
 from sklearn.model_selection import KFold
 
 
 # ### Visualization Libraries
 
-# In[ ]:
+# In[4]:
 
 
 import seaborn as sns
@@ -49,7 +53,7 @@ import librosa.display
 
 # ### Deep Learning Libraries
 
-# In[ ]:
+# In[5]:
 
 
 import tensorflow as tf
@@ -61,37 +65,30 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
-# ### Configuration of Imported Libraries
-
-# In[ ]:
-
-
-py.init_notebook_mode(connected=True)
-
-
 # # Initialization of Variables
 
-# In[ ]:
+# In[7]:
 
 
 samples=[]
 labels = []
+gunshot_frequency_threshold = 0.25
 sampling_rate_per_two_seconds = 44100
 input_shape = (sampling_rate_per_two_seconds, 1)
 
 
-# ## Loading sample file and label file as numpy arrays
+# ## Loading augmented sample file and label file as numpy arrays
 
 # In[ ]:
 
 
-samples = np.load("/home/amorehe/Datasets/gunshot_sound_samples.npy")
-labels = np.load("/home/amorehe/Datasets/gunshot_sound_labels.npy")
+samples = np.load("/home/amorehe/Datasets/gunshot_augmented_sound_samples.npy")
+labels = np.load("/home/amorehe/Datasets/gunshot_augmented_sound_labels.npy")
 
 
 # ## Arranging the data
 
-# In[ ]:
+# In[19]:
 
 
 kf = KFold(n_splits=3, shuffle=True)
@@ -122,13 +119,6 @@ print(train_wav.shape)
 
 
 # # Model
-
-# ## Loading previous model
-
-# In[ ]:
-
-
-model = load_model("/home/amorehe/Datasets/gunshot_sound_full_model.h5")
 
 
 # ## Model Parameters
@@ -209,7 +199,7 @@ model.summary()
 # In[ ]:
 
 
-History = model.fit(train_wav, train_label, 
+model.fit(train_wav, train_label, 
           validation_data=[test_wav, test_label],
           epochs=50,
           callbacks=model_callbacks,
@@ -217,7 +207,7 @@ History = model.fit(train_wav, train_label,
           batch_size=batch_size,
           shuffle=True)
 
-model.save("/home/amorehe/Datasets/gunshot_sound_full_model.h5")
+model.save("/home/amorehe/Datasets/gunshot_sound_model.h5")
 
 
 # ### Optional debugging of incorrectly-labeled examples
