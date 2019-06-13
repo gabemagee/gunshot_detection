@@ -5,7 +5,7 @@
 
 # ### File Directory Libraries
 
-# In[1]:
+# In[ ]:
 
 
 import glob
@@ -16,7 +16,7 @@ from pathlib import Path
 
 # ### Math Libraries
 
-# In[2]:
+# In[ ]:
 
 
 import numpy as np
@@ -30,7 +30,7 @@ import plotly.tools as tls
 
 # ### Data Pre-Processing Libraries
 
-# In[3]:
+# In[ ]:
 
 
 import pandas as pd
@@ -43,7 +43,7 @@ from sklearn.model_selection import KFold
 
 # ### Visualization Libraries
 
-# In[4]:
+# In[ ]:
 
 
 import seaborn as sns
@@ -53,21 +53,22 @@ import librosa.display
 
 # ### Deep Learning Libraries
 
-# In[5]:
+# In[ ]:
 
 
 import tensorflow as tf
 import tensorflow.keras as keras
-from tensorflow.keras import Input, layers
+from tensorflow.keras import Input, layers, optimizers
 from tensorflow.keras import backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras import backend as K
 
 
 # # Initialization of Variables
 
-# In[7]:
+# In[ ]:
 
 
 samples=[]
@@ -76,6 +77,8 @@ gunshot_frequency_threshold = 0.25
 sampling_rate_per_two_seconds = 44100
 input_shape = (sampling_rate_per_two_seconds, 1)
 
+
+# # Data Pre-Processing
 
 # ## Loading augmented sample file and label file as numpy arrays
 
@@ -86,9 +89,23 @@ samples = np.load("/home/amorehe/Datasets/gunshot_augmented_sound_samples.npy")
 labels = np.load("/home/amorehe/Datasets/gunshot_augmented_sound_labels.npy")
 
 
+# ### Optional debugging after processing the data
+
+# In[ ]:
+
+
+i = 0  # You can change the value of 'i' to adjust which sample is being inspected.
+sample=samples[i]
+sample_rate=22050
+print("The number of samples available to the model for training is " + str(len(samples)) + '.')
+print("The maximum frequency value in sample slice #" + str(i) + " is " + str(np.max(abs(sample))) + '.')
+print("The label associated with sample slice #" + str(i) + " is " + str(labels[i]) + '.')
+ipd.Audio(sample, rate=sample_rate)
+
+
 # ## Arranging the data
 
-# In[19]:
+# In[ ]:
 
 
 kf = KFold(n_splits=3, shuffle=True)
@@ -126,9 +143,21 @@ print(train_wav.shape)
 # In[ ]:
 
 
+drop_out_rate = 0.1
 learning_rate = 0.001
+number_of_epochs = 100
 batch_size = 32
-drop_out_rate = 0.2
+
+
+# ## ROC AUC metric - Uses the import "from keras import backend as K"
+
+# In[ ]:
+
+
+def auc(y_true, y_pred):
+    auc = tf.metrics.auc(y_true, y_pred)[1]
+    K.get_session().run(tf.local_variables_initializer())
+    return auc
 
 
 # ## Model Architecture
@@ -137,33 +166,37 @@ drop_out_rate = 0.2
 
 
 input_tensor = Input(shape=input_shape)
+number_of_classes = 2
 
-x = layers.Conv1D(8, 11, padding='valid', activation='relu', strides=1)(input_tensor)
-x = layers.MaxPooling1D(2)(x)
-x = layers.Conv1D(16, 7, padding='valid', activation='relu', strides=1)(x)
-x = layers.MaxPooling1D(4)(x)
-x = layers.Conv1D(32, 5, padding='valid', activation='relu', strides=1)(x)
-x = layers.MaxPooling1D(4)(x)
-x = layers.Conv1D(64, 5, padding='valid', activation='relu', strides=1)(x)
-x = layers.MaxPooling1D(6)(x)
-x = layers.Conv1D(128, 3, padding='valid', activation='relu', strides=1)(x)
-x = layers.MaxPooling1D(6)(x)
-x = layers.Conv1D(256, 3, padding='valid', activation='relu', strides=1)(x)
-x = layers.MaxPooling1D(6)(x)
-x = layers.Flatten()(x)
-x = layers.Dense(100, activation='relu')(x)
-x = layers.Dropout(drop_out_rate)(x)
-x = layers.Dense(50, activation='relu')(x)
-x = layers.Dropout(drop_out_rate)(x)
-x = layers.Dense(20, activation='relu')(x)
+x = layers.Conv1D(16, 9, activation="relu", padding="same")(input_tensor)
+x = layers.Conv1D(16, 9, activation="relu", padding="same")(x)
+x = layers.MaxPool1D(16)(x)
+x = layers.Dropout(rate=drop_out_rate)(x)
 
-output_tensor = layers.Dense(2, activation='softmax')(x)
+x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+x = layers.MaxPool1D(4)(x)
+x = layers.Dropout(rate=drop_out_rate)(x)
+
+x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+x = layers.MaxPool1D(4)(x)
+x = layers.Dropout(rate=drop_out_rate)(x)
+
+x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
+x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
+x = layers.GlobalMaxPool1D()(x)
+x = layers.Dropout(rate=drop_out_rate)(x)
+
+x = layers.Dense(64, activation="relu")(x)
+x = layers.Dense(1028, activation="relu")(x)
+output_tensor = layers.Dense(number_of_classes, activation="softmax")(x)
 
 model = tf.keras.Model(input_tensor, output_tensor)
 
-model.compile(loss=keras.losses.binary_crossentropy,
-             optimizer=keras.optimizers.Adam(lr = learning_rate),
-             metrics=['accuracy'])
+optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
+
+model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=[auc])
 
 
 # ## Configuring model properties
@@ -199,9 +232,9 @@ model.summary()
 # In[ ]:
 
 
-model.fit(train_wav, train_label, 
+History = model.fit(train_wav, train_label, 
           validation_data=[test_wav, test_label],
-          epochs=50,
+          epochs=number_of_epochs,
           callbacks=model_callbacks,
           verbose=1,
           batch_size=batch_size,
