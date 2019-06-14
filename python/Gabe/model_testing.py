@@ -119,7 +119,7 @@ gunshots_correct = np.array((0,1)*number_of_desired_samples).reshape(-1,2,1)
 other_correct = np.array((1,0)*number_of_desired_samples).reshape(-1,2,1)
 
 print(gunshot_samples.shape)
-print(gunshots_correct.shape)
+print(gunshots_correct)
 
 
 
