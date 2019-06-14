@@ -91,7 +91,7 @@ for i in range(len(diff)):
     if diff[i]!=0:
         indexes.append(i)
 arr = np.array(np.load(samples))
-arr_2 = np.array(np.load(samples))
+arr_2 = np.array(np.load(labels))
 for ind in indexes:
     if arr_2[ind]==1:
         direc = results_guns
