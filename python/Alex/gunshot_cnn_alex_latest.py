@@ -134,7 +134,7 @@ def add_background(wav, file, data_directory, label_to_avoid):
     bg_files.remove(file)
     chosen_bg_file = bg_files[np.random.randint(len(bg_files))]
     jndex = int(chosen_bg_file.split('.')[0])
-    while sound_types.loc[jndex, "Class"] == label_to_avoid:
+    while sound_types.loc[sound_types["ID"] == jndex, "Class"].values[0] == label_to_avoid:
         chosen_bg_file = bg_files[np.random.randint(len(bg_files))]
         jndex = int(chosen_bg_file.split('.')[0])
     bg, sr = librosa.load(sound_directory + chosen_bg_file)
@@ -153,12 +153,12 @@ def add_background(wav, file, data_directory, label_to_avoid):
 # In[ ]:
 
 
-augmented_samples = np.zeros((samples.shape[0] * 5, samples.shape[1]))
-augmented_labels = np.zeros((labels.shape[0] * 5,))
+augmented_samples = np.zeros((samples.shape[0] * 6, samples.shape[1]))
+augmented_labels = np.zeros((labels.shape[0] * 6,))
 sound_files = os.listdir(sound_data_dir + "Train/")
 j = 0
 
-for i in range (0, len(augmented_samples), 5):
+for i in range (0, len(augmented_samples), 6):
     file = sound_files[j]
     
     augmented_samples[i,:] = samples[j,:]
@@ -166,17 +166,17 @@ for i in range (0, len(augmented_samples), 5):
     augmented_samples[i + 2,:] = change_pitch(samples[j,:], sample_rate)
     augmented_samples[i + 3,:] = speed_change(samples[j,:])
     augmented_samples[i + 4,:] = change_volume(samples[j,:], np.random.uniform())
-    #if labels[j] != "gun_shot":
-        #augmented_samples[i + 5,:] = add_background(samples[j,:], file, sound_data_dir, "")
-    #else:
-        #augmented_samples[i + 5,:] = add_background(samples[j,:], file, sound_data_dir, "gun_shot")
+    if labels[j] != "gun_shot":
+        augmented_samples[i + 5,:] = add_background(samples[j,:], file, sound_data_dir, "")
+    else:
+        augmented_samples[i + 5,:] = add_background(samples[j,:], file, sound_data_dir, "gun_shot")
     
     augmented_labels[i] = labels[j]
     augmented_labels[i + 1] = labels[j]
     augmented_labels[i + 2] = labels[j]
     augmented_labels[i + 3] = labels[j]
     augmented_labels[i + 4] = labels[j]
-    #augmented_labels[i + 5] = labels[j]
+    augmented_labels[i + 5] = labels[j]
     j += 1
 
 samples = augmented_samples
