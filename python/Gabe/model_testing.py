@@ -125,7 +125,7 @@ print(gunshots_correct)
 print(gunshots_correct.shape)
 
 
-predictions = model.predict(gunshot_samples)
+predictions = model.predict(gunshot_samples).reshape(250,2,1)
 print(predictions.shape)
 predictions = np.argmax(predictions,1)
 a = np.argmax(gunshots_correct,1)
