@@ -59,6 +59,7 @@ def auc(y_true, y_pred):
     return auc
 
 number_of_desired_samples = 250
+sampling_rate_per_two_seconds = 44100
 
 model_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_model.h5"
 
@@ -71,7 +72,7 @@ model.summary()
 
 
 label_np = np.array(np.load(labels))
-sample_np = np.array(np.load(samples))
+sample_np = np.array(np.load(samples)).reshape(-1, sampling_rate_per_two_seconds, 1)
 
 a = model.predict(samples)
 
