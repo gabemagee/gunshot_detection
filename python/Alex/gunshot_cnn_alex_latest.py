@@ -156,15 +156,18 @@ j = 0
 
 for i in range(0, len(augmented_samples), 6):
     file = sound_files[j]
+    print("Current label is " + str(labels[j]))
 
     augmented_samples[i, :] = samples[j, :]
     augmented_samples[i + 1, :] = time_shift(samples[j, :])
     augmented_samples[i + 2, :] = change_pitch(samples[j, :], sample_rate)
     augmented_samples[i + 3, :] = speed_change(samples[j, :])
     augmented_samples[i + 4, :] = change_volume(samples[j, :], np.random.uniform())
-    if labels[j] != "gun_shot":
+    if labels[j] == "gun_shot":
+        print("Adding background noise to a gunshot audio clip...")
         augmented_samples[i + 5, :] = add_background(samples[j, :], file, sound_data_dir, "")
     else:
+        print("Adding non-gunshot background noise to a non-gunshot audio clip...")
         augmented_samples[i + 5, :] = add_background(samples[j, :], file, sound_data_dir, "gun_shot")
 
     augmented_labels[i] = labels[j]
