@@ -60,6 +60,8 @@ def auc(y_true, y_pred):
 
 print(os.getcwd())
 
+number_of_desired_samples = 250
+
 model_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_model.h5"
 
 labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_labels.npy"
@@ -71,12 +73,13 @@ model.summary()
 
 
 label_np = np.load(labels)
+label_np = keras.utils.to_categorical(label_np, 2)
 label_index = 0
 gunshot_label_marker = 1
 gunshot_indexes = []
 non_gunshot_indexes = []
 for label in label_np:
-    if label==1.0:
+    if label[1]==1.0:
         gunshot_indexes.append(label_index)
     else:
         non_gunshot_indexes.append(label_index)
@@ -104,14 +107,24 @@ for index in sub_sample_list_gs:
     gunshot_samples.append(sample_np[index])
 for index in sub_sample_list_uk:
     other_samples.append(sample_np[index])
+sampling_rate_per_two_seconds = 44100
+
 gunshot_samples = np.array(gunshot_samples)
+gunshot_samples = gunshot_samples.reshape(-1, sampling_rate_per_two_seconds, 1)
+
 other_samples = np.array(other_samples)
+other_samples = other_samples.reshape(-1, sampling_rate_per_two_seconds, 1)
 
-gunshots_correct = np.array([1]*number_of_desired_samples)
-other_correct = np.array([0]*number_of_desired_samples)
+gunshots_correct = np.array((0,1)*number_of_desired_samples).reshape(-1,2,1)
+other_correct = np.array((1,0)*number_of_desired_samples).reshape(-1,2,1)
 
-loss, acc = new_model.evaluate(gunshot_samples, gunshots_correct)
-print("Restored model, accuracy on gunshots: {:5.2f}%".format(100*acc))
+print(gunshot_samples.shape)
+print(gunshots_correct.shape)
 
-loss, acc = new_model.evaluate(other_samples, other_correct)
-print("Restored model, accuracy on other: {:5.2f}%".format(100*acc))
+
+
+gs_predictions = model.predict(gunshot_samples)
+gs_predictions_classes = gs_predictions.argmax(axis=-1)
+gs_actual_classes= gunshots_correct.argmax(axis=-1)
+wrong_examples = np.nonzero(gs_predictions_classes != gs_actual_classes)
+print(wrong_examples)
