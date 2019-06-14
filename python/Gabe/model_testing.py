@@ -82,7 +82,7 @@ print(a.shape)
 b = np.argmax(label_np,axis=1)
 print(a)
 print(b)
-
+print(a-b)
 """
 
 label_np = keras.utils.to_categorical(label_np, 2)
