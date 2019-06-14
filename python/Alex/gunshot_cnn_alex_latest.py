@@ -128,6 +128,7 @@ def add_background(wav, file, data_directory, label_to_avoid):
     chosen_bg_file = bg_files[np.random.randint(len(bg_files))]
     jndex = int(chosen_bg_file.split('.')[0])
     while sound_types.loc[sound_types["ID"] == jndex, "Class"].values[0] == label_to_avoid:
+        print("Still looking for a random clip to add as background noise...")
         chosen_bg_file = bg_files[np.random.randint(len(bg_files))]
         jndex = int(chosen_bg_file.split('.')[0])
     bg, sr = librosa.load(sound_directory + chosen_bg_file)
