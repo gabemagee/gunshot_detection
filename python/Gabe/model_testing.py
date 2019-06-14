@@ -126,13 +126,9 @@ print(gunshots_correct.shape)
 
 
 predictions = model.predict(gunshot_samples)
-print(predictions)
-zero = np.argmax(predictions,0)
-one = np.argmax(predictions,1)
-print("zero")
-print(zero)
-print("one")
-print(one)
+predictions = np.argmax(predictions,1)
+a = np.argmax(gunshots_correct,1)
+print(a)
 
 
 #loss, acc = model.evaluate(other_samples, other_correct)
