@@ -70,8 +70,8 @@ model = keras.models.load_model(model_path,custom_objects={'auc':auc})
 model.summary()
 
 
-label_np = np.load(labels)
-sample_np = np.load(samples)
+label_np = np.array(np.load(labels))
+sample_np = np.array(np.load(samples))
 
 a = model.predict(samples)
 
