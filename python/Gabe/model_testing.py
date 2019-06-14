@@ -74,15 +74,15 @@ model.summary()
 label_np = np.array(np.load(labels))
 label_np = np.array(keras.utils.to_categorical(label_np, 2))
 sample_np = np.array(np.load(samples)).reshape(-1, sampling_rate_per_two_seconds, 1)
-a = model.predict(sample_np)
-print(a.shape)
-print(label_np.shape)
-a = np.argmax(a,axis=1)
-print(a.shape)
+a = np.argmax(model.predict(sample_np),axis=1)
 b = np.argmax(label_np,axis=1)
-print(a)
-print(b)
-print(a-b)
+diff = a-b
+
+indexes = []
+for i in range(len(diff)):
+    if diff[i]!=0:
+        indexes.append(i)
+print(indexes)
 """
 
 label_np = keras.utils.to_categorical(label_np, 2)
