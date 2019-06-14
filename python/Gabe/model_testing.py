@@ -74,8 +74,12 @@ model.summary()
 label_np = np.array(np.load(labels))
 sample_np = np.array(np.load(samples)).reshape(-1, sampling_rate_per_two_seconds, 1)
 a = model.predict(sample_np)
+print(a.shape)
+print(label_np.shape)
 a = np.argmax(a,axis=1)
+b = np.argmax(label_np,axis=1)
 print(a)
+print(b)
 
 """
 
