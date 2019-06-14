@@ -58,8 +58,6 @@ def auc(y_true, y_pred):
     K.get_session().run(tf.local_variables_initializer())
     return auc
 
-print(os.getcwd())
-
 number_of_desired_samples = 250
 
 model_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_model.h5"
@@ -127,6 +125,7 @@ print(gunshots_correct.shape)
 gs_predictions = model.predict(gunshot_samples)
 print(gs_predictions)
 gs_predictions_classes = gs_predictions.argmax(axis=-1)
+print(gs_predictions_classes)
 gs_actual_classes= gunshots_correct.argmax(axis=-1)
 wrong_examples = np.nonzero(gs_predictions_classes != gs_actual_classes)
 print(wrong_examples)
