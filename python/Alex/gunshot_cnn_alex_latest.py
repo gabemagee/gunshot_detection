@@ -84,7 +84,6 @@ sound_data_dir="/home/amorehe/Datasets/REU_Data_organized/"
 
 # In[ ]:
 
-
 samples = np.load("/home/amorehe/Datasets/gunshot_sound_samples.npy")
 labels = np.load("/home/amorehe/Datasets/gunshot_sound_labels.npy")
 
@@ -92,7 +91,6 @@ labels = np.load("/home/amorehe/Datasets/gunshot_sound_labels.npy")
 # ## Data augmentation functions
 
 # In[ ]:
-
 
 def time_shift(wav):
     start_ = int(np.random.uniform(-wav.shape[0] * 0.5, wav.shape[0] * 0.5))
@@ -170,7 +168,7 @@ for i in range (0, len(augmented_samples), 6):
         augmented_samples[i + 5,:] = add_background(samples[j,:], file, sound_data_dir, "")
     else:
         augmented_samples[i + 5,:] = add_background(samples[j,:], file, sound_data_dir, "gun_shot")
-    
+
     augmented_labels[i] = labels[j]
     augmented_labels[i + 1] = labels[j]
     augmented_labels[i + 2] = labels[j]
@@ -190,10 +188,8 @@ print("The number of labels available for training is currently " + str(len(labe
 
 # In[ ]:
 
-
 np.save("/home/amorehe/Datasets/gunshot_augmented_sound_samples.npy", samples)
 np.save("/home/amorehe/Datasets/gunshot_augmented_sound_labels.npy", labels)
-
 
 # ## Restructuring the label data
 
@@ -307,7 +303,7 @@ model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metric
 # In[ ]:
 
 
-model_filename = '/home/amorehe/Datasets/gunshot_sound_model.pkl'
+model_filename = '/home/alexm/Datasets/gunshot_sound_model.pkl'
 
 model_callbacks = [
     EarlyStopping(monitor='val_acc',
@@ -343,7 +339,7 @@ History = model.fit(train_wav, train_label,
           batch_size=batch_size,
           shuffle=True)
 
-model.save("/home/amorehe/Datasets/gunshot_sound_model.h5")
+model.save("/home/alexm/Datasets/gunshot_sound_model.h5")
 
 
 # ### Optional debugging of incorrectly-labeled examples
