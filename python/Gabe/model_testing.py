@@ -129,5 +129,5 @@ gs_actual_classes= gunshots_correct.argmax(axis=-1)
 wrong_examples = np.nonzero(gs_predictions_classes != gs_actual_classes)
 print(wrong_examples)
 
-loss, acc = model.evaluate(other_samples, other_correct)
-print("Restored model, accuracy on other: {:5.2f}%".format(100*acc))
+#loss, acc = model.evaluate(other_samples, other_correct)
+#print("Restored model, accuracy on other: {:5.2f}%".format(100*acc))
