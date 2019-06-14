@@ -116,10 +116,11 @@ other_samples = np.array(other_samples)
 other_samples = other_samples.reshape(-1, sampling_rate_per_two_seconds, 1)
 
 gunshots_correct = np.array((0,1)*number_of_desired_samples).reshape(-1,2,1)
-other_correct = np.array((1,0)*number_of_desired_samples).reshape(-1,2,1)
+other_correct = np.array([1,0]*number_of_desired_samples).reshape(-1,2,1)
 
 print(gunshot_samples.shape)
 print(gunshots_correct)
+print(gunshots_correct.shape)
 
 
 
