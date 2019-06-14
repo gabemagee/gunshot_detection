@@ -71,6 +71,14 @@ model.summary()
 
 
 label_np = np.load(labels)
+sample_np = np.load(samples)
+
+a = model.predict(samples)
+
+print(a)
+
+"""
+
 label_np = keras.utils.to_categorical(label_np, 2)
 label_index = 0
 gunshot_label_marker = 1
@@ -104,7 +112,7 @@ for i in range(number_of_desired_samples):
 
 gunshot_samples = []
 other_samples = []
-sample_np = np.load(samples)
+
 for index in sub_sample_list_gs:
     gunshot_samples.append(sample_np[index])
 for index in sub_sample_list_uk:
@@ -136,3 +144,6 @@ print(a)
 
 #loss, acc = model.evaluate(other_samples, other_correct)
 #print("Restored model, accuracy on other: {:5.2f}%".format(100*acc))
+
+
+"""
