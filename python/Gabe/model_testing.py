@@ -82,7 +82,9 @@ indexes = []
 for i in range(len(diff)):
     if diff[i]!=0:
         indexes.append(i)
-print(indexes)
+arr = np.array(np.load(samples))
+for ind in indexes:
+    print(arr[ind])
 """
 
 label_np = keras.utils.to_categorical(label_np, 2)
