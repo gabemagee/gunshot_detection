@@ -73,8 +73,7 @@ model.summary()
 
 label_np = np.array(np.load(labels))
 sample_np = np.array(np.load(samples)).reshape(-1, sampling_rate_per_two_seconds, 1)
-print(sample_np.shape)
-a = model.predict(samples)
+a = model.predict(sample_np)
 
 print(a)
 
