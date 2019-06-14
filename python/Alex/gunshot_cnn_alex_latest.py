@@ -75,7 +75,11 @@ gunshot_frequency_threshold = 0.25
 sample_rate = 22050
 sample_rate_per_two_seconds = 44100
 input_shape = (sample_rate_per_two_seconds, 1)
+<<<<<<< HEAD
 
+=======
+sound_data_dir="/home/amorehe/Datasets/REU_Data_organized/"
+>>>>>>> ab11c1fea43fea7921c7abb94add785c2d98d475
 
 # # Data Pre-Processing
 
@@ -85,6 +89,7 @@ input_shape = (sample_rate_per_two_seconds, 1)
 # In[ ]:
 
 
+<<<<<<< HEAD
 samples = np.load("/home/alexm/Datasets/gunshot_sound_samples.npy")
 labels = np.load("/home/alexm/Datasets/gunshot_sound_labels.npy")
 
@@ -94,6 +99,17 @@ labels = np.load("/home/alexm/Datasets/gunshot_sound_labels.npy")
 # In[ ]:
 
 
+=======
+samples = np.load("/home/amorehe/Datasets/gunshot_sound_samples.npy")
+labels = np.load("/home/amorehe/Datasets/gunshot_sound_labels.npy")
+
+
+# ## Data augmentation functions
+
+# In[ ]:
+
+
+>>>>>>> ab11c1fea43fea7921c7abb94add785c2d98d475
 def time_shift(wav):
     start_ = int(np.random.uniform(-wav.shape[0] * 0.5, wav.shape[0] * 0.5))
     if start_ >= 0:
@@ -125,6 +141,7 @@ def change_volume(wav, magnitude):
     # 0 < x < 1 quieter; x = 1 identity; x > 1 louder
     wav_volume_change = np.multiply(np.array([magnitude]), wav)
     return wav_volume_change
+<<<<<<< HEAD
 
 def add_background(wav, sound_directory):
     bg_files = os.listdir(sound_directory)
@@ -134,6 +151,24 @@ def add_background(wav, sound_directory):
     ceil = max((bg.shape[0] - wav.shape[0]), 1)
     start_ = np.random.randint(ceil)
     bg_slice = bg[start_ : start_+ wav.shape[0]]
+=======
+    
+def add_background(wav, file, data_directory, label_to_avoid):
+    label_csv = data_directory + "train.csv"
+    sound_directory = data_directory + "Train/"
+    sound_types = pd.read_csv(label_csv)
+    bg_files = os.listdir(sound_directory)
+    bg_files.remove(file)
+    chosen_bg_file = bg_files[np.random.randint(len(bg_files))]
+    jndex = int(chosen_bg_file.split('.')[0])
+    while sound_types.loc[jndex, "Class"] == label_to_avoid:
+        chosen_bg_file = bg_files[np.random.randint(len(bg_files))]
+        jndex = int(chosen_bg_file.split('.')[0])
+    bg, sr = librosa.load(sound_directory + chosen_bg_file)
+    ceil = max((bg.shape[0] - wav.shape[0]), 1)
+    start_ = np.random.randint(ceil)
+    bg_slice = bg[start_ : start_ + wav.shape[0]]
+>>>>>>> ab11c1fea43fea7921c7abb94add785c2d98d475
     if bg_slice.shape[0] < wav.shape[0]:
         pad_len = wav.shape[0] - bg_slice.shape[0]
         bg_slice = np.r_[np.random.uniform(-0.001, 0.001, int(pad_len / 2)), bg_slice, np.random.uniform(-0.001, 0.001, int(np.ceil(pad_len / 2)))]
@@ -146,31 +181,59 @@ def add_background(wav, sound_directory):
 # In[ ]:
 
 
+<<<<<<< HEAD
 augmented_samples = np.zeros((samples.shape[0] * 6, samples.shape[1]))
 augmented_labels = np.zeros((labels.shape[0] * 6,))
 j = 0
 
 for i in range (0, len(augmented_samples), 6):
+=======
+augmented_samples = np.zeros((samples.shape[0] * 5, samples.shape[1]))
+augmented_labels = np.zeros((labels.shape[0] * 5,))
+sound_files = os.listdir(sound_data_dir + "Train/")
+j = 0
+
+for i in range (0, len(augmented_samples), 5):
+    file = sound_files[j]
+    
+>>>>>>> ab11c1fea43fea7921c7abb94add785c2d98d475
     augmented_samples[i,:] = samples[j,:]
     augmented_samples[i + 1,:] = time_shift(samples[j,:])
     augmented_samples[i + 2,:] = change_pitch(samples[j,:], sample_rate)
     augmented_samples[i + 3,:] = speed_change(samples[j,:])
     augmented_samples[i + 4,:] = change_volume(samples[j,:], np.random.uniform())
+<<<<<<< HEAD
     augmented_samples[i + 5,:] = add_background(samples[j,:], sound_data_dir)
 
+=======
+    #if labels[j] != "gun_shot":
+        #augmented_samples[i + 5,:] = add_background(samples[j,:], file, sound_data_dir, "")
+    #else:
+        #augmented_samples[i + 5,:] = add_background(samples[j,:], file, sound_data_dir, "gun_shot")
+    
+>>>>>>> ab11c1fea43fea7921c7abb94add785c2d98d475
     augmented_labels[i] = labels[j]
     augmented_labels[i + 1] = labels[j]
     augmented_labels[i + 2] = labels[j]
     augmented_labels[i + 3] = labels[j]
     augmented_labels[i + 4] = labels[j]
+<<<<<<< HEAD
     augmented_labels[i + 5] = labels[j]
+=======
+    #augmented_labels[i + 5] = labels[j]
+>>>>>>> ab11c1fea43fea7921c7abb94add785c2d98d475
     j += 1
 
 samples = augmented_samples
 labels = augmented_labels
 
+<<<<<<< HEAD
 print("The number of samples of available for training is currently " + str(len(samples)) + '.')
 print("The number of labels of available for training is currently " + str(len(labels)) + '.')
+=======
+print("The number of samples available for training is currently " + str(len(samples)) + '.')
+print("The number of labels available for training is currently " + str(len(labels)) + '.')
+>>>>>>> ab11c1fea43fea7921c7abb94add785c2d98d475
 
 
 # ## Saving augmented samples and labels as numpy array files
@@ -178,8 +241,13 @@ print("The number of labels of available for training is currently " + str(len(l
 # In[ ]:
 
 
+<<<<<<< HEAD
 np.save("/home/alexm/Datasets/gunshot_augmented_sound_samples.npy", samples)
 np.save("/home/alexm/Datasets/gunshot_augmented_sound_labels.npy", labels)
+=======
+np.save("/home/amorehe/Datasets/gunshot_augmented_sound_samples.npy", samples)
+np.save("/home/amorehe/Datasets/gunshot_augmented_sound_labels.npy", labels)
+>>>>>>> ab11c1fea43fea7921c7abb94add785c2d98d475
 
 
 # ## Restructuring the label data
