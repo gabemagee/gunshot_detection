@@ -117,6 +117,7 @@ other_samples = other_samples.reshape(-1, sampling_rate_per_two_seconds, 1)
 
 gunshots_correct = np.array((0,1)*number_of_desired_samples).reshape(-1,2,1)
 other_correct = np.array((1,0)*number_of_desired_samples).reshape(-1,2,1)
+<<<<<<< HEAD
 
 print(gunshot_samples.shape)
 print(gunshots_correct.shape)
@@ -128,3 +129,14 @@ gs_predictions_classes = gs_predictions.argmax(axis=-1)
 gs_actual_classes= gunshots_correct.argmax(axis=-1)
 wrong_examples = np.nonzero(gs_predictions_classes != gs_actual_classes)
 print(wrong_examples)
+=======
+
+print(gunshot_samples.shape)
+print(gunshots_correct.shape)
+
+loss, acc = model.evaluate(gunshot_samples, gunshots_correct)
+print("Restored model, accuracy on gunshots: {:5.2f}%".format(100*acc))
+
+loss, acc = model.evaluate(other_samples, other_correct)
+print("Restored model, accuracy on other: {:5.2f}%".format(100*acc))
+>>>>>>> ab11c1fea43fea7921c7abb94add785c2d98d475
