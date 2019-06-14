@@ -101,26 +101,26 @@ def time_shift(wav):
     else:
         wav_time_shift = np.r_[np.random.uniform(-0.001, 0.001, -start_), wav[:start_]]
     return wav_time_shift
-    
+
 def change_pitch(wav, sample_rate):
     magnitude = int(np.random.uniform(-10, 10))
     wav_pitch_change = librosa.effects.pitch_shift(wav, sample_rate, magnitude)
     return wav_pitch_change
-    
+
 def speed_change(wav):
     speed_rate = np.random.uniform(0.7, 1.3)
     wav_speed_tune = cv2.resize(wav, (1, int(len(wav) * speed_rate))).squeeze()
-    
+
     if len(wav_speed_tune) < len(wav):
         pad_len = len(wav) - len(wav_speed_tune)
         wav_speed_tune = np.r_[np.random.uniform(-0.001, 0.001, int(pad_len / 2)),
                                wav_speed_tune,
                                np.random.uniform(-0.001, 0.001, int(np.ceil(pad_len / 2)))]
-    else: 
+    else:
         cut_len = len(wav_speed_tune) - len(wav)
         wav_speed_tune = wav_speed_tune[int(cut_len / 2) : int(cut_len / 2) + len(wav)]
     return wav_speed_tune
-    
+
 def change_volume(wav, magnitude):
     # 0 < x < 1 quieter; x = 1 identity; x > 1 louder
     wav_volume_change = np.multiply(np.array([magnitude]), wav)
@@ -137,7 +137,6 @@ def add_background(wav, file, data_directory, label_to_avoid):
     while sound_types.loc[jndex, "Class"] == label_to_avoid:
         chosen_bg_file = bg_files[np.random.randint(len(bg_files))]
         jndex = int(chosen_bg_file.split('.')[0])
-    print("Chosen file is " + str(sound_directory + chosen_bg_file))
     bg, sr = librosa.load(sound_directory + chosen_bg_file)
     ceil = max((bg.shape[0] - wav.shape[0]), 1)
     start_ = np.random.randint(ceil)
@@ -240,7 +239,7 @@ test_wav = test_wav.reshape(-1, sample_rate_per_two_seconds, 1)
 
 
 print(train_wav.shape)
-
+print(train_label.shape)
 
 # ## Model Parameters
 
@@ -315,7 +314,7 @@ model_callbacks = [
                   patience=10,
                   verbose=1,
                   mode='auto'),
-    
+
     ModelCheckpoint(model_filename, monitor='val_acc',
                     verbose=1,
                     save_best_only=True,
@@ -336,7 +335,7 @@ model.summary()
 # In[ ]:
 
 
-History = model.fit(train_wav, train_label, 
+History = model.fit(train_wav, train_label,
           validation_data=[test_wav, test_label],
           epochs=number_of_epochs,
           callbacks=model_callbacks,
