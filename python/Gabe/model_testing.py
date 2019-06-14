@@ -67,9 +67,17 @@ labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_s
 
 samples = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_samples.npy"
 
+results = "/home/gamagee/workspace/gunshot_detection/REU_Data/testing_results/"
+
+results_guns = results +"guns/"
+
+results_others = results+"others/"
+
+
 model = keras.models.load_model(model_path,custom_objects={'auc':auc})
 model.summary()
 
+sr = 22050
 
 label_np = np.array(np.load(labels))
 label_np = np.array(keras.utils.to_categorical(label_np, 2))
@@ -83,8 +91,16 @@ for i in range(len(diff)):
     if diff[i]!=0:
         indexes.append(i)
 arr = np.array(np.load(samples))
+arr_2 = np.array(np.load(samples))
 for ind in indexes:
-    print(arr[ind])
+    if arr_2[ind]==1:
+        direc = results_guns
+    else:
+        direc = results_others
+    filepath = direc+"/"+str(ind)+".wav"
+    print(filepath)
+    librosa.output.write_wav(filepath,arr[ind],sr)
+
 """
 
 label_np = keras.utils.to_categorical(label_np, 2)
