@@ -127,6 +127,7 @@ print(gs_predictions)
 gs_predictions_classes = gs_predictions.argmax(axis=-1)
 print(gs_predictions_classes)
 gs_actual_classes= gunshots_correct.argmax(axis=-1)
+print(gs_actual_classes)
 wrong_examples = np.nonzero(gs_predictions_classes != gs_actual_classes)
 print(wrong_examples)
 
