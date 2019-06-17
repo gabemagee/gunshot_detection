@@ -93,6 +93,7 @@ venv.bak/
 #data
 REU_Data/
 .REU_Data
+testing_results/
 
 #Mac
 .DS_Store
