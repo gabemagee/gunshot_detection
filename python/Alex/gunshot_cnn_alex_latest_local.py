@@ -140,7 +140,8 @@ print("The number of labels available for training is currently " + str(len(labe
 
 # In[ ]:
 
-
+samples = np.array(samples)
+labels = np.array(labels)
 np.save(base_dir + "gunshot_sound_samples.npy", samples)
 np.save(base_dir + "gunshot_sound_labels.npy", labels)
 
