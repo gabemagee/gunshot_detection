@@ -122,6 +122,7 @@ with open(label_csv,"r") as lblcsv:
     c = list(csv.reader(lblcsv))
     header = c[0]
     for row in c[1:]:
+        e = {}
         e["label"] = row[1]
         e["source"] = row[2]
         d[row[0]] = e
