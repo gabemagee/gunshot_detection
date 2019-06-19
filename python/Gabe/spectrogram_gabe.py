@@ -152,7 +152,7 @@ sample_rate_per_two_seconds = 44100
 for file in os.listdir(sample_directory):
     print(sample_directory+file)
     sample,sr = librosa.load(sample_directory+file)
-    if len(y) <= sample_rate_per_two_seconds:
+    if len(sample) <= sample_rate_per_two_seconds:
         number_of_missing_frames = sample_rate_per_two_seconds - len(sample)
         padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
         label = d[file]["label"]
