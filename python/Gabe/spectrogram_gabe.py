@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[48]:
+# In[6]:
 
 
 import os
@@ -39,9 +39,15 @@ from os import listdir
 from os.path import isfile, join
 from glob import glob
 import IPython
+import tensorflow as tf
+import tensorflow.keras as keras
+from tensorflow.keras import Input, layers, optimizers, backend as K
+from tensorflow.keras.models import load_model
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
-# In[49]:
+# In[7]:
 
 
 def time_shift(wav):
@@ -98,14 +104,14 @@ def add_background(wav, file, data_directory, label_to_avoid):
     return wav_with_bg
 
 
-# In[60]:
+# In[8]:
 
 
 def make_spectrogram(y,sr):
     return np.array(librosa.feature.melspectrogram(y=a, sr=sr))
 
 
-# In[61]:
+# In[9]:
 
 
 data_directory = "/home/gamagee/workspace/gunshot_detection/REU_Data/REU_Samples_and_Labels/"
@@ -136,5 +142,112 @@ print(s)
 # In[ ]:
 
 
+##preprocessing data
 
+for file in os.listdir(sample_directory):
+    y,sr = librosa.load(sample_directory+file)
+    n = make_spectrogram(y,sr)
+    print(n.shape)
+
+exit()
+
+
+# In[10]:
+
+
+#Model
+#Loading previous model
+#model = load_model(base_dir + "gunshot_sound_model.h5")
+
+
+# In[11]:
+
+
+#ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
+def auc(y_true, y_pred):
+    auc = tf.metrics.auc(y_true, y_pred)[1]
+    K.get_session().run(tf.local_variables_initializer())
+    return auc
+
+
+# In[12]:
+
+
+#Model Parameters
+drop_out_rate = 0.1
+learning_rate = 0.001
+number_of_epochs = 100
+number_of_classes = 2
+batch_size = 32
+optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
+input_tensor = Input(shape=input_shape)
+metrics = [auc, "accuracy"]
+
+
+# In[3]:
+
+
+#Model Architecture
+x = layers.Conv1D(16, 9, activation="relu", padding="same")(input_tensor)
+x = layers.Conv1D(16, 9, activation="relu", padding="same")(x)
+x = layers.MaxPool1D(16)(x)
+x = layers.Dropout(rate=drop_out_rate)(x)
+
+x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+x = layers.MaxPool1D(4)(x)
+x = layers.Dropout(rate=drop_out_rate)(x)
+
+x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+x = layers.MaxPool1D(4)(x)
+x = layers.Dropout(rate=drop_out_rate)(x)
+
+x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
+x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
+x = layers.GlobalMaxPool1D()(x)
+x = layers.Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
+
+x = layers.Dense(64, activation="relu")(x)
+x = layers.Dense(1028, activation="relu")(x)
+output_tensor = layers.Dense(number_of_classes, activation="softmax")(x)
+
+model = tf.keras.Model(input_tensor, output_tensor)
+model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=metrics)
+
+
+# In[ ]:
+
+
+#Configuring model properties
+model_filename = base_dir + "gunshot_sound_model.pkl"
+
+model_callbacks = [
+    EarlyStopping(monitor='val_acc',
+                  patience=10,
+                  verbose=1,
+                  mode='auto'),
+    
+    ModelCheckpoint(model_filename, monitor='val_acc',
+                    verbose=1,
+                    save_best_only=True,
+                    mode='auto'),
+]
+
+
+# In[ ]:
+
+
+#Optional debugging of the model's architecture
+model.summary()
+model.summary()
+Training & caching the model
+History = model.fit(train_wav, train_label, 
+          validation_data=[test_wav, test_label],
+          epochs=number_of_epochs,
+          callbacks=model_callbacks,
+          verbose=1,
+          batch_size=batch_size,
+          shuffle=True)
+model.save(base_dir + "gunshot_sound_model.h5")
 
