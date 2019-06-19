@@ -125,8 +125,12 @@ with open(label_csv,"r") as lblcsv:
         e = {}
         e["label"] = row[1]
         e["source"] = row[2]
-        d[row[0]] = e
+        d[row[0]+".wav"] = e
+        if row[1] not in s:
+            s.append(row[1])
 print(d)
+print(len(s))
+print(s)
 
 
 # In[ ]:
