@@ -147,6 +147,8 @@ samples = []
 labels = []
 
 
+sample_rate_per_two_seconds = 44100
+
 for file in os.listdir(sample_directory):
     print(sample_directory+file)
     y,sr = librosa.load(sample_directory+file)
