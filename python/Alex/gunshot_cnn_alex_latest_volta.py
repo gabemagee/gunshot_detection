@@ -74,8 +74,8 @@ sample_rate = 22050
 sample_rate_per_two_seconds = 44100
 input_shape = (sample_rate_per_two_seconds, 1)
 base_dir = "/home/amorehe/Datasets/"
-data_dir = base_dir + "REU_Data_organized/"
-sound_data_dir = data_dir + "Train/"
+data_dir = base_dir + "REU_Samples_and_Labels/"
+sound_data_dir = data_dir + "Samples/"
 
 
 # # Data Pre-Processing
@@ -85,7 +85,7 @@ sound_data_dir = data_dir + "Train/"
 # In[ ]:
 
 
-sound_types = pd.read_csv(data_dir + "train.csv")
+sound_types = pd.read_csv(data_dir + "labels.csv")
 
 
 # ## Reading in all of the sound data WAV files
@@ -191,8 +191,8 @@ def change_volume(wav, magnitude):
     return wav_volume_change
     
 def add_background(wav, file, data_directory, label_to_avoid):
-    label_csv = data_directory + "train.csv"
-    sound_directory = data_directory + "Train/"
+    label_csv = data_directory + "labels.csv"
+    sound_directory = data_directory + "Samples/"
     sound_types = pd.read_csv(label_csv)
     bg_files = os.listdir(sound_directory)
     bg_files.remove(file)
