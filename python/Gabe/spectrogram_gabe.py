@@ -39,7 +39,6 @@ from os import listdir
 from os.path import isfile, join
 from glob import glob
 import IPython
-get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 # In[49]:
