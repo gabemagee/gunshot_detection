@@ -145,11 +145,12 @@ print(s)
 ##preprocessing data
 samples = []
 labels = []
+ids = []
 
 
 sample_rate_per_two_seconds = 44100
 
-for file in os.listdir(sample_directory):
+for file in os.listdir(sample_directory)[:100]:
     print(sample_directory+file)
     sample,sr = librosa.load(sample_directory+file)
     if len(sample) <= sample_rate_per_two_seconds:
@@ -158,6 +159,7 @@ for file in os.listdir(sample_directory):
         label = d[file]["label"]
         samples.append(padded_sample)
         labels.append(label)
+        ids.append(file.split(".")[0])
     else:
         number_of_missing_frames = len(sample) % sample_rate_per_two_seconds
         sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_frames)])
@@ -166,6 +168,8 @@ for file in os.listdir(sample_directory):
             label = d[file]["label"]
             samples.append(sample_slice)
             labels.append(label)
+            ids.append(file.split(".")[0])
+
 
 
 for sample in samples:
