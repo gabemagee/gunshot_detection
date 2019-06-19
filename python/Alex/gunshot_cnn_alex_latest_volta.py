@@ -140,8 +140,8 @@ print("The number of labels available for training is currently " + str(len(labe
 # In[ ]:
 
 
-#np.save(base_dir + "gunshot_sound_samples.npy", samples)
-#np.save(base_dir + "gunshot_sound_labels.npy", labels)
+np.save(base_dir + "gunshot_sound_samples.npy", samples)
+np.save(base_dir + "gunshot_sound_labels.npy", labels)
 
 
 # ## Loading sample file and label file as numpy arrays
@@ -149,8 +149,8 @@ print("The number of labels available for training is currently " + str(len(labe
 # In[ ]:
 
 
-samples = np.array(np.load(base_dir + "gunshot_sound_samples.npy"))
-labels = np.array(np.load(base_dir + "gunshot_sound_labels.npy"))
+# samples = np.load(base_dir + "gunshot_sound_samples.npy")
+# labels = np.load(base_dir + "gunshot_sound_labels.npy")
 
 
 # ## Data augmentation functions
@@ -217,6 +217,8 @@ def add_background(wav, file, data_directory, label_to_avoid):
 # In[ ]:
 
 
+samples = np.array(samples)
+labels = np.array(labels)
 number_of_augmentations = 5
 augmented_samples = np.zeros((samples.shape[0] * (number_of_augmentations + 1), samples.shape[1]))
 augmented_labels = np.zeros((labels.shape[0] * (number_of_augmentations + 1),))
@@ -230,7 +232,7 @@ for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
     augmented_samples[i + 2,:] = change_pitch(samples[j,:], sample_rate)
     augmented_samples[i + 3,:] = speed_change(samples[j,:])
     augmented_samples[i + 4,:] = change_volume(samples[j,:], np.random.uniform())
-    if labels[j] == "gun_shot":
+    if labels[j] == 1:
         augmented_samples[i + 5,:] = add_background(samples[j,:], file, data_dir, "") 
     else:
         augmented_samples[i + 5,:] = add_background(samples[j,:], file, data_dir, "gun_shot")
@@ -264,8 +266,8 @@ np.save(base_dir + "gunshot_augmented_sound_labels.npy", labels)
 # In[ ]:
 
 
-# samples = np.array(np.load(base_dir + "gunshot_augmented_sound_samples.npy"))
-# labels = np.array(np.load(base_dir + "gunshot_augmented_sound_labels.npy"))
+# samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
+# labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
 
 
 # ### Optional debugging after processing the data
@@ -337,6 +339,17 @@ print(train_wav.shape)
 # model = load_model(base_dir + "gunshot_sound_model.h5")
 
 
+# ## ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
+
+# In[ ]:
+
+
+def auc(y_true, y_pred):
+    auc = tf.metrics.auc(y_true, y_pred)[1]
+    K.get_session().run(tf.local_variables_initializer())
+    return auc
+
+
 # ## Model Parameters
 
 # In[ ]:
@@ -350,17 +363,6 @@ batch_size = 32
 optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
 input_tensor = Input(shape=input_shape)
 metrics = [auc, "accuracy"]
-
-
-# ## ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
-
-# In[ ]:
-
-
-def auc(y_true, y_pred):
-    auc = tf.metrics.auc(y_true, y_pred)[1]
-    K.get_session().run(tf.local_variables_initializer())
-    return auc
 
 
 # ## Model Architecture
