@@ -241,7 +241,12 @@ model_callbacks = [
 #Optional debugging of the model's architecture
 model.summary()
 model.summary()
-Training & caching the model
+
+
+# In[ ]:
+
+
+#Training & caching the model
 History = model.fit(train_wav, train_label, 
           validation_data=[test_wav, test_label],
           epochs=number_of_epochs,
