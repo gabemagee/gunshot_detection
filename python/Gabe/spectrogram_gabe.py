@@ -143,12 +143,33 @@ print(s)
 
 
 ##preprocessing data
+samples = []
+labels = []
+
 
 for file in os.listdir(sample_directory):
     print(sample_directory+file)
     y,sr = librosa.load(sample_directory+file)
-    n = make_spectrogram(y,sr)
-    print(n.shape)
+    if len(y) <= sample_rate_per_two_seconds:
+        number_of_missing_frames = sample_rate_per_two_seconds - len(sample)
+        padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
+        label = d[file]["label"]
+        samples.append(padded_sample)
+        labels.append(label)
+    else:
+        number_of_missing_frames = len(sample) % sample_rate_per_two_seconds
+        sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
+        for i in range(0, sample.size - sample_rate_per_two_seconds, sample_rate_per_two_seconds):
+            sample_slice = sample[i : i + sample_rate_per_two_seconds]
+            label = d[file]["label"]
+            samples.append(sample_slice)
+            labels.append(label)
+
+
+for sample in samples:
+    a = make_spectrogram(sample,sr)
+    print(a.shape)
+
 
 exit()
 
