@@ -117,12 +117,15 @@ sample_directory = data_directory + "Samples/"
 
 
 s = []
+d = {}
 with open(label_csv,"r") as lblcsv:
-    c = csv.reader(lblcsv)
+    c = csv.reader(lblcsv)[1:]
+    header = csv.reader(lblcsv)[0]
     for row in c:
-        if row[1] not in s:
-            s.append(row[1])
-print(s)
+        e["label"] = row[1]
+        e["source"] = row[2]
+        d[row[0]] = e
+print(d)
 
 
 # In[ ]:
