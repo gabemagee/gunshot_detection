@@ -119,9 +119,9 @@ sample_directory = data_directory + "Samples/"
 s = []
 d = {}
 with open(label_csv,"r") as lblcsv:
-    c = csv.reader(lblcsv)[1:]
-    header = csv.reader(lblcsv)[0]
-    for row in c:
+    c = list(csv.reader(lblcsv))
+    header = c[0]
+    for row in c[1:]:
         e["label"] = row[1]
         e["source"] = row[2]
         d[row[0]] = e
