@@ -67,7 +67,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 # In[ ]:
 
 
-samples=[]
+samples = []
 labels = []
 gunshot_frequency_threshold = 0.25
 sample_rate = 22050
@@ -93,53 +93,54 @@ sound_types = pd.read_csv(data_dir + "train.csv")
 # In[ ]:
 
 
-print("...Parsing sound data...")
-sound_file_id = 0
-sound_file_names = []
+#print("...Parsing sound data...")
+#sound_file_id = 0
+#sound_file_names = []
 
-for file in os.listdir(sound_data_dir):
-    if file.endswith(".wav"):
-        try:
+#for file in os.listdir(sound_data_dir):
+#    if file.endswith(".wav"):
+#        try:
             # Adding 2 second-long samples to the list of samples
-            sound_file_id = int(re.search(r'\d+', file).group())
-            sample, sample_rate = librosa.load(sound_data_dir + file)
-            prescribed_label = sound_types.loc[sound_types["ID"] == sound_file_id, "Class"].values[0]
+#            sound_file_id = int(re.search(r'\d+', file).group())
+#            sample, sample_rate = librosa.load(sound_data_dir + file)
+#            prescribed_label = sound_types.loc[sound_types["ID"] == sound_file_id, "Class"].values[0]
 
-            if len(sample) <= sample_rate_per_two_seconds:
-                label = 1
-                number_of_missing_hertz = sample_rate_per_two_seconds - len(sample)
-                padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
-                if prescribed_label != "gun_shot":
-                    label = 0
+#            if len(sample) <= sample_rate_per_two_seconds:
+#                label = 1
+#                number_of_missing_hertz = sample_rate_per_two_seconds - len(sample)
+#                padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
+#                if prescribed_label != "gun_shot":
+#                    label = 0
+#
+#                samples.append(padded_sample)
+#                labels.append(label)
+#                sound_file_names.append(file)
+#            else:
+#                for i in range(0, sample.size - sample_rate_per_two_seconds, sample_rate_per_two_seconds):
+#                    sample_slice = sample[i : i + sample_rate_per_two_seconds]
+#                    if prescribed_label != "gun_shot":
+#                        label = 0
+#                    elif np.max(abs(sample_slice)) < gunshot_frequency_threshold:
+#                        label = 0
+#
+#                    samples.append(sample_slice)
+#                    labels.append(label)
+#                    sound_file_names.append(file)
+#        except:
+#            sample, sample_rate = soundfile.read(sound_data_dir + file)
+#            print("Sound(s) not recognized by Librosa:", file, sample)
+#            pass
 
-                samples.append(padded_sample)
-                labels.append(label)
-                sound_file_names.append(file)
-            else:
-                for i in range(0, sample.size - sample_rate_per_two_seconds, sample_rate_per_two_seconds):
-                    sample_slice = sample[i : i + sample_rate_per_two_seconds]
-                    if prescribed_label != "gun_shot":
-                        label = 0
-                    elif np.max(abs(sample_slice)) < gunshot_frequency_threshold:
-                        label = 0
-
-                    samples.append(sample_slice)
-                    labels.append(label)
-                    sound_file_names.append(file)
-        except:
-            sample, sample_rate = soundfile.read(sound_data_dir + file)
-            print("Sound(s) not recognized by Librosa:", file, sample)
-            pass
-
-print("The number of samples available for training is currently " + str(len(samples)) + '.')
-print("The number of labels available for training is currently " + str(len(labels)) + '.')
+#print("The number of samples available for training is currently " + str(len(samples)) + '.')
+#print("The number of labels available for training is currently " + str(len(labels)) + '.')
 
 
 # ## Saving samples and labels as numpy array files
 
 # In[ ]:
 
-
+#samples = np.array(samples)
+#labels = np.array(labels)
 #np.save(base_dir + "gunshot_sound_samples.npy", samples)
 #np.save(base_dir + "gunshot_sound_labels.npy", labels)
 
@@ -149,8 +150,8 @@ print("The number of labels available for training is currently " + str(len(labe
 # In[ ]:
 
 
-samples = np.array(np.load(base_dir + "gunshot_sound_samples.npy"))
-labels = np.array(np.load(base_dir + "gunshot_sound_labels.npy"))
+#samples = np.array(np.load(base_dir + "gunshot_sound_samples.npy"))
+#labels = np.array(np.load(base_dir + "gunshot_sound_labels.npy"))
 
 
 # ## Data augmentation functions
@@ -217,37 +218,37 @@ def add_background(wav, file, data_directory, label_to_avoid):
 # In[ ]:
 
 
-number_of_augmentations = 5
-augmented_samples = np.zeros((samples.shape[0] * (number_of_augmentations + 1), samples.shape[1]))
-augmented_labels = np.zeros((labels.shape[0] * (number_of_augmentations + 1),))
-j = 0
+#number_of_augmentations = 5
+#augmented_samples = np.zeros((samples.shape[0] * (number_of_augmentations + 1), samples.shape[1]))
+#augmented_labels = np.zeros((labels.shape[0] * (number_of_augmentations + 1),))
+#j = 0
 
-for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
-    file = sound_file_names[j]
+#for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
+#    file = sound_file_names[j]
     
-    augmented_samples[i,:] = samples[j,:]
-    augmented_samples[i + 1,:] = time_shift(samples[j,:])
-    augmented_samples[i + 2,:] = change_pitch(samples[j,:], sample_rate)
-    augmented_samples[i + 3,:] = speed_change(samples[j,:])
-    augmented_samples[i + 4,:] = change_volume(samples[j,:], np.random.uniform())
-    if labels[j] == "gun_shot":
-        augmented_samples[i + 5,:] = add_background(samples[j,:], file, data_dir, "") 
-    else:
-        augmented_samples[i + 5,:] = add_background(samples[j,:], file, data_dir, "gun_shot")
+#    augmented_samples[i,:] = samples[j,:]
+#    augmented_samples[i + 1,:] = time_shift(samples[j,:])
+#    augmented_samples[i + 2,:] = change_pitch(samples[j,:], sample_rate)
+#    augmented_samples[i + 3,:] = speed_change(samples[j,:])
+#    augmented_samples[i + 4,:] = change_volume(samples[j,:], np.random.uniform())
+#    if labels[j] == "gun_shot":
+#        augmented_samples[i + 5,:] = add_background(samples[j,:], file, data_dir, "") 
+#    else:
+#        augmented_samples[i + 5,:] = add_background(samples[j,:], file, data_dir, "gun_shot")
     
-    augmented_labels[i] = labels[j]
-    augmented_labels[i + 1] = labels[j]
-    augmented_labels[i + 2] = labels[j]
-    augmented_labels[i + 3] = labels[j]
-    augmented_labels[i + 4] = labels[j]
-    augmented_labels[i + 5] = labels[j]
-    j += 1
+#    augmented_labels[i] = labels[j]
+#    augmented_labels[i + 1] = labels[j]
+#    augmented_labels[i + 2] = labels[j]
+#    augmented_labels[i + 3] = labels[j]
+#    augmented_labels[i + 4] = labels[j]
+#    augmented_labels[i + 5] = labels[j]
+#    j += 1
 
-samples = augmented_samples
-labels = augmented_labels
+#samples = augmented_samples
+#labels = augmented_labels
 
-print("The number of samples available for training is currently " + str(len(samples)) + '.')
-print("The number of labels available for training is currently " + str(len(labels)) + '.')
+#print("The number of samples available for training is currently " + str(len(samples)) + '.')
+#print("The number of labels available for training is currently " + str(len(labels)) + '.')
 
 
 # ## Saving augmented samples and labels as numpy array files
@@ -255,8 +256,8 @@ print("The number of labels available for training is currently " + str(len(labe
 # In[ ]:
 
 
-np.save(base_dir + "gunshot_augmented_sound_samples.npy", samples)
-np.save(base_dir + "gunshot_augmented_sound_labels.npy", labels)
+#np.save(base_dir + "gunshot_augmented_sound_samples.npy", samples)
+#np.save(base_dir + "gunshot_augmented_sound_labels.npy", labels)
 
 
 # ## Loading augmented sample file and label file as numpy arrays
@@ -264,8 +265,8 @@ np.save(base_dir + "gunshot_augmented_sound_labels.npy", labels)
 # In[ ]:
 
 
-# samples = np.array(np.load(base_dir + "gunshot_augmented_sound_samples.npy"))
-# labels = np.array(np.load(base_dir + "gunshot_augmented_sound_labels.npy"))
+samples = np.array(np.load(base_dir + "gunshot_augmented_sound_samples.npy"))
+labels = np.array(np.load(base_dir + "gunshot_augmented_sound_labels.npy"))
 
 
 # ### Optional debugging after processing the data
@@ -349,7 +350,6 @@ number_of_classes = 2
 batch_size = 32
 optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
 input_tensor = Input(shape=input_shape)
-metrics = [auc, "accuracy"]
 
 
 # ## ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
@@ -392,6 +392,7 @@ x = layers.Dense(64, activation="relu")(x)
 x = layers.Dense(1028, activation="relu")(x)
 output_tensor = layers.Dense(number_of_classes, activation="softmax")(x)
 
+metrics = [auc, "accuracy"]
 model = tf.keras.Model(input_tensor, output_tensor)
 model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=metrics)
 
