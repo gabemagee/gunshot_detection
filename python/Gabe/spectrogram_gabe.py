@@ -149,7 +149,7 @@ ids = []
 
 
 sample_rate_per_two_seconds = 44100
-input_shape = (-1, 128, 87, 1)
+
 sr = 22050
 
 
@@ -214,7 +214,7 @@ label_path = base_dir+"gabe_label.npy"
 np.save(sample_path,samples)
 np.save(label_path,labels)
 """
-
+input_shape = (128, 87, 1)
 sample_path = base_dir+"gabe_sample.npy"
 label_path = base_dir+"gabe_label.npy"
 samples = np.load(sample_path)
