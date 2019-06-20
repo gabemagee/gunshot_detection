@@ -87,8 +87,8 @@ model.summary()
 
 sr = 22050
 
-label_np = np.concatenate(np.array(np.load(a_labels)),np.array(np.load(b_labels)))
-scont = np.concatenate(np.array(np.load(a_samples)),np.array(np.load(a_samples)))
+label_np = np.concatenate((np.array(np.load(a_labels)),np.array(np.load(b_labels))))
+scont = np.concatenate((np.array(np.load(a_samples)),np.array(np.load(a_samples))))
 
 label_np = np.array(keras.utils.to_categorical(label_np, 2))
 sample_np = np.array(scont).reshape(-1, sampling_rate_per_two_seconds, 1)
