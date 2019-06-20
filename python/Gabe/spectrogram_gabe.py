@@ -219,7 +219,7 @@ sample_path = base_dir+"gabe_sample.npy"
 label_path = base_dir+"gabe_label.npy"
 samples = np.load(sample_path)
 labels = np.load(label_path)
-
+samples.reshape(-1,128,87,1)
 kf = KFold(n_splits=3, shuffle=True)
 for train_index, test_index in kf.split(samples):
     train_wav, test_wav = samples[train_index], samples[test_index]
