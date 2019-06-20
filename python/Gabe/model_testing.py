@@ -65,9 +65,15 @@ sampling_rate_per_two_seconds = 44100
 
 model_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_model.h5"
 
-labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_labels.npy"
+a_labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_labels.npy"
 
-samples = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_samples.npy"
+a_samples = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_samples.npy"
+
+
+b_labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_labels.npy"
+
+b_samples = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_samples.npy"
+
 
 results = "/home/gamagee/workspace/gunshot_detection/REU_Data/testing_results/"
 
@@ -81,24 +87,24 @@ model.summary()
 
 sr = 22050
 
-label_np = np.array(np.load(labels))
-label_np = np.array(keras.utils.to_categorical(label_np, 2))
-sample_np = np.array(np.load(samples)).reshape(-1, sampling_rate_per_two_seconds, 1)
+label_np = np.concatenate((np.array(np.load(a_labels)),np.array(np.load(b_labels))))
+scont = np.concatenate((np.array(np.load(a_samples)),np.array(np.load(a_samples))))
+
+label_np_1 = np.array(keras.utils.to_categorical(label_np, 2))
+sample_np = np.array(scont).reshape(-1, sampling_rate_per_two_seconds, 1)
 a = np.argmax(model.predict(sample_np),axis=1)
-b = np.argmax(label_np,axis=1)
+b = np.argmax(label_np_1,axis=1)
 diff = a-b
 
 indexes = []
 for i in range(len(diff)):
     if diff[i]!=0:
         indexes.append(i)
-arr = np.array(np.load(samples))
-arr_2 = np.array(np.load(labels))
 for ind in indexes:
-    if arr_2[ind]==1:
+    if label_np[ind]==1:
         direc = results_guns
     else:
         direc = results_others
     filepath = direc+"/"+str(ind)+".wav"
     print(filepath)
-    librosa.output.write_wav(filepath,arr[ind],sr)
+    librosa.output.write_wav(filepath,scont[ind],sr)
