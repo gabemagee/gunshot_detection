@@ -41,6 +41,7 @@ from glob import glob
 import IPython
 import tensorflow as tf
 import tensorflow.keras as keras
+from tensorflow.python.client import device_lib
 from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
