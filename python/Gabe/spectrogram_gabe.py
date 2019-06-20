@@ -329,6 +329,7 @@ model.summary()
 print(train_wav.shape)
 # In[ ]:
 
+train_wav = train_wav.reshape(-1,128, 87, 1)
 
 #Training & caching the model
 History = model.fit(train_wav, train_label,
