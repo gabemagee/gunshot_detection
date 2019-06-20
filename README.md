@@ -1,17 +1,16 @@
 # gunshot_detection
-Building a model to detect gunshots from audio and then put onto arduinos
+Building a model that can detect gunshots from audio and that can also be scalably deployed to a Raspberry Pi cluster.
 
+## Steps
+### 1. Build a working gunshot model.
+Input: Microphone audio.
 
-# Steps
-### 1. Build a working gunshot model
-Input: audio.
-Output: Boolean yes/no
-### 2. Use Post-Training Quantization to make the model smaller
-### 3. See if accuracy loss is acceptable. If not, return to 1.
-### 4. Convert the model to a TensorFlow Lite FlatBuffer
-Use the TensorFlow Lite converter Python API: https://www.tensorflow.org/lite/convert/python_api
-### 5. Convert the FlatBuffer to a C byte array
-https://www.tensorflow.org/lite/microcontrollers/build_convert
-### 6. Integrate the TensorFlow Lite for Microcontrollers C++ library
-### 7. Deploy to the arduino
-### 8. Test in real world scenario. If not acceptable, return to 1.
+Output: A Boolean value (i.e. Yes / No or 1 / 0).
+
+### 2. Check if accuracy loss is acceptable. If it is not, return to step 1.
+
+### 3. Deploy the model to a Raspberry Pi 3 Model B+ for testing.
+
+### 4. Feed into the model audio data coming from a microphone connected to the Raspberry Pi.
+
+### 5. Test the model in real world scenarios. If the results are not acceptable, return to  step 1.
