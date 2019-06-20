@@ -152,12 +152,13 @@ ids = []
 sample_rate_per_two_seconds = 44100
 
 
-aug_samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
-aug_labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
 
 
 norm_samples = np.load(base_dir + "gunshot_sound_samples.npy")
 norm_labels = np.load(base_dir + "gunshot_sound_labels.npy")
+
+aug_samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
+aug_labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
 
 labels = np.concatenate((aug_labels,norm_labels))
 samples = np.concatenate((aug_samples,norm_samples))
