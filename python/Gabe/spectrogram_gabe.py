@@ -200,6 +200,9 @@ for file in os.listdir(sample_directory):
 
 train_label = np.array(labels)
 train_wav = []
+
+sr = 22050
+
 for sample in samples:
     a = make_spectrogram(sample,sr)
     train_wav.append(a.shape)
