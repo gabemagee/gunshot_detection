@@ -112,7 +112,7 @@ with tf.device("/gpu:0"):
     #Model parameters
     drop_out_rate = 0.1
     learning_rate = 0.001
-    number_of_epochs = 100
+    number_of_epochs = 50
     number_of_classes = 4
     batch_size = 32
     optimizer = optimizers.Adam(learning_rate, learning_rate / 100)

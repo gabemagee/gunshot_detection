@@ -41,6 +41,7 @@ from glob import glob
 import IPython
 import tensorflow as tf
 import tensorflow.keras as keras
+from tensorflow.python.client import device_lib
 from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
@@ -103,14 +104,16 @@ def add_background(wav, file, data_directory, label_to_avoid):
     wav_with_bg = wav * np.random.uniform(0.8, 1.2) + bg_slice * np.random.uniform(0, 0.5)
     return wav_with_bg
 
-
+def get_available_gpus():
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos if x.device_type == 'GPU']
 # In[8]:
 
 
 def make_spectrogram(y,sr):
     return np.array(librosa.feature.melspectrogram(y=y, sr=sr))
 
-
+print(get_available_gpus())
 # In[9]:
 
 
@@ -150,8 +153,10 @@ ids = []
 
 sample_rate_per_two_seconds = 44100
 
+sr = 22050
 
 
+"""
 
 norm_samples = np.load(base_dir + "gunshot_sound_samples.npy")
 norm_labels = np.load(base_dir + "gunshot_sound_labels.npy")
@@ -168,7 +173,7 @@ print(labels.shape)
 print(samples.shape)
 
 
-"""
+
 
 eee = 0
 for file in os.listdir(sample_directory):
@@ -196,25 +201,28 @@ for file in os.listdir(sample_directory):
 
             ids.append(file.split(".")[0])
 
-"""
 
 
 
-sr = 22050
+
 sa = []
 for sample in samples:
     a = make_spectrogram(sample,sr)
     sa.append(a)
-samples = np.array(sa)
+samples = np.array(sa).reshape(input_shape)
 
 sample_path = base_dir+"gabe_sample.npy"
 label_path = base_dir+"gabe_label.npy"
 
 np.save(sample_path,samples)
 np.save(label_path,labels)
-#
-
-
+"""
+input_shape = (128, 87, 1)
+sample_path = base_dir+"gabe_sample.npy"
+label_path = base_dir+"gabe_label.npy"
+samples = np.load(sample_path)
+labels = np.load(label_path)
+samples.reshape(-1,128,87,1)
 kf = KFold(n_splits=3, shuffle=True)
 for train_index, test_index in kf.split(samples):
     train_wav, test_wav = samples[train_index], samples[test_index]
@@ -223,7 +231,7 @@ for train_index, test_index in kf.split(samples):
 
 #(samples, rows, cols, channels)
 
-input_shape = (128, 87, 1)
+
 
 #exit()
 
@@ -251,8 +259,8 @@ def auc(y_true, y_pred):
 
 #Model Parameters
 drop_out_rate = 0.1
-learning_rate = 0.001
-number_of_epochs = 100
+learning_rate = 0.01
+number_of_epochs = 50
 number_of_classes = 2
 batch_size = 32
 optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
@@ -317,11 +325,12 @@ model_callbacks = [
 
 #Optional debugging of the model's architecture
 model.summary()
-model.summary()
 
-
+print(test_wav.shape)
 # In[ ]:
-
+test_wav = test_wav.reshape(-1,128,87,1)
+train_wav = train_wav.reshape(-1,128, 87, 1)
+print(test_wav.shape)
 
 #Training & caching the model
 History = model.fit(train_wav, train_label,
@@ -331,4 +340,4 @@ History = model.fit(train_wav, train_label,
           verbose=1,
           batch_size=batch_size,
           shuffle=True)
-model.save(base_dir + "gunshot_sound_model.h5")
+model.save(base_dir + "gunshot_sound_model_spectro.h5")
