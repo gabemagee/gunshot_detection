@@ -326,11 +326,11 @@ model_callbacks = [
 #Optional debugging of the model's architecture
 model.summary()
 
-print(train_wav.shape)
+print(test_wav.shape)
 # In[ ]:
-
+test_wav = test_wav.reshape(-1,128,87,1)
 train_wav = train_wav.reshape(-1,128, 87, 1)
-print(train_wav.shape)
+print(test_wav.shape)
 
 #Training & caching the model
 History = model.fit(train_wav, train_label,
