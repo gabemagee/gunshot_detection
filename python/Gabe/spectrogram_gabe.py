@@ -135,7 +135,6 @@ with open(label_csv,"r") as lblcsv:
         d[row[0]+".wav"] = e
         if row[1] not in s:
             s.append(row[1])
-print(d)
 print(len(s))
 print(s)
 
@@ -163,6 +162,8 @@ aug_labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
 labels = np.concatenate((aug_labels,norm_labels))
 samples = np.concatenate((aug_samples,norm_samples))
 
+keras.utils.to_categorical(labels, 2)
+
 print(labels.shape)
 print(samples.shape)
 
@@ -188,7 +189,7 @@ for file in os.listdir(sample_directory):
             if label == "gun_shot":
                 labels.append(1)
             else:
-                lables.append(0)
+                labels.append(0)
             samples.append(sample_slice)
 
             ids.append(file.split(".")[0])
