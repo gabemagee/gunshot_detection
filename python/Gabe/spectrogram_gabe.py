@@ -259,8 +259,8 @@ def auc(y_true, y_pred):
 
 #Model Parameters
 drop_out_rate = 0.1
-learning_rate = 0.001
-number_of_epochs = 100
+learning_rate = 0.01
+number_of_epochs = 50
 number_of_classes = 2
 batch_size = 32
 optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
