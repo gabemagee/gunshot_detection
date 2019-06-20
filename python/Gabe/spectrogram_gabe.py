@@ -152,11 +152,24 @@ ids = []
 sample_rate_per_two_seconds = 44100
 
 
+aug_samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
+aug_labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
+
+
+norm_samples = np.load(base_dir + "gunshot_sound_samples.npy")
+norm_labels = np.load(base_dir + "gunshot_sound_labels.npy")
+
+labels = np.concatenate((aug_labels,norm_labels))
+samples = np.concatenate((aug_samples,norm_samples))
+
+print(labels.shape)
+print(samples.shape)
+
+
 eee = 0
 for file in os.listdir(sample_directory):
-    #print(eee)
-    #eee = eee +1
-    print(sample_directory+file)
+    print(eee)
+    eee = eee +1
     sample,sr = librosa.load(sample_directory+file)
     if len(sample) <= sample_rate_per_two_seconds:
         number_of_missing_frames = sample_rate_per_two_seconds - len(sample)
@@ -171,15 +184,20 @@ for file in os.listdir(sample_directory):
         for i in range(0, sample.size - sample_rate_per_two_seconds, sample_rate_per_two_seconds):
             sample_slice = sample[i : i + sample_rate_per_two_seconds]
             label = d[file]["label"]
+            if label == "gun_shot":
+                labels.append(1)
+            else:
+                lables.append(0)
             samples.append(sample_slice)
-            labels.append(label)
+
             ids.append(file.split(".")[0])
 
-
-
+train_label = np.array(labels)
+train_wav = []
 for sample in samples:
     a = make_spectrogram(sample,sr)
-    print(a.shape)
+    train_wav.append(a.shape)
+train_wav = np.array(train_wav)
 
 
 #(samples, rows, cols, channels)
