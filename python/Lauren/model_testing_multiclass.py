@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[3]:
+#creates a text file of results labeled incorrectly by the 4-class model
+#text file has name of new wav file, actual label, and predicted label
 
 
 #imports
