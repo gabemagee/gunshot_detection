@@ -74,12 +74,12 @@ results_others = results+"others/"
 
 # In[7]:
 
-print("...about to try loading model...")
+print("\n ...about to try loading model... \n")
 
 #load model
 model = keras.models.load_model(model_path, custom_objects={'auc' : auc})
 
-print("...successfully loaded the model...")
+print("\n ...successfully loaded the model... \n")
 
 model.summary()
 
@@ -90,8 +90,10 @@ sr = 22050
 
 
 #load samples and labels
+print("\n ...about to load the samples and labels... \n")
 label_np = np.concatenate((np.array(np.load(a_labels)),np.array(np.load(b_labels))))
 scont = np.concatenate((np.array(np.load(a_samples)),np.array(np.load(a_samples))))
+print("\n ...successfully loaded the samples and labels... \n")
 
 
 # In[ ]:
@@ -100,15 +102,25 @@ scont = np.concatenate((np.array(np.load(a_samples)),np.array(np.load(a_samples)
 #to categorical, reshape
 label_np_1 = np.array(keras.utils.to_categorical(label_np, 4))
 sample_np = np.array(scont).reshape(-1, sampling_rate_per_two_seconds, 1)
+print("\n ...successfully went to categorical and reshaped... \n")
+print(label_np_1)
 
 
 # In[ ]:
 
 
 #predict
+print("\n ... about to predict...\n")
 a = np.argmax(model.predict(sample_np),axis=1)
+print("\n ...predictions done... \n")
+print(a)
 b = np.argmax(label_np_1,axis=1)
+print("\n ... idk made it past another line...\n")
+print(b)
 diff = a-b
+print("\n ...and did the diff... \n")
+print(diff)
+
 
 
 # In[ ]:
