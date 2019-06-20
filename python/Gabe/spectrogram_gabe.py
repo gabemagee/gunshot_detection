@@ -326,7 +326,7 @@ model_callbacks = [
 #Optional debugging of the model's architecture
 model.summary()
 
-
+print(train_wav.shape)
 # In[ ]:
 
 
