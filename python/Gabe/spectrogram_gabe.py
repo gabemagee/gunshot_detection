@@ -150,7 +150,11 @@ ids = []
 
 sample_rate_per_two_seconds = 44100
 
-for file in os.listdir(sample_directory)[:100]:
+
+eee = 0
+for file in os.listdir(sample_directory):
+    #print(eee)
+    #eee = eee +1
     print(sample_directory+file)
     sample,sr = librosa.load(sample_directory+file)
     if len(sample) <= sample_rate_per_two_seconds:
@@ -176,6 +180,10 @@ for sample in samples:
     a = make_spectrogram(sample,sr)
     print(a.shape)
 
+
+#(samples, rows, cols, channels)
+
+input_shape = (128, 87, 1)
 
 exit()
 
