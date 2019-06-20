@@ -117,6 +117,7 @@ def make_spectrogram(y,sr):
 data_directory = "/home/gamagee/workspace/gunshot_detection/REU_Data/REU_Samples_and_Labels/"
 label_csv = data_directory + "labels.csv"
 sample_directory = data_directory + "Samples/"
+base_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/"
 
 
 # In[ ]:
@@ -185,7 +186,7 @@ for sample in samples:
 
 input_shape = (128, 87, 1)
 
-exit()
+#exit()
 
 
 # In[10]:
@@ -220,28 +221,27 @@ input_tensor = Input(shape=input_shape)
 metrics = [auc, "accuracy"]
 
 
-# In[3]:
 
 
 #Model Architecture
-x = layers.Conv1D(16, 9, activation="relu", padding="same")(input_tensor)
-x = layers.Conv1D(16, 9, activation="relu", padding="same")(x)
-x = layers.MaxPool1D(16)(x)
+x = layers.Conv2D(16, (4,4), activation="relu", padding="same")(input_tensor)
+x = layers.Conv2D(16, (4,4), activation="relu", padding="same")(x)
+x = layers.MaxPool2D((2,2))(x)
 x = layers.Dropout(rate=drop_out_rate)(x)
 
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
-x = layers.MaxPool1D(4)(x)
+x = layers.Conv2D(32, (4,4), activation="relu", padding="same")(input_tensor)
+x = layers.Conv2D(32, (4,4), activation="relu", padding="same")(x)
+x = layers.MaxPool2D((2,2))(x)
 x = layers.Dropout(rate=drop_out_rate)(x)
 
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
-x = layers.MaxPool1D(4)(x)
+x = layers.Conv2D(32, (4,4), activation="relu", padding="same")(input_tensor)
+x = layers.Conv2D(32, (4,4), activation="relu", padding="same")(x)
+x = layers.MaxPool2D((2,2))(x)
 x = layers.Dropout(rate=drop_out_rate)(x)
 
-x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
-x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
-x = layers.GlobalMaxPool1D()(x)
+x = layers.Conv2D(256, (4,4), activation="relu", padding="same")(input_tensor)
+x = layers.Conv2D(256, (4,4), activation="relu", padding="same")(x)
+x = layers.GlobalMaxPool2D()(x)
 x = layers.Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
 
 x = layers.Dense(64, activation="relu")(x)
@@ -250,6 +250,8 @@ output_tensor = layers.Dense(number_of_classes, activation="softmax")(x)
 
 model = tf.keras.Model(input_tensor, output_tensor)
 model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=metrics)
+
+
 
 
 # In[ ]:
