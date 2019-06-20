@@ -199,13 +199,13 @@ for file in os.listdir(sample_directory):
 """
 
 
-
+input_shape = (-1, 128, 87, 1)
 sr = 22050
 sa = []
 for sample in samples:
     a = make_spectrogram(sample,sr)
     sa.append(a)
-samples = np.array(sa)
+samples = np.array(sa).reshape(input_shape)
 
 sample_path = base_dir+"gabe_sample.npy"
 label_path = base_dir+"gabe_label.npy"
@@ -223,7 +223,7 @@ for train_index, test_index in kf.split(samples):
 
 #(samples, rows, cols, channels)
 
-input_shape = (128, 87, 1)
+
 
 #exit()
 
@@ -316,7 +316,6 @@ model_callbacks = [
 
 
 #Optional debugging of the model's architecture
-model.summary()
 model.summary()
 
 
