@@ -151,7 +151,7 @@ ids = []
 sample_rate_per_two_seconds = 44100
 
 
-
+"""
 
 norm_samples = np.load(base_dir + "gunshot_sound_samples.npy")
 norm_labels = np.load(base_dir + "gunshot_sound_labels.npy")
@@ -168,7 +168,7 @@ print(labels.shape)
 print(samples.shape)
 
 
-"""
+
 
 eee = 0
 for file in os.listdir(sample_directory):
@@ -196,7 +196,7 @@ for file in os.listdir(sample_directory):
 
             ids.append(file.split(".")[0])
 
-"""
+
 
 
 input_shape = (-1, 128, 87, 1)
@@ -212,8 +212,12 @@ label_path = base_dir+"gabe_label.npy"
 
 np.save(sample_path,samples)
 np.save(label_path,labels)
-#
+"""
 
+sample_path = base_dir+"gabe_sample.npy"
+label_path = base_dir+"gabe_label.npy"
+samples = np.load(sample_path)
+labels = np.load(label_path)
 
 kf = KFold(n_splits=3, shuffle=True)
 for train_index, test_index in kf.split(samples):
