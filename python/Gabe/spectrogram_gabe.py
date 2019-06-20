@@ -202,11 +202,17 @@ train_label = np.array(labels)
 train_wav = []
 
 sr = 22050
-
+sa = []
 for sample in samples:
     a = make_spectrogram(sample,sr)
-    train_wav.append(a.shape)
-train_wav = np.array(train_wav)
+    sa.append(a.shape)
+samples = np.array(sa)
+
+
+kf = KFold(n_splits=3, shuffle=True)
+for train_index, test_index in kf.split(samples):
+    train_wav, test_wav = samples[train_index], samples[test_index]
+    train_label, test_label = labels[train_index], labels[test_index]
 
 
 #(samples, rows, cols, channels)
