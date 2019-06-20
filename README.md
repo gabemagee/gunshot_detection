@@ -11,6 +11,6 @@ Output: A Boolean value (i.e. Yes / No or 1 / 0).
 
 ### 3. Deploy the model to a Raspberry Pi 3 Model B+ for testing.
 
-### 4. Feed into the model audio data coming from a microphone connected to the Raspberry Pi.
+### 4. Feed into the model audio data coming from a microphone on the Raspberry Pi.
 
 ### 5. Test the model in real world scenarios. If the results are not acceptable, return to  step 1.
