@@ -168,6 +168,8 @@ print(labels.shape)
 print(samples.shape)
 
 
+"""
+
 eee = 0
 for file in os.listdir(sample_directory):
     print(eee)
@@ -193,6 +195,8 @@ for file in os.listdir(sample_directory):
             samples.append(sample_slice)
 
             ids.append(file.split(".")[0])
+
+"""
 
 train_label = np.array(labels)
 train_wav = []
