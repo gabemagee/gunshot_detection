@@ -162,7 +162,7 @@ aug_labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
 labels = np.concatenate((aug_labels,norm_labels))
 samples = np.concatenate((aug_samples,norm_samples))
 
-keras.utils.to_categorical(labels, 2)
+labels = keras.utils.to_categorical(labels, 2)
 
 print(labels.shape)
 print(samples.shape)
