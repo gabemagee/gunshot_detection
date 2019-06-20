@@ -149,6 +149,8 @@ ids = []
 
 
 sample_rate_per_two_seconds = 44100
+input_shape = (-1, 128, 87, 1)
+sr = 22050
 
 
 """
@@ -199,8 +201,7 @@ for file in os.listdir(sample_directory):
 
 
 
-input_shape = (-1, 128, 87, 1)
-sr = 22050
+
 sa = []
 for sample in samples:
     a = make_spectrogram(sample,sr)
