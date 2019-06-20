@@ -198,15 +198,21 @@ for file in os.listdir(sample_directory):
 
 """
 
-train_label = np.array(labels)
-train_wav = []
+
 
 sr = 22050
 sa = []
 for sample in samples:
     a = make_spectrogram(sample,sr)
-    sa.append(a.shape)
+    sa.append(a)
 samples = np.array(sa)
+
+sample_path = base_dir+"gabe_sample.npy"
+label_path = base_dir+"gabe_label.npy"
+
+np.save(sample_path,samples)
+np.save(label_path,labels)
+#
 
 
 kf = KFold(n_splits=3, shuffle=True)
