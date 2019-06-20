@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[3]:
 
 
 #imports
@@ -38,7 +38,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 import csv
 
 
-# In[5]:
+# In[4]:
 
 
 #auc custom metric
@@ -52,7 +52,7 @@ number_of_desired_samples = 250
 sampling_rate_per_two_seconds = 44100
 
 
-# In[6]:
+# In[5]:
 
 
 #paths
@@ -72,65 +72,69 @@ results_guns = results +"guns/"
 results_others = results+"others/"
 
 
-# In[7]:
+# In[ ]:
 
-print("\n ...about to try loading model... \n")
+
+#text file to log wrong results
+file = open(results + "incorrect_samples.txt","w")
+
+
+# In[6]:
+
 
 #load model
 model = keras.models.load_model(model_path, custom_objects={'auc' : auc})
-
-print("\n ...successfully loaded the model... \n")
 
 model.summary()
 
 sr = 22050
 
 
-# In[ ]:
+# In[7]:
 
 
 #load samples and labels
-print("\n ...about to load the samples and labels... \n")
-label_np = np.concatenate((np.array(np.load(a_labels)),np.array(np.load(b_labels))))
-scont = np.concatenate((np.array(np.load(a_samples)),np.array(np.load(a_samples))))
-print("\n ...successfully loaded the samples and labels... \n")
+label_np = np.load(a_labels)
+scont = np.load(a_samples)
 
 
 # In[ ]:
 
 
 #to categorical, reshape
-label_np_1 = np.array(keras.utils.to_categorical(label_np, 4))
+#label_np_1 = np.array(keras.utils.to_categorical(label_np, 4))
 sample_np = np.array(scont).reshape(-1, sampling_rate_per_two_seconds, 1)
-print("\n ...successfully went to categorical and reshaped... \n")
-print(label_np_1)
 
 
 # In[ ]:
 
 
 #predict
-print("\n ... about to predict...\n")
-a = np.argmax(model.predict(sample_np),axis=1)
-print("\n ...predictions done... \n")
-print(a)
-b = np.argmax(label_np_1,axis=1)
-print("\n ... idk made it past another line...\n")
-print(b)
-diff = a-b
-print("\n ...and did the diff... \n")
-print(diff)
-
+predictions = np.argmax(model.predict(sample_np),axis=1)
 
 
 # In[ ]:
 
 
+#find differences
+    #if diff = 0, that means the model predicted it correctly
+diff = label_np - predictions
 
+
+# In[ ]:
+
+
+#get the indices of the samples it got wrong
 indexes = []
 for i in range(len(diff)):
     if diff[i]!=0:
         indexes.append(i)
+
+
+# In[ ]:
+
+
+#for each index, write the wav file and put it in the text file
 for ind in indexes:
     if label_np[ind]==1:
         direc = results_guns
@@ -139,4 +143,7 @@ for ind in indexes:
     filepath = direc+"/"+str(ind)+".wav"
     print(filepath)
     librosa.output.write_wav(filepath,scont[ind],sr)
+    file.write("filename: " + str(ind) + ".wav\n")
+    file.write("    actual label: " + str(label_np[ind])+ "\n")
+    file.write("    predicted label: " + str(predictions[ind])+ "\n")
 
