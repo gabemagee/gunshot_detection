@@ -340,4 +340,4 @@ History = model.fit(train_wav, train_label,
           verbose=1,
           batch_size=batch_size,
           shuffle=True)
-model.save(base_dir + "gunshot_sound_model.h5")
+model.save(base_dir + "gunshot_sound_model_spectro.h5")
