@@ -135,9 +135,6 @@ label_path = base_dir+"gabe_label.npy"
 samples = np.load(sample_path)
 labels = np.load(label_path)
 samples.reshape(-1,128,87,1)
-samples = []
-labels = []
-ids = []
 sample_rate_per_two_seconds = 44100
 number_of_classes = 2
 sr = 22050
@@ -148,7 +145,7 @@ for train_index, test_index in kf.split(samples):
     train_label, test_label = labels[train_index], labels[test_index]
 
 
-def model(name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.01,number_of_epochs = 50,batch_size = 32,filter_size = (4,4),maxpool_size = (2,2),activation = "relu"):
+def model(name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.01,number_of_epochs = 100,batch_size = 32,filter_size = (4,4),maxpool_size = (2,2),activation = "relu"):
     optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
     input_tensor = Input(shape=input_shape)
     metrics = [auc, "accuracy"]
@@ -211,6 +208,15 @@ def model(name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.01,number_of_epoc
     model.save(base_dir + "gunshot_sound_model_spectrograph_"+name+".h5")
     return model.evaluate(test_wav, test_label, batch_size=batch_size)
 
+drop_out_rates = 0.1,0.05,0.01,0.25
+learning_rates = 0.1,0.05,0.01
+filter_sizes = (4,4),(5,5),(6,6),(3,3)
+
+for dor in drop_out_rates:
+    for lr in learning_rates:
+        for fs in filter_sizes:
+            name = "dropout rate ("+str(dor)+") learning rate ("+str(lr)+") filter size ("+str(fs)+")"
+            print("dropout rate (",dor,") learning rate (",lr,") filter size (",fs,"): ",model(drop_out_rate=dor,learning_rate=lr,filter_size=fs))
 
 
 
