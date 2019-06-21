@@ -148,7 +148,7 @@ for train_index, test_index in kf.split(samples):
     train_label, test_label = labels[train_index], labels[test_index]
 
 
-def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.01,number_of_epochs = 100,batch_size = 64,filter_size = (3,3),maxpool_size = (3,3),activation = "relu"):
+def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.001,number_of_epochs = 100,batch_size = 64,filter_size = (3,3),maxpool_size = (3,3),activation = "relu"):
     optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
     input_tensor = Input(shape=input_shape)
     metrics = [auc, "accuracy"]
