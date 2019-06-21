@@ -96,10 +96,12 @@ def make_spectrogram(y,sr):
 sr = 22050
 spectro_samples = np.array([make_spectrogram(a,sr) for a in scont]).reshape(-1,128,87,1)
 
+print("done preprocessing")
 
 #label_np_1 = np.array(keras.utils.to_categorical(label_np, 2))
 #sample_np = np.array(scont).reshape(-1, sampling_rate_per_two_seconds, 1)
-a = np.argmax(model.predict(spectro_samples),axis=1)
+predictions = model.predict(spectro_samples)
+a = np.argmax(predictions,axis=1)
 b = np.argmax(label_np_1,axis=1)
 diff = a-b
 
@@ -113,5 +115,4 @@ for ind in indexes:
     else:
         direc = results_others
     filepath = direc+"/"+str(ind)+".wav"
-    print(filepath)
     librosa.output.write_wav(filepath,scont[ind],sr)
