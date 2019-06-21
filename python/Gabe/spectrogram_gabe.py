@@ -153,18 +153,18 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
     input_tensor = Input(shape=input_shape)
     metrics = [auc, "accuracy"]
     #Model Architecture
-    x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(input_tensor)
-    x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
-    x = layers.MaxPool2D(maxpool_size)(x)
-    x = layers.Dropout(rate=drop_out_rate)(x)
-
-    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(x)
+    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(input_tensor)
     x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
     x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
     x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
+    x = layers.MaxPool2D(maxpool_size)(x)
+    x = layers.Dropout(rate=drop_out_rate)(x)
+
+    x = layers.Conv2D(64, filter_size, activation=activation, padding="same")(x)
+    x = layers.Conv2D(64, filter_size, activation=activation, padding="same")(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
