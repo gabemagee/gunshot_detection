@@ -5,38 +5,57 @@
 
 # In[ ]:
 
+import pyaudio
 import wave
-import sounddevice as sd
+import numpy as np
 
 
 # ## Variable Initializations
 
 # In[ ]:
 
-sample_rate = 44100
-sample_duration = 2
-number_of_channels = 1
-sd.default.samplerate = sample_rate
-sd.default.channels = number_of_channels
+audio_format = pyaudio.paFloat32
+audio_rate = 44100
+audio_channels = 1
+audio_device_index = 1
+audio_frames_per_buffer = 4096
+audio_sample_duration = 2
 
 
 # ## Processing Microphone Audio
 
 # In[ ]:
 
-print("Now recording audio...")
+pa = pyaudio.PyAudio()
+    
+stream = pa.open(format = audio_format,
+                 rate = audio_rate,
+                 channels = audio_channels,
+                 input_device_index = audio_device_index,
+                 frames_per_buffer = audio_frames_per_buffer,
+                 input = True)
 
-sound_data_array = sd.rec(int(sample_duration * sample_rate))
-sd.wait()
+print("--- Recording Audio ---")
+np_array_data = []
 
-print("Finished recording audio...")
+# Loops through the stream and appends audio chunks to the frame array
+for i in range(0, int((audio_rate / audio_frames_per_buffer) * audio_sample_duration)):
+    data = stream.read(audio_frames_per_buffer, exception_on_overflow = False)
+    np_array_data.append(np.frombuffer(data, dtype=np.float32))
+    
+microphone_data = np.concatenate(np_array_data)
+print("--- Finished Recording Audio ---")
 
-print(sound_data_array)
+# Stops the stream, closes it, and terminates the PyAudio instance
+stream.stop_stream()
+stream.close()
+pa.terminate()
 
-# save the audio frames as .wav file
-wavefile = wave.open("test",'wb')
-wavefile.setnchannels(number_of_channels)
-wavefile.setsampwidth(4)
-wavefile.setframerate(sample_rate)
-wavefile.writeframes(b''.join(sound_data_array))
+# Saves the audio frames as WAV files
+wavefile = wave.open("mic_test",'wb')
+wavefile.setnchannels(audio_channels)
+wavefile.setsampwidth(pa.get_sample_size(audio_format))
+wavefile.setframerate(audio_rate)
+wavefile.writeframes(b''.join(microphone_data))
 wavefile.close()
+
