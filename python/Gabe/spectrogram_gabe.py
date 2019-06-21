@@ -155,17 +155,17 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
-    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(input_tensor)
+    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(x)
     x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
-    x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(input_tensor)
+    x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
     x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
-    x = layers.Conv2D(256, filter_size, activation=activation, padding="same")(input_tensor)
+    x = layers.Conv2D(256, filter_size, activation=activation, padding="same")(x)
     x = layers.Conv2D(256, filter_size, activation=activation, padding="same")(x)
     x = layers.GlobalMaxPool2D()(x)
     x = layers.Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
@@ -211,13 +211,8 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
 drop_out_rates = 0.1,0.05,0.01,0.25
 learning_rates = 0.1,0.05,0.01
 filter_sizes = (4,4),(5,5),(6,6),(3,3)
-
-for dor in drop_out_rates:
-    for lr in learning_rates:
-        for fs in filter_sizes:
-            name = "dropout rate ("+str(dor)+") learning rate ("+str(lr)+") filter size ("+str(fs)+")"
-            print("dropout rate (",dor,") learning rate (",lr,") filter size (",fs,"): ",model(train_wav, train_label, test_label, test_wav, name= name,drop_out_rate=dor,learning_rate=lr,filter_size=fs,verbose=0))
-
+name = "model"
+print(model(train_wav, train_label, test_label, test_wav, name= name,drop_out_rate=0.1,learning_rate=0.01,filter_size=(5,5),verbose=0))
 
 
 """
