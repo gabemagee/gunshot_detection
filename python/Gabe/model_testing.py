@@ -98,7 +98,7 @@ spectro_samples = np.array([make_spectrogram(a,sr) for a in scont]).reshape(-1,1
 
 print("done preprocessing")
 
-#label_np_1 = np.array(keras.utils.to_categorical(label_np, 2))
+label_np_1 = np.array(keras.utils.to_categorical(label_np, 2))
 #sample_np = np.array(scont).reshape(-1, sampling_rate_per_two_seconds, 1)
 predictions = model.predict(spectro_samples)
 a = np.argmax(predictions,axis=1)
