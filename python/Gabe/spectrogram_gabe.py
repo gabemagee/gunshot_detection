@@ -122,6 +122,8 @@ def auc(y_true, y_pred):
     K.get_session().run(tf.local_variables_initializer())
     return auc
 
+print(get_available_gpus())
+
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 config = tf.ConfigProto()
