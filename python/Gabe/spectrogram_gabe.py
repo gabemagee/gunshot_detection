@@ -145,7 +145,7 @@ for train_index, test_index in kf.split(samples):
     train_label, test_label = labels[train_index], labels[test_index]
 
 
-def model(name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.01,number_of_epochs = 100,batch_size = 32,filter_size = (4,4),maxpool_size = (2,2),activation = "relu"):
+def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.01,number_of_epochs = 100,batch_size = 32,filter_size = (4,4),maxpool_size = (2,2),activation = "relu"):
     optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
     input_tensor = Input(shape=input_shape)
     metrics = [auc, "accuracy"]
@@ -216,7 +216,7 @@ for dor in drop_out_rates:
     for lr in learning_rates:
         for fs in filter_sizes:
             name = "dropout rate ("+str(dor)+") learning rate ("+str(lr)+") filter size ("+str(fs)+")"
-            print("dropout rate (",dor,") learning rate (",lr,") filter size (",fs,"): ",model(name= name,drop_out_rate=dor,learning_rate=lr,filter_size=fs,verbose=0))
+            print("dropout rate (",dor,") learning rate (",lr,") filter size (",fs,"): ",model(train_wav, train_label, test_label, test_wav, name= name,drop_out_rate=dor,learning_rate=lr,filter_size=fs,verbose=0))
 
 
 
