@@ -191,12 +191,12 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
         EarlyStopping(monitor='val_acc',
                       patience=10,
                       verbose=verbose,
-                      mode='auto'),
+                      mode='max'),
 
         ModelCheckpoint(model_filename, monitor='val_acc',
                         verbose=verbose,
                         save_best_only=True,
-                        mode='auto'),
+                        mode='max'),
     ]
     #Optional debugging of the model's architecture
     model.summary()
