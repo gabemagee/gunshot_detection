@@ -32,21 +32,22 @@ def auc(y_true, y_pred):
     return auc
 
 
-model_name = "/home/lauogden/models/gunshot_sound_model.h5"
+model_name = "/home/lauogden/gunshot_detection/raspberry_pi/models/gunshot_sound_model.h5"
 
-converter = tf.lite.TFLiteConverter.from_keras_model_file(model_name, custom_objects={'auc': auc})
+converter = tf.lite.TFLiteConverter.from_keras_model_file(model_name, custom_objects = {"auc":auc}
+)
 print("\n made the converter using from_keras_model \n")
 
 #post-training quantization
-converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
-print(" did post training quantization \n")
+#converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
+#print(" did post training quantization \n")
 
 #convert
 tflite_model = converter.convert()
 print(" converted successfully \n")
 
 #save
-open("/home/lauogden/models/converted_gunshot_model_ptq.tflite", "wb").write(tflite_model)
+open("/home/lauogden/gunshot_detection/raspberry_pi/models/converted_gunshot_sound_model.tflite", "wb").write(tflite_model)
 print(" saved successfully \n")
 
 
