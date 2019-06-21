@@ -37,6 +37,13 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import KFold
 
+def get_available_gpus():
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos if x.device_type == 'GPU']
+# In[8]:
+
+print(get_available_gpus())
+
 def time_shift(wav):
     start_ = int(np.random.uniform(-wav.shape[0] * 0.5, wav.shape[0] * 0.5))
     if start_ >= 0:
@@ -90,10 +97,7 @@ def add_background(wav, file, data_directory, label_to_avoid):
     wav_with_bg = wav * np.random.uniform(0.8, 1.2) + bg_slice * np.random.uniform(0, 0.5)
     return wav_with_bg
 
-def get_available_gpus():
-    local_device_protos = device_lib.list_local_devices()
-    return [x.name for x in local_device_protos if x.device_type == 'GPU']
-# In[8]:
+
 
 
 def make_spectrogram(y,sr):
