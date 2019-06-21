@@ -5,37 +5,38 @@
 
 # In[ ]:
 
-import keras
-import pyaudio
+import wave
+import sounddevice as sd
 
 
 # ## Variable Initializations
 
 # In[ ]:
 
-audio_format = pyaudio.paInt16
-audio_channels = 1
-audio_rate = 44100
-audio_device_index = 1
-audio_input_block_time = 0.05
-audio_input_frames_per_block = int(audio_rate * audio_input_block_time)
+sample_rate = 44100
+sample_duration = 2
+number_of_channels = 1
+sd.default.samplerate = sample_rate
+sd.default.channels = number_of_channels
 
 
 # ## Processing Microphone Audio
 
 # In[ ]:
 
-pa = pyaudio.PyAudio()
-stream = pa.open(format = audio_format,
-                 channels = audio_channels,
-                 rate = audio_rate,
-                 input = True,
-                 input_device_index = audio_device_index,
-                 frames_per_buffer = audio_input_frames_per_block)
+print("Now recording audio...")
 
-while (True):
-    try:
-        block = stream.read(audio_input_frames_per_block)
-    except IOerror as e:
-        print("--- Error Trying to Process Microphone Audio ---")
+sound_data_array = sd.rec(int(sample_duration * sample_rate))
+sd.wait()
 
+print("Finished recording audio...")
+
+print(sound_data_array)
+
+# save the audio frames as .wav file
+wavefile = wave.open("test",'wb')
+wavefile.setnchannels(number_of_channels)
+wavefile.setsampwidth(4)
+wavefile.setframerate(sample_rate)
+wavefile.writeframes(b''.join(sound_data_array))
+wavefile.close()
