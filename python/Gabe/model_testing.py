@@ -54,6 +54,12 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 import csv
 
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
+config = tf.ConfigProto()
+config.gpu_options.allow_growth=True
+sess = tf.Session(config=config)
+K.set_session(sess)
 
 def auc(y_true, y_pred):
     auc = tf.metrics.auc(y_true, y_pred)[1]
