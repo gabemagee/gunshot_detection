@@ -63,7 +63,7 @@ def auc(y_true, y_pred):
 number_of_desired_samples = 250
 sampling_rate_per_two_seconds = 44100
 
-model_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_model.h5"
+model_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_model_spectrograph_model.h5"
 
 a_labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_labels.npy"
 
@@ -90,9 +90,16 @@ sr = 22050
 label_np = np.concatenate((np.array(np.load(a_labels)),np.array(np.load(b_labels))))
 scont = np.concatenate((np.array(np.load(a_samples)),np.array(np.load(a_samples))))
 
-label_np_1 = np.array(keras.utils.to_categorical(label_np, 2))
-sample_np = np.array(scont).reshape(-1, sampling_rate_per_two_seconds, 1)
-a = np.argmax(model.predict(sample_np),axis=1)
+def make_spectrogram(y,sr):
+    return np.array(librosa.feature.melspectrogram(y=y, sr=sr))
+
+sr = 22050
+spectro_samples = np.array([make_spectrogram(a,sr) for a in scont]).reshape(-1,128,87,1)
+
+
+#label_np_1 = np.array(keras.utils.to_categorical(label_np, 2))
+#sample_np = np.array(scont).reshape(-1, sampling_rate_per_two_seconds, 1)
+a = np.argmax(model.predict(spectro_samples),axis=1)
 b = np.argmax(label_np_1,axis=1)
 diff = a-b
 
