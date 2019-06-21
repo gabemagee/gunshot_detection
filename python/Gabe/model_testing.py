@@ -115,4 +115,5 @@ for ind in indexes:
     else:
         direc = results_others
     filepath = direc+"/"+str(ind)+".wav"
+    print(filepath)
     librosa.output.write_wav(filepath,scont[ind],sr)
