@@ -155,21 +155,25 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
     #Model Architecture
     x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(input_tensor)
     x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(x)
+    x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
     x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
     x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
+    x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
     x = layers.Conv2D(64, filter_size, activation=activation, padding="same")(x)
     x = layers.Conv2D(64, filter_size, activation=activation, padding="same")(x)
+    x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
     x = layers.Conv2D(256, filter_size, activation=activation, padding="same")(x)
     x = layers.Conv2D(256, filter_size, activation=activation, padding="same")(x)
+    x = layers.BatchNormalization()(x)
     x = layers.GlobalMaxPool2D()(x)
     x = layers.Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
 
@@ -215,7 +219,7 @@ drop_out_rates = 0.1,0.05,0.01,0.25
 learning_rates = 0.1,0.05,0.01
 filter_sizes = (4,4),(5,5),(6,6),(3,3)
 name = "model"
-print(model(train_wav, train_label, test_label, test_wav, name= name,drop_out_rate=0.1,learning_rate=0.01,filter_size=(5,5),verbose=1))
+print(model(train_wav, train_label, test_label, test_wav, name= name,drop_out_rate=0.1,learning_rate=0.01,filter_size=(3,3),verbose=1))
 
 
 """
