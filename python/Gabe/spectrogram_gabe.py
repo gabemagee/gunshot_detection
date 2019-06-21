@@ -216,7 +216,7 @@ for dor in drop_out_rates:
     for lr in learning_rates:
         for fs in filter_sizes:
             name = "dropout rate ("+str(dor)+") learning rate ("+str(lr)+") filter size ("+str(fs)+")"
-            print("dropout rate (",dor,") learning rate (",lr,") filter size (",fs,"): ",model(drop_out_rate=dor,learning_rate=lr,filter_size=fs,verbose=0))
+            print("dropout rate (",dor,") learning rate (",lr,") filter size (",fs,"): ",model(name= name,drop_out_rate=dor,learning_rate=lr,filter_size=fs,verbose=0))
 
 
 
