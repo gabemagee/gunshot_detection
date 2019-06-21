@@ -36,8 +36,6 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import KFold
-# In[7]:
-
 
 def time_shift(wav):
     start_ = int(np.random.uniform(-wav.shape[0] * 0.5, wav.shape[0] * 0.5))
@@ -124,7 +122,12 @@ def auc(y_true, y_pred):
     K.get_session().run(tf.local_variables_initializer())
     return auc
 
-print(get_available_gpus())
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
+config = tf.ConfigProto()
+config.gpu_options.allow_growth=True
+sess = tf.Session(config=config)
+K.set_session(sess)
 
 data_directory = "/home/gamagee/workspace/gunshot_detection/REU_Data/REU_Samples_and_Labels/"
 label_csv = data_directory + "labels.csv"
@@ -212,7 +215,7 @@ drop_out_rates = 0.1,0.05,0.01,0.25
 learning_rates = 0.1,0.05,0.01
 filter_sizes = (4,4),(5,5),(6,6),(3,3)
 name = "model"
-print(model(train_wav, train_label, test_label, test_wav, name= name,drop_out_rate=0.1,learning_rate=0.01,filter_size=(5,5),verbose=0))
+print(model(train_wav, train_label, test_label, test_wav, name= name,drop_out_rate=0.1,learning_rate=0.01,filter_size=(5,5),verbose=1))
 
 
 """
