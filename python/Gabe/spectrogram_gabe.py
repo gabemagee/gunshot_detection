@@ -1,24 +1,13 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[6]:
-
-
 import os
 import pandas as pd
 import librosa
 import librosa.display
 import glob
-import pandas as pd
 import numpy as np
 import sys
 import keras
 from keras.models import Sequential
-from keras.layers import Conv2D
-from keras.layers import MaxPooling2D
-from keras.layers import Flatten
-from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Conv1D, GlobalAveragePooling1D, MaxPooling1D
+from keras.layers import Conv1D, Conv2D, MaxPooling2D, GlobalAveragePooling1D, MaxPooling1D, Dense, Dropout, Activation, Flatten
 from keras import optimizers
 from keras.optimizers import Adam, SGD
 from keras.utils import np_utils
@@ -46,7 +35,6 @@ from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-
 from sklearn.model_selection import KFold
 # In[7]:
 
@@ -113,51 +101,120 @@ def get_available_gpus():
 def make_spectrogram(y,sr):
     return np.array(librosa.feature.melspectrogram(y=y, sr=sr))
 
-print(get_available_gpus())
-# In[9]:
 
+def get_categories():
+    s = []
+    d = {}
+    with open(label_csv,"r") as lblcsv:
+        c = list(csv.reader(lblcsv))
+        header = c[0]
+        for row in c[1:]:
+            e = {}
+            e["label"] = row[1]
+            e["source"] = row[2]
+            d[row[0]+".wav"] = e
+            if row[1] not in s:
+                s.append(row[1])
+    return s,d
+
+
+#ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
+def auc(y_true, y_pred):
+    auc = tf.metrics.auc(y_true, y_pred)[1]
+    K.get_session().run(tf.local_variables_initializer())
+    return auc
+
+print(get_available_gpus())
 
 data_directory = "/home/gamagee/workspace/gunshot_detection/REU_Data/REU_Samples_and_Labels/"
 label_csv = data_directory + "labels.csv"
 sample_directory = data_directory + "Samples/"
 base_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/"
-
-
-# In[ ]:
-
-
-s = []
-d = {}
-with open(label_csv,"r") as lblcsv:
-    c = list(csv.reader(lblcsv))
-    header = c[0]
-    for row in c[1:]:
-        e = {}
-        e["label"] = row[1]
-        e["source"] = row[2]
-        d[row[0]+".wav"] = e
-        if row[1] not in s:
-            s.append(row[1])
-print(len(s))
-print(s)
-
-
-# In[ ]:
-
-
-##preprocessing data
+sample_path = base_dir+"gabe_sample.npy"
+label_path = base_dir+"gabe_label.npy"
+samples = np.load(sample_path)
+labels = np.load(label_path)
+samples.reshape(-1,128,87,1)
 samples = []
 labels = []
 ids = []
-
-
 sample_rate_per_two_seconds = 44100
-
+number_of_classes = 2
 sr = 22050
+input_shape = (128, 87, 1)
+kf = KFold(n_splits=3, shuffle=True)
+for train_index, test_index in kf.split(samples):
+    train_wav, test_wav = samples[train_index], samples[test_index]
+    train_label, test_label = labels[train_index], labels[test_index]
+
+
+def model(name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.01,number_of_epochs = 50,batch_size = 32,filter_size = (4,4),maxpool_size = (2,2),activation = "relu"):
+    optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
+    input_tensor = Input(shape=input_shape)
+    metrics = [auc, "accuracy"]
+    #Model Architecture
+    x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(input_tensor)
+    x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
+    x = layers.MaxPool2D(maxpool_size)(x)
+    x = layers.Dropout(rate=drop_out_rate)(x)
+
+    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(input_tensor)
+    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(x)
+    x = layers.MaxPool2D(maxpool_size)(x)
+    x = layers.Dropout(rate=drop_out_rate)(x)
+
+    x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(input_tensor)
+    x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
+    x = layers.MaxPool2D(maxpool_size)(x)
+    x = layers.Dropout(rate=drop_out_rate)(x)
+
+    x = layers.Conv2D(256, filter_size, activation=activation, padding="same")(input_tensor)
+    x = layers.Conv2D(256, filter_size, activation=activation, padding="same")(x)
+    x = layers.GlobalMaxPool2D()(x)
+    x = layers.Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
+
+    x = layers.Dense(64, activation=activation)(x)
+    x = layers.Dense(1028, activation=activation)(x)
+    output_tensor = layers.Dense(number_of_classes, activation="softmax")(x)
+
+    model = tf.keras.Model(input_tensor, output_tensor)
+    model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=metrics)
+
+    #Configuring model properties
+    model_filename = base_dir + "gunshot_sound_model_spectrograph_"+name+".pkl"
+
+    model_callbacks = [
+        EarlyStopping(monitor='val_acc',
+                      patience=10,
+                      verbose=verbose,
+                      mode='auto'),
+
+        ModelCheckpoint(model_filename, monitor='val_acc',
+                        verbose=verbose,
+                        save_best_only=True,
+                        mode='auto'),
+    ]
+    #Optional debugging of the model's architecture
+    model.summary()
+
+    test_wav = test_wav.reshape(-1,128,87,1)
+    train_wav = train_wav.reshape(-1,128, 87, 1)
+
+    #Training & caching the model
+    History = model.fit(train_wav, train_label,
+              validation_data=[test_wav, test_label],
+              epochs=number_of_epochs,
+              callbacks=model_callbacks,
+              verbose=verbose,
+              batch_size=batch_size,
+              shuffle=True)
+    model.save(base_dir + "gunshot_sound_model_spectrograph_"+name+".h5")
+    return model.evaluate(test_wav, test_label, batch_size=batch_size)
+
+
 
 
 """
-
 norm_samples = np.load(base_dir + "gunshot_sound_samples.npy")
 norm_labels = np.load(base_dir + "gunshot_sound_labels.npy")
 
@@ -171,9 +228,6 @@ labels = keras.utils.to_categorical(labels, 2)
 
 print(labels.shape)
 print(samples.shape)
-
-
-
 
 eee = 0
 for file in os.listdir(sample_directory):
@@ -201,10 +255,6 @@ for file in os.listdir(sample_directory):
 
             ids.append(file.split(".")[0])
 
-
-
-
-
 sa = []
 for sample in samples:
     a = make_spectrogram(sample,sr)
@@ -217,127 +267,3 @@ label_path = base_dir+"gabe_label.npy"
 np.save(sample_path,samples)
 np.save(label_path,labels)
 """
-input_shape = (128, 87, 1)
-sample_path = base_dir+"gabe_sample.npy"
-label_path = base_dir+"gabe_label.npy"
-samples = np.load(sample_path)
-labels = np.load(label_path)
-samples.reshape(-1,128,87,1)
-kf = KFold(n_splits=3, shuffle=True)
-for train_index, test_index in kf.split(samples):
-    train_wav, test_wav = samples[train_index], samples[test_index]
-    train_label, test_label = labels[train_index], labels[test_index]
-
-
-#(samples, rows, cols, channels)
-
-
-
-#exit()
-
-
-# In[10]:
-
-
-#Model
-#Loading previous model
-#model = load_model(base_dir + "gunshot_sound_model.h5")
-
-
-# In[11]:
-
-
-#ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
-def auc(y_true, y_pred):
-    auc = tf.metrics.auc(y_true, y_pred)[1]
-    K.get_session().run(tf.local_variables_initializer())
-    return auc
-
-
-# In[12]:
-
-
-#Model Parameters
-drop_out_rate = 0.1
-learning_rate = 0.01
-number_of_epochs = 50
-number_of_classes = 2
-batch_size = 32
-optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
-input_tensor = Input(shape=input_shape)
-metrics = [auc, "accuracy"]
-
-
-
-
-#Model Architecture
-x = layers.Conv2D(16, (4,4), activation="relu", padding="same")(input_tensor)
-x = layers.Conv2D(16, (4,4), activation="relu", padding="same")(x)
-x = layers.MaxPool2D((2,2))(x)
-x = layers.Dropout(rate=drop_out_rate)(x)
-
-x = layers.Conv2D(32, (4,4), activation="relu", padding="same")(input_tensor)
-x = layers.Conv2D(32, (4,4), activation="relu", padding="same")(x)
-x = layers.MaxPool2D((2,2))(x)
-x = layers.Dropout(rate=drop_out_rate)(x)
-
-x = layers.Conv2D(32, (4,4), activation="relu", padding="same")(input_tensor)
-x = layers.Conv2D(32, (4,4), activation="relu", padding="same")(x)
-x = layers.MaxPool2D((2,2))(x)
-x = layers.Dropout(rate=drop_out_rate)(x)
-
-x = layers.Conv2D(256, (4,4), activation="relu", padding="same")(input_tensor)
-x = layers.Conv2D(256, (4,4), activation="relu", padding="same")(x)
-x = layers.GlobalMaxPool2D()(x)
-x = layers.Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
-
-x = layers.Dense(64, activation="relu")(x)
-x = layers.Dense(1028, activation="relu")(x)
-output_tensor = layers.Dense(number_of_classes, activation="softmax")(x)
-
-model = tf.keras.Model(input_tensor, output_tensor)
-model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=metrics)
-
-
-
-
-# In[ ]:
-
-
-#Configuring model properties
-model_filename = base_dir + "gunshot_sound_model.pkl"
-
-model_callbacks = [
-    EarlyStopping(monitor='val_acc',
-                  patience=10,
-                  verbose=1,
-                  mode='auto'),
-
-    ModelCheckpoint(model_filename, monitor='val_acc',
-                    verbose=1,
-                    save_best_only=True,
-                    mode='auto'),
-]
-
-
-# In[ ]:
-
-
-#Optional debugging of the model's architecture
-model.summary()
-
-print(test_wav.shape)
-# In[ ]:
-test_wav = test_wav.reshape(-1,128,87,1)
-train_wav = train_wav.reshape(-1,128, 87, 1)
-print(test_wav.shape)
-
-#Training & caching the model
-History = model.fit(train_wav, train_label,
-          validation_data=[test_wav, test_label],
-          epochs=number_of_epochs,
-          callbacks=model_callbacks,
-          verbose=1,
-          batch_size=batch_size,
-          shuffle=True)
-model.save(base_dir + "gunshot_sound_model_spectro.h5")
