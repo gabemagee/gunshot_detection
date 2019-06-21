@@ -189,12 +189,12 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
 
     model_callbacks = [
         EarlyStopping(monitor='val_acc',
-                      patience=10,
-                      verbose=verbose,
+                      patience=15,
+                      verbose=1,
                       mode='max'),
 
         ModelCheckpoint(model_filename, monitor='val_acc',
-                        verbose=verbose,
+                        verbose=1,
                         save_best_only=True,
                         mode='max'),
     ]
