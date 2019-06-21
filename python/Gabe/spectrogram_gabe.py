@@ -154,25 +154,25 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
     metrics = [auc, "accuracy"]
     #Model Architecture
     x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(input_tensor)
-    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(x)
+    #x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
     x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
-    x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
+    #x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
     x = layers.Conv2D(64, filter_size, activation=activation, padding="same")(x)
-    x = layers.Conv2D(64, filter_size, activation=activation, padding="same")(x)
+    #x = layers.Conv2D(64, filter_size, activation=activation, padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
     x = layers.Conv2D(256, filter_size, activation=activation, padding="same")(x)
-    x = layers.Conv2D(256, filter_size, activation=activation, padding="same")(x)
+    #x = layers.Conv2D(256, filter_size, activation=activation, padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.GlobalMaxPool2D()(x)
     x = layers.Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
