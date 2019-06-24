@@ -51,6 +51,8 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.python.client import device_lib
+
 
 import csv
 
