@@ -93,9 +93,11 @@ results_regular = results+"regular/"
 
 results_both = results+"both/"
 
+spectrogram_samples_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectro_samples.npy"
+reg_samples_path = ""
 
-#model = keras.models.load_model(model_path,custom_objects={'auc':auc})
-#model.summary()
+model = keras.models.load_model(model_path,custom_objects={'auc':auc})
+model.summary()
 
 sr = 22050
 
@@ -103,9 +105,11 @@ label_np = np.concatenate((np.array(np.load(a_labels)),np.array(np.load(b_labels
 scont = np.concatenate((np.array(np.load(a_samples)),np.array(np.load(a_samples))))
 
 
-spectro_samples = np.array([make_spectrogram(a,sr) for a in scont]).reshape(-1,128,87,1)
+#spectro_samples = np.array([make_spectrogram(a,sr) for a in scont]).reshape(-1,128,87,1)
 
-np.save("/home/gamagee/workspace/gunshot_detection/REU_Data/spectro_samples.npy",spectro_samples)
+spectro_samples = np.array(np.load(spectrogram_samples_path))
+
+
 
 print("done preprocessing")
 
