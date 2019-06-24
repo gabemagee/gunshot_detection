@@ -364,6 +364,12 @@ optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
 input_tensor = Input(shape=input_shape)
 metrics = [auc, "accuracy"]
 
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+config = tf.ConfigProto()
+config.gpu_options.allow_growth=True
+sess = tf.Session(config=config)
+K.set_session(sess)
+
 
 # ## Model Architecture
 
