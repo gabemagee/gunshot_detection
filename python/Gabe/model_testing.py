@@ -94,8 +94,8 @@ results_regular = results+"regular/"
 results_both = results+"both/"
 
 
-model = keras.models.load_model(model_path,custom_objects={'auc':auc})
-model.summary()
+#model = keras.models.load_model(model_path,custom_objects={'auc':auc})
+#model.summary()
 
 sr = 22050
 
@@ -104,6 +104,8 @@ scont = np.concatenate((np.array(np.load(a_samples)),np.array(np.load(a_samples)
 
 
 spectro_samples = np.array([make_spectrogram(a,sr) for a in scont]).reshape(-1,128,87,1)
+
+np.save("/home/gamagee/workspace/gunshot_detection/REU_Data/spectro_samples.npy",spectro_samples)
 
 print("done preprocessing")
 
@@ -119,7 +121,8 @@ diff_s = a-b
 model = keras.models.load_model(model_path_linear,custom_objects={'auc':auc})
 model.summary()
 label_np_1 = np.array(keras.utils.to_categorical(label_np, 2))
-predictions = model.predict(scont)
+sample_np = np.array(scont).reshape(-1, sampling_rate_per_two_seconds, 1)
+predictions = model.predict(sample_np)
 a = np.argmax(predictions,axis=1)
 b = np.argmax(label_np_1,axis=1)
 diff_a = a - b
