@@ -97,15 +97,11 @@ def add_background(wav, file, data_directory, label_to_avoid):
     wav_with_bg = wav * np.random.uniform(0.8, 1.2) + bg_slice * np.random.uniform(0, 0.5)
     return wav_with_bg
 
-
-
-
 def make_spectrogram(y):
     y = np.array(y)
     print(type(y))
     print(y.dtype)
     return np.array(librosa.feature.melspectrogram(y=y, sr=22050))
-
 
 def get_categories():
     s = []
@@ -230,58 +226,3 @@ learning_rates = 0.1,0.05,0.01
 filter_sizes = (4,4),(5,5),(6,6),(3,3)
 name = "model"
 print(model(train_wav, train_label, test_label, test_wav, name= name))
-
-
-"""
-norm_samples = np.load(base_dir + "gunshot_sound_samples.npy")
-norm_labels = np.load(base_dir + "gunshot_sound_labels.npy")
-
-aug_samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
-aug_labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
-
-labels = np.concatenate((aug_labels,norm_labels))
-samples = np.concatenate((aug_samples,norm_samples))
-
-labels = keras.utils.to_categorical(labels, 2)
-
-print(labels.shape)
-print(samples.shape)
-
-eee = 0
-for file in os.listdir(sample_directory):
-    print(eee)
-    eee = eee +1
-    sample,sr = librosa.load(sample_directory+file)
-    if len(sample) <= sample_rate_per_two_seconds:
-        number_of_missing_frames = sample_rate_per_two_seconds - len(sample)
-        padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_frames)])
-        label = d[file]["label"]
-        samples.append(padded_sample)
-        labels.append(label)
-        ids.append(file.split(".")[0])
-    else:
-        number_of_missing_frames = len(sample) % sample_rate_per_two_seconds
-        sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_frames)])
-        for i in range(0, sample.size - sample_rate_per_two_seconds, sample_rate_per_two_seconds):
-            sample_slice = sample[i : i + sample_rate_per_two_seconds]
-            label = d[file]["label"]
-            if label == "gun_shot":
-                labels.append(1)
-            else:
-                labels.append(0)
-            samples.append(sample_slice)
-
-            ids.append(file.split(".")[0])
-
-sa = []
-for sample in samples:
-    a = make_spectrogram(sample,sr)
-    sa.append(a)
-samples = np.array(sa).reshape(input_shape)
-
-sample_path = base_dir+"gabe_sample.npy"
-label_path = base_dir+"gabe_label.npy"
-
-np.save(sample_path,samples)
-np.save(label_path,labels)
-"""
