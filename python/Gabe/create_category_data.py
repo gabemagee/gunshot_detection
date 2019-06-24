@@ -13,6 +13,6 @@ types = []
 with open(label_csv) as csvfile:
     reader = csv.reader(csvfile)
     for row in reader[:1]:
-        if row[1] not in types:
+        if row[1] not in types and row[1]!="Class":
             types.append(row[1])
 print(types)
