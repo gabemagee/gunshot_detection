@@ -156,9 +156,10 @@ for train_index, test_index in kf.split(samples):
 
 def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.001,number_of_epochs = 100,batch_size = 64,filter_size = (3,3),maxpool_size = (3,3),activation = "relu"):
     optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
-    input_tensor = Input(shape=input_shape)
+    input_tensor = Input(shape=(44100,1))
     metrics = [auc, "accuracy"]
     #Model Architecture
+    x = layers.Lambda(lambda x: np.array(librosa.feature.melspectrogram(y=x, sr=sr)),output_shape=(128, 87, 1))
     x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(input_tensor)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
