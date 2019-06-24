@@ -105,9 +105,9 @@ label_np = np.concatenate((np.array(np.load(a_labels)),np.array(np.load(b_labels
 scont = np.concatenate((np.array(np.load(a_samples)),np.array(np.load(a_samples))))
 
 
-#spectro_samples = np.array([make_spectrogram(a,sr) for a in scont]).reshape(-1,128,87,1)
+#spectro_samples = np.array([make_spectrogram(a,sr) for a in scont])
 
-spectro_samples = np.array(np.load(spectrogram_samples_path)).reshape(-1, sampling_rate_per_two_seconds, 1)
+spectro_samples = np.array(np.load(spectrogram_samples_path)).reshape(-1,128,87,1)
 
 
 
