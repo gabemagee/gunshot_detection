@@ -100,8 +100,8 @@ def add_background(wav, file, data_directory, label_to_avoid):
 
 
 
-def make_spectrogram(y,sr):
-    return np.array(librosa.feature.melspectrogram(y=y, sr=sr))
+def make_spectrogram(y):
+    return np.array(librosa.feature.melspectrogram(y=y, sr=22050))
 
 
 def get_categories():
@@ -173,7 +173,7 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
     input_tensor = Input(shape=(44100,1))
     metrics = [auc, "accuracy"]
     #Model Architecture
-    x = layers.Lambda(lambda x: np.array(librosa.feature.melspectrogram(y=x, sr=sr)),output_shape=(128, 87, 1))(input_tensor)
+    x = layers.Lambda(make_spectrogram,output_shape=(128, 87, 1))(input_tensor)
     x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
