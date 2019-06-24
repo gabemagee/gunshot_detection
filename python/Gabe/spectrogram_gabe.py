@@ -100,8 +100,11 @@ def add_background(wav, file, data_directory, label_to_avoid):
 
 
 
-def make_spectrogram(y,sr):
-    return np.array(librosa.feature.melspectrogram(y=y, sr=sr))
+def make_spectrogram(y):
+    y = np.array(y)
+    print(type(y))
+    print(y.dtype)
+    return np.array(librosa.feature.melspectrogram(y=y, sr=22050))
 
 
 def get_categories():
@@ -141,13 +144,27 @@ sample_directory = data_directory + "Samples/"
 base_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/"
 sample_path = base_dir+"gabe_sample.npy"
 label_path = base_dir+"gabe_label.npy"
-samples = np.load(sample_path)
-labels = np.load(label_path)
-samples.reshape(-1,128,87,1)
+#samples = np.load(sample_path)
+#labels = np.load(label_path)
+#samples.reshape(-1,128,87,1)
 sample_rate_per_two_seconds = 44100
 number_of_classes = 2
 sr = 22050
 input_shape = (128, 87, 1)
+
+
+norm_samples = np.load(base_dir + "gunshot_sound_samples.npy")
+norm_labels = np.load(base_dir + "gunshot_sound_labels.npy")
+
+aug_samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
+aug_labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
+
+labels = np.concatenate((aug_labels,norm_labels))
+samples = np.concatenate((aug_samples,norm_samples))
+
+labels = keras.utils.to_categorical(labels, 2)
+
+
 kf = KFold(n_splits=3, shuffle=True)
 for train_index, test_index in kf.split(samples):
     train_wav, test_wav = samples[train_index], samples[test_index]
@@ -156,10 +173,11 @@ for train_index, test_index in kf.split(samples):
 
 def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.001,number_of_epochs = 100,batch_size = 64,filter_size = (3,3),maxpool_size = (3,3),activation = "relu"):
     optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
-    input_tensor = Input(shape=input_shape)
+    input_tensor = Input(shape=(44100,1))
     metrics = [auc, "accuracy"]
     #Model Architecture
-    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(input_tensor)
+    x = layers.Lambda(make_spectrogram,output_shape=(128, 87, 1))(input_tensor)
+    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
