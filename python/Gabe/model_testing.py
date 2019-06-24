@@ -106,7 +106,7 @@ results_both = results+"both/"
 
 spectrogram_samples_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectro_samples.npy"
 reg_samples_path = ""
-
+print("hi")
 model = keras.models.load_model(model_path,custom_objects={'auc':auc})
 model.summary()
 
