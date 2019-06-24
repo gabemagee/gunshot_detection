@@ -158,7 +158,7 @@ for ind in indexes_both:
         direc = results_both+"false_negative/"
     else:
         direc = results_both+"false_positive/"
-    filepath = direc+"/"+str(ind)+".wav"
+    filepath = direc+str(ind)+".wav"
     print(filepath)
     librosa.output.write_wav(filepath,scont[ind],sr)
 for ind in indexes_s:
@@ -166,7 +166,7 @@ for ind in indexes_s:
         direc = results_spectrogram+"false_negative/"
     else:
         direc = results_spectrogram+"false_positive/"
-    filepath = direc+"/"+str(ind)+".wav"
+    filepath = direc+str(ind)+".wav"
     print(filepath)
     librosa.output.write_wav(filepath,scont[ind],sr)
 for ind in indexes_a:
@@ -174,6 +174,6 @@ for ind in indexes_a:
         direc = results_regular+"false_negative/"
     else:
         direc = results_regular+"false_positive/"
-    filepath = direc+"/"+str(ind)+".wav"
+    filepath = direc+str(ind)+".wav"
     print(filepath)
     librosa.output.write_wav(filepath,scont[ind],sr)
