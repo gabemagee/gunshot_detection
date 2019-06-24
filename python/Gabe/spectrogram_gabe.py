@@ -102,6 +102,7 @@ def add_background(wav, file, data_directory, label_to_avoid):
 
 def make_spectrogram(y):
     y = np.array(y)
+    print(type(y))
     return np.array(librosa.feature.melspectrogram(y=y, sr=22050))
 
 
