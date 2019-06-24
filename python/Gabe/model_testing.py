@@ -66,26 +66,32 @@ def auc(y_true, y_pred):
     K.get_session().run(tf.local_variables_initializer())
     return auc
 
+
+def make_spectrogram(y,sr):
+    return np.array(librosa.feature.melspectrogram(y=y, sr=sr))
+
 number_of_desired_samples = 250
 sampling_rate_per_two_seconds = 44100
 
 model_path = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_model_spectrograph_model.h5"
 
-a_labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_labels.npy"
+model_path_linear = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_sound_model.h5"
 
+a_labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_labels.npy"
 a_samples = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_samples.npy"
 
 
 b_labels = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_labels.npy"
-
 b_samples = "/home/gamagee/workspace/gunshot_detection/REU_Data/gunshot_augmented_sound_samples.npy"
 
 
 results = "/home/gamagee/workspace/gunshot_detection/REU_Data/testing_results/"
 
-results_guns = results +"guns/"
+results_spectrogram = results+"spectro/"
 
-results_others = results+"others/"
+results_regular = results+"regular/"
+
+results_both = results+"both/"
 
 
 model = keras.models.load_model(model_path,custom_objects={'auc':auc})
@@ -96,10 +102,7 @@ sr = 22050
 label_np = np.concatenate((np.array(np.load(a_labels)),np.array(np.load(b_labels))))
 scont = np.concatenate((np.array(np.load(a_samples)),np.array(np.load(a_samples))))
 
-def make_spectrogram(y,sr):
-    return np.array(librosa.feature.melspectrogram(y=y, sr=sr))
 
-sr = 22050
 spectro_samples = np.array([make_spectrogram(a,sr) for a in scont]).reshape(-1,128,87,1)
 
 print("done preprocessing")
@@ -109,17 +112,50 @@ label_np_1 = np.array(keras.utils.to_categorical(label_np, 2))
 predictions = model.predict(spectro_samples)
 a = np.argmax(predictions,axis=1)
 b = np.argmax(label_np_1,axis=1)
-diff = a-b
+diff_s = a-b
 
-indexes = []
-for i in range(len(diff)):
-    if diff[i]!=0:
-        indexes.append(i)
-for ind in indexes:
+
+#testing the other model
+model = keras.models.load_model(model_path_linear,custom_objects={'auc':auc})
+model.summary()
+label_np_1 = np.array(keras.utils.to_categorical(label_np, 2))
+predictions = model.predict(scont)
+a = np.argmax(predictions,axis=1)
+b = np.argmax(label_np_1,axis=1)
+diff_a = a - b
+
+
+indexes_both = []
+indexes_s = []
+indexes_a = []
+for i in range(len(diff_s)):
+    if diff_s[i]!=0 and diff_a[i]!=0:
+        indexes_both.append(i)
+    if diff_s[i]!=0:
+        indexes_s.append(i)
+    if diff_a[i]!=0:
+        indexes_a.append(i)
+for ind in indexes_both:
     if label_np[ind]==1:
-        direc = results_guns
+        direc = results_both+"false_negative/"
     else:
-        direc = results_others
+        direc = results_both+"false_positive/"
+    filepath = direc+"/"+str(ind)+".wav"
+    print(filepath)
+    librosa.output.write_wav(filepath,scont[ind],sr)
+for ind in indexes_s:
+    if label_np[ind]==1:
+        direc = results_spectrogram+"false_negative/"
+    else:
+        direc = results_spectrogram+"false_positive/"
+    filepath = direc+"/"+str(ind)+".wav"
+    print(filepath)
+    librosa.output.write_wav(filepath,scont[ind],sr)
+for ind in indexes_a:
+    if label_np[ind]==1:
+        direc = results_regular+"false_negative/"
+    else:
+        direc = results_regular+"false_positive/"
     filepath = direc+"/"+str(ind)+".wav"
     print(filepath)
     librosa.output.write_wav(filepath,scont[ind],sr)
