@@ -141,13 +141,27 @@ sample_directory = data_directory + "Samples/"
 base_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/"
 sample_path = base_dir+"gabe_sample.npy"
 label_path = base_dir+"gabe_label.npy"
-samples = np.load(sample_path)
-labels = np.load(label_path)
-samples.reshape(-1,128,87,1)
+#samples = np.load(sample_path)
+#labels = np.load(label_path)
+#samples.reshape(-1,128,87,1)
 sample_rate_per_two_seconds = 44100
 number_of_classes = 2
 sr = 22050
 input_shape = (128, 87, 1)
+
+
+norm_samples = np.load(base_dir + "gunshot_sound_samples.npy")
+norm_labels = np.load(base_dir + "gunshot_sound_labels.npy")
+
+aug_samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
+aug_labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
+
+labels = np.concatenate((aug_labels,norm_labels))
+samples = np.concatenate((aug_samples,norm_samples))
+
+labels = keras.utils.to_categorical(labels, 2)
+
+
 kf = KFold(n_splits=3, shuffle=True)
 for train_index, test_index in kf.split(samples):
     train_wav, test_wav = samples[train_index], samples[test_index]
