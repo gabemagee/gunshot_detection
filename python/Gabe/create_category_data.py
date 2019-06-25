@@ -15,4 +15,3 @@ with open(label_csv) as csvfile:
     for row in reader:
         if row[1] not in types and row[1]!="Class":
             types.append(row[1])
-print(types)
