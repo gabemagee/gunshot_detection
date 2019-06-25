@@ -53,13 +53,14 @@ sa = []
 for i in range(len(labels)):
     spec_dir = './spectrograms/'
     im = cv2.imread(spec_dir + str(i) + '.png')
+    im = cv2.resize(im, (192, 192))
     sa.append(im)
 
-samples = np.array(sa).reshape(-1, 221, 223, 3)
+samples = np.array(sa).reshape(-1, 192, 192, 3)
 samples = samples.astype('float32')
 samples /= 255
 
-'''
+
 #4 categories
 urban = ['air_conditioner', 'car_horn', 'children_playing', 'dog_bark', 'other',
        'drilling', 'engine_idling', 'jackhammer', 'siren', 'street_music']
@@ -67,7 +68,7 @@ for i in range(len(labels)):
     if labels[i] in urban:
         labels[i] = 'other'
 nclass = 4
-'''
+
 
 lb = LabelBinarizer()
 labels = lb.fit_transform(labels)
@@ -86,13 +87,7 @@ generations = 20000
 num_gens_to_wait = 250
 batch_size = 32
 drop_out_rate = 0.2
-input_shape = (221, 223)
-
-#For Conv2D add Channel
-#train_wav = train_wav.reshape(-1, input_shape[0], input_shape[1], 3)
-#test_wav = test_wav.reshape(-1, input_shape[0], input_shape[1], 3)
-#train_wav = train_wav.astype('float32')
-#test_wav = test_wav.astype('float32')
+input_shape = (192, 192)
 
 def auc(y_true, y_pred):
     auc = tf.metrics.auc(y_true, y_pred)[1]
@@ -134,10 +129,10 @@ model.add(MaxPooling2D(pool_size = (2, 2)))
 model.add(Dropout(0.25))
 
 # (CONV => RELU) * 2 => POOL
-model.add(Conv2D(200, (3, 3), padding = "same"))
+model.add(Conv2D(256, (3, 3), padding = "same"))
 model.add(Activation("relu"))
 model.add(BatchNormalization(axis = chanDim))
-model.add(Conv2D(200, (3, 3), padding = "same"))
+model.add(Conv2D(256, (3, 3), padding = "same"))
 model.add(Activation("relu"))
 model.add(BatchNormalization(axis = chanDim))
 model.add(MaxPooling2D(pool_size = (2, 2)))
