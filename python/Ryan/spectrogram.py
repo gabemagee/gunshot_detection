@@ -46,6 +46,7 @@ K.set_session(sess)
 
 #samples = np.load("aug_samples.npy")
 labels = np.load("aug_labels.npy")
+nclass = 13
 
 #read in spectrograms
 sa = []
@@ -58,13 +59,15 @@ samples = np.array(sa).reshape(-1, 221, 223, 3)
 samples = samples.astype('float32')
 samples /= 255
 
-
+'''
 #4 categories
 urban = ['air_conditioner', 'car_horn', 'children_playing', 'dog_bark', 'other',
        'drilling', 'engine_idling', 'jackhammer', 'siren', 'street_music']
 for i in range(len(labels)):
     if labels[i] in urban:
         labels[i] = 'other'
+nclass = 4
+'''
 
 lb = LabelBinarizer()
 labels = lb.fit_transform(labels)
@@ -97,7 +100,7 @@ def auc(y_true, y_pred):
     return auc
 
 # Initialising the CNN
-n_labels = 4
+n_labels = nclass
 input_size = input_shape
 model = Sequential()
 chanDim = -1
