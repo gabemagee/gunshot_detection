@@ -18,13 +18,24 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from gsmmodem.modem import GsmModem
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
+# ## Package Configurations
+
+# In[ ]:
+
+logger = logging.getLogger('debugger')
+logger.setLevel(logging.DEBUG)
+ch = logging.FileHandler('spam.log')
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 # ## Variable Initializations
 
 # In[ ]:
 
-audio_format = pyaudio.paFloat32
+audio_format = pyaudio.paInt16
 audio_rate = 44100
 audio_channels = 1
 audio_device_index = 1
@@ -169,7 +180,8 @@ def analyze_microphone_data(microphone_data, audio_rate, model, modem, phone_num
         
     # Passes a given audio sample into the model for prediction
     probabilities = model.predict(reformed_microphone_data)
-    logging.info("Probabilities derived by the model:%s", probabilities)
+    logging_message = "Probabilities derived by the model: " + str(probabilities)
+    logging.debug(logging_message)
     if (probabilities[0][1] >= 0.9):
         sms_alert_process = Process(target = send_sms_alert, args = (probabilities))
         sms_alert_process.start()
@@ -182,12 +194,12 @@ def send_sms_alert(probabilities):
             message = " (Testing) ALERT: A Gunshot Has Been Detected (Testing)"
             for number in phone_numbers_to_message:
                 modem.sendSms(number, message)
-            logging.info(" *** Sent out an SMS alert to all designated recipients *** ")
+            logging.debug(" *** Sent out an SMS alert to all designated recipients *** ")
         except:
-            logging.info("ERROR: Unable to successfully send an SMS alert to the designated recipients.")
+            logging.debug("ERROR: Unable to successfully send an SMS alert to the designated recipients.")
             pass
         finally:
-            logging.info(" * Finished evaluating an audio sample with the model * ")
+            logging.debug(" ** Finished evaluating an audio sample with the model ** ")
 
 
 # ## Capturing Microphone Audio
@@ -212,8 +224,10 @@ while(True):
         data = stream.read(audio_frames_per_buffer, exception_on_overflow = False)
         np_array_data.append(np.frombuffer(data, dtype=np.float32))
     microphone_data = np.concatenate(np_array_data)
-    logging.info("Cumulative length of a given two-second audio sample:%s", len(microphone_data))
-    logging.info("The maximum frequency value for a given two-second audio sample:%s", max(microphone_data))
+    logging_message = "Cumulative length of a given two-second audio sample: " + str(len(microphone_data))
+    logging.info(logging_message)
+    logging_message = "The maximum frequency value for a given two-second audio sample: " + str(max(microphone_data))
+    logging.info(logging_message)
     
     # If a sample meets a certain threshold, a new concurrent analysis process is created
     if max(microphone_data) >= 0.001:
