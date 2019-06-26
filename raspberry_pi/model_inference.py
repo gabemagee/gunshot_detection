@@ -6,10 +6,7 @@
 # In[ ]:
 
 import pyaudio
-import wave
 import librosa
-import matplotlib.pyplot as plt
-import IPython.display as ipd
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
@@ -18,8 +15,6 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from gsmmodem.modem import GsmModem
-#get_ipython().magic('matplotlib inline')
-
 
 # ## Variable Initializations
 
@@ -34,7 +29,7 @@ audio_sample_duration = 2
 input_shape = (audio_rate, 1)
 modem_port = '/dev/ttyUSB0'
 modem_baudrate = 115200
-modem_sim_pin = None # SIM card PIN (if any)
+modem_sim_pin = None  # SIM card PIN (if any)
 
 
 # ## Establishing a Connection to the SMS Modem
@@ -175,11 +170,12 @@ while(True):
     np_array_data = []
     
     # Loops through the stream and appends audio chunks to the frame array
-    for i in range(0, int(audio_rate / audio_frames_per_buffer) * audio_sample_duration):
-        data = stream.read(audio_frames_per_buffer, exception_on_overflow = True)
+    for i in range(0, int(audio_rate / audio_frames_per_buffer * audio_sample_duration)):
+        data = stream.read(audio_frames_per_buffer, exception_on_overflow = False)
         np_array_data.append(np.frombuffer(data, dtype=np.float32))
     microphone_data = np.concatenate(np_array_data)
-    print("The maximum frequency value from a given audio sample:", max(microphone_data))
+    print("Cumulative length of a given two-second audio sample:", len(microphone_data))
+    print("The maximum frequency value for a given two-second audio sample:", max(microphone_data))
     
     # Allows discarding of quiet audio samples
     if max(microphone_data) >= 0.001:
@@ -195,42 +191,16 @@ while(True):
         print("Probabilities derived by the model:", probabilities)
         
         # If the model detects a gunshot, an SMS alert will be sent to local authorities
-        try:
-            if (probabilities[0][1] >= 0.9):
+        if (probabilities[0][1] >= 0.1):
+            try:
+                modem.waitForNetworkCoverage(timeout=86400)
                 message = " (Testing) ALERT: A Gunshot Has Been Detected (Testing)"
                 phone_numbers_to_message = ["8163449956", "9176202840", "7857642331"]
                 for number in phone_numbers_to_message:
                     modem.sendSms(number, message)
-        finally:
-            print("Finished evaluating an audio sample")
-
-# ## Viewing the Audio Sample Data
-
-# In[ ]:
-
-# def show(data):
-#     librosa.display.waveplot(data, sr=22050)
-
-
-# ## Saving Recorded Audio Sample (Optional)
-
-# In[ ]:
-
-# np.save("./recordings/reformed_microphone_data_pi.npy", reformed_microphone_data)
-
-
-# ## Loading in Training Samples
-
-# In[ ]:
-
-# training_sample, training_sample_rate = librosa.load("./training_samples/9229.wav")
-# number_of_missing_hertz = 44100 - len(training_sample)
-# training_sample = np.array(training_sample.tolist() + [0 for i in range(number_of_missing_hertz)])
-
-
-# ## Converting Audio Samples to Spectrograms
-
-# In[ ]:
-
-# reformed_microphone_data = np.array(librosa.feature.melspectrogram(y=reformed_microphone_data.reshape(44100), sr=22050))
-# training_sample = np.array(librosa.feature.melspectrogram(y=training_sample, sr=22050))
+                print(" *** Sent out an SMS alert to all designated recipients *** ")
+            except:
+                print("ERROR: Unable to successfully send an SMS alert to the designated recipients.")
+                pass
+            finally:
+                print(" *** Finished evaluating an audio sample with the model *** ")
