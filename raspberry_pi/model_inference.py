@@ -8,18 +8,18 @@
 import pyaudio
 import librosa
 import logging
-import sys
+import time
+import multiprocessing
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
-from multiprocessing import Process
 from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from gsmmodem.modem import GsmModem
 
-# ## Package Configurations
+# ## Configuring the Logger
 
 # In[ ]:
 
@@ -51,7 +51,7 @@ phone_numbers_to_message = ["8163449956", "9176202840", "7857642331"]
 
 # In[ ]:
 
-logging.info("Initializing connection to modem...")
+logger.debug("Initializing connection to modem...")
 modem = GsmModem(modem_port, modem_baudrate)
 modem.smsTextMode = False
 modem.connect(modem_sim_pin)
@@ -72,9 +72,9 @@ def auc(y_true, y_pred):
 # In[ ]:
 
 #input_shape = (128, 87, 1)
+#input_tensor = Input(shape=input_shape)
 learning_rate = 0.001
 optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
-#input_tensor = Input(shape=input_shape)
 #filter_size = (3,3)
 #maxpool_size = (3,3)
 #activation = "relu"
@@ -171,6 +171,9 @@ model.load_weights("./models/gunshot_sound_model.h5")
 
 # In[ ]:
 
+# Multiprocessing Inference: Currently, there is one analysis process running for the duration of the program
+# The main process adds the microphone data to a queue which the analysis process retrieves from the queue and analyzes
+
 def analyze_microphone_data(microphone_data, audio_rate, model, modem, phone_numbers_to_message):
     # Performs post-processing on live audio samples
     reformed_microphone_data = librosa.resample(y=microphone_data, orig_sr=audio_rate, target_sr=22050)
@@ -180,8 +183,8 @@ def analyze_microphone_data(microphone_data, audio_rate, model, modem, phone_num
         
     # Passes a given audio sample into the model for prediction
     probabilities = model.predict(reformed_microphone_data)
-    logging_message = "Probabilities derived by the model: " + str(probabilities)
-    logging.debug(logging_message)
+    logger_message = "Probabilities derived by the model: " + str(probabilities)
+    logger.debug(logger_message)
     if (probabilities[0][1] >= 0.9):
         sms_alert_process = Process(target = send_sms_alert, args = (probabilities))
         sms_alert_process.start()
@@ -194,12 +197,12 @@ def send_sms_alert(probabilities):
             message = " (Testing) ALERT: A Gunshot Has Been Detected (Testing)"
             for number in phone_numbers_to_message:
                 modem.sendSms(number, message)
-            logging.debug(" *** Sent out an SMS alert to all designated recipients *** ")
+            logger.debug(" *** Sent out an SMS alert to all designated recipients *** ")
         except:
-            logging.debug("ERROR: Unable to successfully send an SMS alert to the designated recipients.")
+            logger.debug("ERROR: Unable to successfully send an SMS alert to the designated recipients.")
             pass
         finally:
-            logging.debug(" ** Finished evaluating an audio sample with the model ** ")
+            logger.debug(" ** Finished evaluating an audio sample with the model ** ")
 
 
 # ## Capturing Microphone Audio
@@ -215,7 +218,7 @@ stream = pa.open(format = audio_format,
                  frames_per_buffer = audio_frames_per_buffer,
                  input = True)
 
-logging.info("--- Recording Audio ---")
+logger.debug("--- Recording Audio ---")
 while(True):
     np_array_data = []
     
@@ -224,15 +227,12 @@ while(True):
         data = stream.read(audio_frames_per_buffer, exception_on_overflow = False)
         np_array_data.append(np.frombuffer(data, dtype=np.float32))
     microphone_data = np.concatenate(np_array_data)
-    logging_message = "Cumulative length of a given two-second audio sample: " + str(len(microphone_data))
-    logging.info(logging_message)
-    logging_message = "The maximum frequency value for a given two-second audio sample: " + str(max(microphone_data))
-    logging.info(logging_message)
+    logger_message = "Cumulative length of a given two-second audio sample: " + str(len(microphone_data))
+    logger.debug(logger_message)
+    logger_message = "The maximum frequency value for a given two-second audio sample: " + str(max(microphone_data))
+    logger.debug(logger_message)
     
     # If a sample meets a certain threshold, a new concurrent analysis process is created
     if max(microphone_data) >= 0.001:
         analysis_process = Process(target = analyze_microphone_data, args = (microphone_data, audio_rate, model, modem, phone_numbers_to_message))
         analysis_process.start()
-        
-    # Closes all finished processes    
-    multiprocessing.active_children()
