@@ -28,7 +28,7 @@ from gsmmodem.modem import GsmModem
 
 logger = logging.getLogger('debugger')
 logger.setLevel(logging.DEBUG)
-ch = logging.FileHandler('spam.log')
+ch = logging.FileHandler('output.log')
 ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
@@ -106,7 +106,7 @@ def analyze_microphone_data(audio_rate):
     model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=metrics)
     
     # Loading 1D Time-Series Model Weights
-    model.load_weights("./models/gunshot_sound_model_normalized.h5")
+    model.load_weights("./models/gunshot_sound_model.h5")
     
     # 2D Spectrogram Model Parameters
 #     input_shape = (128, 87, 1)
@@ -150,12 +150,15 @@ def analyze_microphone_data(audio_rate):
 
     # Loading 2D Spectrogram Model Weights
 #     spec_model.load_weights("./models/gunshot_sound_model_spectrograph_model.h5")
+
+    # A counter for creating unique WAV files
+    gunshot_sample_counter = 1
     
     # The audio analysis process will run indefinitely
     while True:
         
         # Waits to continue until something is in the queue
-        microphone_data = analysis_queue.get()
+        microphone_data = audio_analysis_queue.get()
         
         # Performs post-processing on live audio samples
         reformed_microphone_data = librosa.resample(y=microphone_data, orig_sr=audio_rate, target_sr=22050)
@@ -168,7 +171,9 @@ def analyze_microphone_data(audio_rate):
         logger_message = "Probabilities derived by the model: " + str(probabilities)
         logger.debug(logger_message)
         if (probabilities[0][1] >= 0.9):
-            sms_alert_queue.put(1)
+            sms_alert_queue.put("Gunshot Detected")
+            librosa.output.write_wav("Gunshot Sample #" + str(gunshot_sample_counter) + ".wav", reformed_microphone_data.reshape(44100), 22050)
+            gunshot_sample_counter += 1
 
 
 def send_sms_alert(phone_numbers_to_message):
@@ -187,7 +192,7 @@ def send_sms_alert(phone_numbers_to_message):
     # The SMS alert process will run indefinitely
     while True:
         sms_alert_status = sms_alert_queue.get()
-        if sms_alert_status == 1:
+        if sms_alert_status == "Gunshot Detected":
             try:
                 # At this point in execution, an attempt to send an SMS alert to local authorities will be made
                 modem.waitForNetworkCoverage(timeout=86400)
@@ -225,11 +230,10 @@ stream = pa.open(format = audio_format,
 logger.debug("--- Listening to Audio Stream ---")
 
 audio_analysis_queue = multiprocessing.Queue()
-audio_analysis_process = multiprocessing.Process(target = analyze_microphone_data, args = (audio_rate))
-audio_analysis_process.start()
-
 sms_alert_queue = multiprocessing.Queue()
-sms_alert_process = multiprocessing.Process(target = send_sms_alert, args = (phone_numbers_to_message))
+audio_analysis_process = multiprocessing.Process(target = analyze_microphone_data, args = (audio_rate,))
+sms_alert_process = multiprocessing.Process(target = send_sms_alert, args = (phone_numbers_to_message,))
+audio_analysis_process.start()
 sms_alert_process.start()
 
 while True:
@@ -238,17 +242,15 @@ while True:
     # Loops through the stream and appends audio chunks to the frame array
     for i in range(0, int(audio_rate / audio_frames_per_buffer * audio_sample_duration)):
         sound_buffer = stream.read(audio_frames_per_buffer, exception_on_overflow = False)
-        sound_data.append(np.frombuffer(sound_buffer, dtype=np.float32))
+        sound_data.append(np.frombuffer(sound_buffer, dtype=np.int16))
     microphone_data = np.concatenate(sound_data)
-    logger_message = "Cumulative length of a given two-second audio sample: " + str(len(microphone_data))
-    logger.debug(logger_message)
     logger_message = "The maximum frequency value for a given two-second audio sample: " + str(max(microphone_data))
     logger.debug(logger_message)
     
     # If a sample meets a certain threshold, a new batch of microphone data is placed on the queue
-    if max(microphone_data) >= 0.001:
+    if max(microphone_data) >= 500:
         audio_analysis_queue.put(microphone_data)
         
     # Closes all finished processes   
-    children = multiprocessing.active_children()
+    multiprocessing.active_children()
 
