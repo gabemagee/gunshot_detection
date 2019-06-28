@@ -25,6 +25,8 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 #%matplotlib inline
 #Initialization of Variables
 print("hi")
+
+
 samples=[]
 labels = []
 gunshot_frequency_threshold = 0.25
@@ -38,9 +40,13 @@ sound_data_dir = data_dir + "Samples/"
 #Reading in the CSV file of descriptors for many kinds of sounds
 sound_types = pd.read_csv(data_dir + "labels.csv")
 #Reading in all of the sound data WAV files
+
+
 print("...Parsing sound data...")
 sound_file_id = 0
 sound_file_names = []
+
+"""
 
 for file in os.listdir(sound_data_dir):
     if file.endswith(".wav"):
@@ -82,9 +88,14 @@ np.save(base_dir + "gunshot_sound_labels.npy", labels)
 
 exit()
 
+"""
+
 samples = np.load(base_dir + "gunshot_sound_samples.npy")
 labels = np.load(base_dir + "gunshot_sound_labels.npy")
 #Data augmentation functions
+
+print("loaded")
+
 def time_shift(wav):
     start_ = int(np.random.uniform(-wav.shape[0] * 0.5, wav.shape[0] * 0.5))
     if start_ >= 0:
@@ -122,7 +133,7 @@ def add_background(wav, file, data_directory, label_to_avoid):
     sound_directory = data_directory + "Samples/"
     sound_types = pd.read_csv(label_csv)
     bg_files = os.listdir(sound_directory)
-    bg_files.remove(file)
+    #bg_files.remove(file)
     chosen_bg_file = bg_files[np.random.randint(len(bg_files))]
     jndex = int(chosen_bg_file.split('.')[0])
     while sound_types.loc[sound_types["ID"] == jndex, "Class"].values[0] == label_to_avoid:
@@ -146,7 +157,7 @@ augmented_labels = np.zeros((labels.shape[0] * (number_of_augmentations + 1),))
 j = 0
 
 for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
-    file = sound_file_names[j]
+    file = ""
 
     augmented_samples[i,:] = samples[j,:]
     augmented_samples[i + 1,:] = time_shift(samples[j,:])
