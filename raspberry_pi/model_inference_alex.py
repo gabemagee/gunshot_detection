@@ -18,7 +18,7 @@ from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from gsmmodem.modem import GsmModem
+#from gsmmodem.modem import GsmModem
 
 
 # ## Configuring the Logger
@@ -43,8 +43,8 @@ logger.addHandler(ch)
 audio_format = pyaudio.paInt16
 audio_rate = 44100
 audio_channels = 1
-audio_device_index = 1
-audio_frames_per_buffer = 4410
+audio_device_index = 6  # For personal laptop
+audio_frames_per_buffer = 22050  # New experimental value
 audio_sample_duration = 2
 phone_numbers_to_message = ["8163449956", "9176202840", "7857642331"]
 
@@ -151,8 +151,8 @@ def analyze_microphone_data(audio_rate):
     # Loading 2D Spectrogram Model Weights
 #     spec_model.load_weights("./models/gunshot_sound_model_spectrograph_model.h5")
 
-    # A counter for creating unique WAV files
-    gunshot_sample_counter = 1
+    # An iterator variable for counting the number of gunshot sounds detected
+    gunshot_sound_counter = 1
     
     # The audio analysis process will run indefinitely
     while True:
@@ -171,12 +171,16 @@ def analyze_microphone_data(audio_rate):
         logger_message = "Probabilities derived by the model: " + str(probabilities)
         logger.debug(logger_message)
         if (probabilities[0][1] >= 0.9):
-            sms_alert_queue.put("Gunshot Detected")
-            librosa.output.write_wav("Gunshot Sample #" + str(gunshot_sample_counter) + ".wav", reformed_microphone_data.reshape(44100), 22050)
-            gunshot_sample_counter += 1
+            sms_alert_queue.put(1)
+            librosa.output.write_wav("Gunshot Sound Sample #" + str(gunshot_sound_counter) + ".wav", microphone_data, 22050)
+            gunshot_sound_counter += 1
 
 
 def send_sms_alert(phone_numbers_to_message):
+    
+    return 0
+    
+    """
     
     # Configuring the Modem Connection
     modem_port = '/dev/ttyUSB0'
@@ -192,7 +196,7 @@ def send_sms_alert(phone_numbers_to_message):
     # The SMS alert process will run indefinitely
     while True:
         sms_alert_status = sms_alert_queue.get()
-        if sms_alert_status == "Gunshot Detected":
+        if sms_alert_status == 1:
             try:
                 # At this point in execution, an attempt to send an SMS alert to local authorities will be made
                 modem.waitForNetworkCoverage(timeout=86400)
@@ -205,6 +209,9 @@ def send_sms_alert(phone_numbers_to_message):
                 pass
             finally:
                 logger.debug(" ** Finished evaluating an audio sample with the model ** ")
+    
+    """
+    
 
 
 # ## Opening the Microphone Audio Stream
@@ -229,10 +236,10 @@ stream = pa.open(format = audio_format,
 
 logger.debug("--- Listening to Audio Stream ---")
 
-audio_analysis_queue = multiprocessing.Queue()
-sms_alert_queue = multiprocessing.Queue()
 audio_analysis_process = multiprocessing.Process(target = analyze_microphone_data, args = (audio_rate,))
 sms_alert_process = multiprocessing.Process(target = send_sms_alert, args = (phone_numbers_to_message,))
+audio_analysis_queue = multiprocessing.Queue()
+sms_alert_queue = multiprocessing.Queue()
 audio_analysis_process.start()
 sms_alert_process.start()
 
