@@ -14,12 +14,13 @@ import scipy.signal
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import cv2
 from threading import Thread
 from array import array
 from datetime import timedelta as td
 from queue import Queue
 from sklearn.preprocessing import LabelBinarizer
-
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 # from gsmmodem.modem import GsmModem
 
 
@@ -61,9 +62,9 @@ audio_analysis_queue = Queue()
 sms_alert_queue = Queue()
 
 # Only one of these state variables may be set to true at a given point in time
-USING_1D_TIME_SERIES_MODEL = True
-USING_1D_SPECTROGRAM_MODEL = False
-USING_2D_SPECTROGRAM_MODEL = False
+USING_1D_TIME_SERIES_MODEL = False
+USING_2D_RAW_SPECTROGRAM_MODEL = False
+USING_2D_IMAGE_SPECTROGRAM_MODEL = True
 
 # ## Loading in Augmented Labels
 
@@ -261,37 +262,28 @@ def remove_noise(audio_clip,
 
 
 def convert_to_spectrogram(data, sample_rate):
-    return np.array(librosa.feature.melspectrogram(y = data, sr = sample_rate))
+    return np.array(librosa.feature.melspectrogram(y = data, sr = sample_rate), dtype = "float32")
 
-def convert_figure_to_image(figure):
-    """
-    @brief: Converts a Matplotlib figure to a 4D numpy array with RGBA channels and return it
-    @param figure: A matplotlib figure
-    @return: A NumPy 3D array of RGBA values
-    """
-    
-    # Draws the renderer
-    figure.canvas.draw()
-
-    # Gets the RGBA buffer from the figure
-    width, height = figure.canvas.get_width_height()
-    data = np.fromstring(figure.canvas.tostring_argb(), dtype = np.uint8)
-    data.shape = (width, height, 4)
-
-    # Calling figure.canvas.tostring_argb will give a pixmap in ARGB mode;
-    # We can then roll the ALPHA channel to have it in RGBA mode
-    data = np.roll(data, 3, axis = 2)
-    return data
 
 def convert_spectrogram_to_image(spectrogram):
     plt.interactive(False)
-    figure = plt.figure(figsize = [0.72, 0.72])
+    
+    figure = plt.figure(figsize = [0.72, 0.72], dpi = 400)
+    plt.tight_layout(pad = 0)
     ax = figure.add_subplot(111)
     ax.axes.get_xaxis().set_visible(False)
     ax.axes.get_yaxis().set_visible(False)
     ax.set_frame_on(False)
+    
     librosa.display.specshow(librosa.power_to_db(spectrogram, ref = np.max))
-    image = convert_figure_to_image(figure = figure)
+
+    canvas = FigureCanvas(figure)
+    canvas.draw()
+    s, (width, height) = canvas.print_to_buffer()
+    
+    image = np.fromstring(figure.canvas.tostring_argb(), dtype = "uint8")
+    image = image.reshape((width, height, 3))
+    image = cv2.resize(image, (192, 192))
 
     # Cleaning up the matplotlib instance
     plt.close()    
@@ -310,7 +302,6 @@ def convert_spectrogram_to_image(spectrogram):
 
 # Saves a two-second gunshot sample as a WAV file
 def create_gunshot_wav_file(microphone_data, index, timestamp):
-    microphone_data = microphone_data.reshape(44100)
     librosa.output.write_wav("../recordings/Gunshot Sound Sample #"
                              + str(index) + " ("
                              + str(timestamp) + ").wav", microphone_data, 22050)
@@ -322,7 +313,7 @@ def create_gunshot_wav_file(microphone_data, index, timestamp):
 
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="../models/gunshot_sound_model.tflite")
+interpreter = tf.lite.Interpreter(model_path="../models/gunshot_2d_spectrogram_model.tflite")
 interpreter.allocate_tensors()
 
 # Gets input and output tensors as well as the input shape
@@ -422,11 +413,10 @@ stream = pa.open(format=AUDIO_FORMAT,
 stream.start_stream()
 logger.debug("--- Listening to Audio Stream ---")
 
-### Main (Audio Analysis) Thread
-
-
 # In[ ]:
 
+
+### Main (Audio Analysis) Thread
 
 # The main (audio analysis) thread will run indefinitely
 while True:
@@ -459,17 +449,17 @@ while True:
         
         # Passes an audio sample of an appropriate format into the model for inference
         if USING_1D_TIME_SERIES_MODEL:
-            modified_microphone_data = modified_microphone_data
-        elif USING_1D_SPECTROGRAM_MODEL:
-            modified_microphone_data = convert_to_spectrogram(data = modified_microphone_data, sample_rate = 22050)
-        elif USING_2D_SPECTROGRAM_MODEL:
-            modified_microphone_data = convert_to_spectrogram(data = modified_microphone_data, sample_rate = 22050)
-            modified_microphone_data = convert_spectrogram_to_image(spectrogram = modified_microphone_data)
+            processed_data = modified_microphone_data
+        elif USING_2D_RAW_SPECTROGRAM_MODEL:
+            processed_data = convert_to_spectrogram(data = modified_microphone_data, sample_rate = 22050)
+        elif USING_2D_IMAGE_SPECTROGRAM_MODEL:
+            processed_data = convert_to_spectrogram(data = modified_microphone_data, sample_rate = 22050)
+            processed_data = convert_spectrogram_to_image(spectrogram = processed_data)
             
         # Reshapes the modified microphone data accordingly
-        modified_microphone_data = modified_microphone_data.reshape(input_shape)
+        processed_data = processed_data.reshape(input_shape)
         
-        interpreter.set_tensor(input_details[0]["index"], modified_microphone_data)
+        interpreter.set_tensor(input_details[0]["index"], processed_data)
         interpreter.invoke()
         probabilities = interpreter.get_tensor(output_details[0]["index"])
         logger.debug("The model-predicted probability values: " + str(probabilities[0]))
@@ -499,7 +489,7 @@ while True:
 
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="../models/gunshot_sound_model.tflite")
+interpreter = tf.lite.Interpreter(model_path="../models/gunshot_2d__model.tflite")
 interpreter.allocate_tensors()
 
 # Gets input and output tensors as well as the input shape
