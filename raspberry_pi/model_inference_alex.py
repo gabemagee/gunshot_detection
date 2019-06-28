@@ -51,8 +51,8 @@ audio_channels = 1
 audio_device_index = 1
 audio_frames_per_buffer = 4410
 audio_sample_duration = 2
-audio_volume_threshold = 3000
-inference_model_threshold = 0.99
+audio_volume_threshold = 1000
+inference_model_confidence_threshold = 0.99
 phone_numbers_to_message = ["8163449956", "9176202840", "7857642331"]
 
 
@@ -96,7 +96,7 @@ def analyze_microphone_data(audio_rate):
     number_of_classes = 2
     batch_size = 32
     optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
-    input_shape = (audio_rate, 1)
+    input_shape = (44100, 1)
     input_tensor = Input(shape=input_shape)
     metrics = [auc, "accuracy"]
 
@@ -186,21 +186,20 @@ def analyze_microphone_data(audio_rate):
         # Performs post-processing on live audio samples
         modified_microphone_data = librosa.resample(y = microphone_data, orig_sr = audio_rate, target_sr = 22050)
         modified_microphone_data = normalize(modified_microphone_data)
-#         modified_microphone_data = modified_microphone_data * 16
-        modified_microphone_data = modified_microphone_data[:audio_rate]
-        modified_microphone_data = modified_microphone_data.reshape(-1, audio_rate, 1)
+        modified_microphone_data = modified_microphone_data[:44100]
+        modified_microphone_data = modified_microphone_data.reshape(-1, 44100, 1)
 
         # Passes a given audio sample into the model for prediction
         probabilities = model.predict(modified_microphone_data)
         logger_message = "Probabilities derived by the model: " + str(probabilities)
         logger.debug(logger_message)
-        if (probabilities[0][1] >= inference_model_threshold):
+        if (probabilities[0][1] >= inference_model_confidence_threshold):
             # Sends out an SMS alert
             sms_alert_queue.put("Gunshot Detected")
             
             # Saves the original microphone data sample as a WAV file
             microphone_data = pack('<' + ('h' * len(microphone_data)), *microphone_data)
-            wave_file = wave.open("Gunshot Sound Sample #" + str(gunshot_sound_counter) + ".wav", "wb")
+            wave_file = wave.open("./recordings/Gunshot Sound Sample #" + str(gunshot_sound_counter) + ".wav", "wb")
             wave_file.setnchannels(audio_channels)
             wave_file.setsampwidth(2)
             wave_file.setframerate(audio_rate)
@@ -210,10 +209,10 @@ def analyze_microphone_data(audio_rate):
             # Saves the modified microphone data sample as a WAV file
             modified_microphone_data = modified_microphone_data.reshape(44100)
             modified_microphone_data = pack('<' + ('h' * len(modified_microphone_data)), *modified_microphone_data)
-            wave_file = wave.open("Modified Gunshot Sound Sample #" + str(gunshot_sound_counter) + ".wav", "wb")
+            wave_file = wave.open("./recordings/Modified Gunshot Sound Sample #" + str(gunshot_sound_counter) + ".wav", "wb")
             wave_file.setnchannels(audio_channels)
             wave_file.setsampwidth(2)
-            wave_file.setframerate(audio_rate / 2)
+            wave_file.setframerate(22050)
             wave_file.writeframes(modified_microphone_data)
             wave_file.close()
             
