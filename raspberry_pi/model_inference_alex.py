@@ -11,6 +11,8 @@ import librosa
 import logging
 import time
 import multiprocessing
+import audioop
+import soundfile as sf
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
@@ -18,7 +20,7 @@ from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-#from gsmmodem.modem import GsmModem
+from gsmmodem.modem import GsmModem
 
 
 # ## Configuring the Logger
@@ -43,8 +45,8 @@ logger.addHandler(ch)
 audio_format = pyaudio.paInt16
 audio_rate = 44100
 audio_channels = 1
-audio_device_index = 6  # For personal laptop
-audio_frames_per_buffer = 22050  # New experimental value
+audio_device_index = 1  # For personal laptop
+audio_frames_per_buffer = 4410  # New experimental value
 audio_sample_duration = 2
 phone_numbers_to_message = ["8163449956", "9176202840", "7857642331"]
 
@@ -161,8 +163,9 @@ def analyze_microphone_data(audio_rate):
         microphone_data = audio_analysis_queue.get()
         
         # Performs post-processing on live audio samples
-        reformed_microphone_data = librosa.resample(y=microphone_data, orig_sr=audio_rate, target_sr=22050)
-        reformed_microphone_data = librosa.util.normalize(reformed_microphone_data)
+        reformed_microphone_data = librosa.resample(y = microphone_data, orig_sr = audio_rate, target_sr = 22050)
+#         reformed_microphone_data = librosa.util.normalize(reformed_microphone_data)
+        reformed_microphone_data = reformed_microphone_data * 16
         reformed_microphone_data = reformed_microphone_data[:audio_rate]
         reformed_microphone_data = reformed_microphone_data.reshape(-1, audio_rate, 1)
 
@@ -170,17 +173,16 @@ def analyze_microphone_data(audio_rate):
         probabilities = model.predict(reformed_microphone_data)
         logger_message = "Probabilities derived by the model: " + str(probabilities)
         logger.debug(logger_message)
-        if (probabilities[0][1] >= 0.9):
+        if (probabilities[0][1] >= 0.8):
             sms_alert_queue.put(1)
-            librosa.output.write_wav("Gunshot Sound Sample #" + str(gunshot_sound_counter) + ".wav", microphone_data, 22050)
+            with sf.SoundFile("Gunshot Sound Sample #" + str(gunshot_sound_counter) + ".wav", mode = 'x', samplerate = 44100, channels = 1) as file:
+                file.write(microphone_data)
+            with sf.SoundFile("Gunshot Reformed Sound Sample #" + str(gunshot_sound_counter) + ".wav", mode = 'x', samplerate = 22050, channels = 1) as file:
+                file.write(reformed_microphone_data.reshape(44100))
             gunshot_sound_counter += 1
 
 
 def send_sms_alert(phone_numbers_to_message):
-    
-    return 0
-    
-    """
     
     # Configuring the Modem Connection
     modem_port = '/dev/ttyUSB0'
@@ -209,9 +211,6 @@ def send_sms_alert(phone_numbers_to_message):
                 pass
             finally:
                 logger.debug(" ** Finished evaluating an audio sample with the model ** ")
-    
-    """
-    
 
 
 # ## Opening the Microphone Audio Stream
@@ -255,9 +254,15 @@ while True:
     logger.debug(logger_message)
     
     # If a sample meets a certain threshold, a new batch of microphone data is placed on the queue
-    if max(microphone_data) >= 500:
+    if max(microphone_data) >= 100:
         audio_analysis_queue.put(microphone_data)
         
     # Closes all finished processes   
     multiprocessing.active_children()
+
+
+# In[ ]:
+
+
+
 
