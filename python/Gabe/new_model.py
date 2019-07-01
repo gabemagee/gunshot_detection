@@ -133,7 +133,7 @@ def add_background(wav, file, data_directory, label_to_avoid):
     sound_directory = data_directory + "Samples/"
     sound_types = pd.read_csv(label_csv)
     bg_files = os.listdir(sound_directory)
-    bg_files.remove(file)
+    #bg_files.remove(file)
     chosen_bg_file = bg_files[np.random.randint(len(bg_files))]
     jndex = int(chosen_bg_file.split('.')[0])
     while sound_types.loc[sound_types["ID"] == jndex, "Class"].values[0] == label_to_avoid:
@@ -157,7 +157,7 @@ augmented_labels = np.zeros((labels.shape[0] * (number_of_augmentations + 1),))
 j = 0
 
 for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
-    file = sound_file_names[j]
+    file = ""
 
     augmented_samples[i,:] = samples[j,:]
     augmented_samples[i + 1,:] = time_shift(samples[j,:])
