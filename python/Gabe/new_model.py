@@ -46,8 +46,6 @@ print("...Parsing sound data...")
 sound_file_id = 0
 sound_file_names = []
 
-"""
-
 for file in os.listdir(sound_data_dir):
     if file.endswith(".wav"):
         try:
@@ -86,9 +84,6 @@ np.save(base_dir + "gunshot_sound_samples.npy", samples)
 np.save(base_dir + "gunshot_sound_labels.npy", labels)
 #Loading sample file and label file as numpy arrays
 
-exit()
-
-"""
 
 samples = np.load(base_dir + "gunshot_sound_samples.npy")
 labels = np.load(base_dir + "gunshot_sound_labels.npy")
@@ -157,7 +152,7 @@ augmented_labels = np.zeros((labels.shape[0] * (number_of_augmentations + 1),))
 j = 0
 
 for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
-    file = ""
+    file = sound_file_names[j]
 
     augmented_samples[i,:] = samples[j,:]
     augmented_samples[i + 1,:] = time_shift(samples[j,:])
@@ -186,8 +181,6 @@ print("The number of labels available for training is currently " + str(len(labe
 np.save(base_dir + "gunshot_augmented_sound_samples.npy", samples)
 np.save(base_dir + "gunshot_augmented_sound_labels.npy", labels)
 #Loading augmented sample file and label file as numpy arrays
-
-exit()
 
 samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
 labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
