@@ -24,6 +24,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 #Configuration of Imported Libraries
 #%matplotlib inline
 #Initialization of Variables
+print("hi")
 samples=[]
 labels = []
 gunshot_frequency_threshold = 0.25
@@ -40,7 +41,7 @@ sound_types = pd.read_csv(data_dir + "labels.csv")
 print("...Parsing sound data...")
 sound_file_id = 0
 sound_file_names = []
-​
+
 for file in os.listdir(sound_data_dir):
     if file.endswith(".wav"):
         try:
@@ -179,7 +180,7 @@ np.save(base_dir + "gunshot_augmented_sound_samples.npy", samples)
 np.save(base_dir + "gunshot_augmented_sound_labels.npy", labels)
 #Loading augmented sample file and label file as numpy arrays
 
-exit()
+exit()n
 
 samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
 labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
