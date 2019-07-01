@@ -12,15 +12,18 @@ import logging
 import time
 import multiprocessing
 import audioop
-import soundfile as sf
+import wave
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
+from sys import byteorder
+from array import array
+from struct import pack
 from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from gsmmodem.modem import GsmModem
+#from gsmmodem.modem import GsmModem
 
 
 # ## Configuring the Logger
@@ -45,10 +48,28 @@ logger.addHandler(ch)
 audio_format = pyaudio.paInt16
 audio_rate = 44100
 audio_channels = 1
-audio_device_index = 1  # For personal laptop
-audio_frames_per_buffer = 4410  # New experimental value
+audio_device_index = 1
+audio_frames_per_buffer = 4410
 audio_sample_duration = 2
+audio_volume_threshold = 3000
+inference_model_threshold = 0.99
 phone_numbers_to_message = ["8163449956", "9176202840", "7857642331"]
+
+
+# ## Sound Post-Processing Functions
+
+# In[ ]:
+
+
+def normalize(sound_data):
+    # Averages the volume out
+    sound_normalization_threshold = 16384
+    times = float(sound_normalization_threshold) / max(abs(i) for i in sound_data)
+    
+    r = array('h')
+    for datum in sound_data:
+        r.append(int(datum * times))
+    return np.array(r)
 
 
 # ## Defining Process Functions
@@ -163,26 +184,51 @@ def analyze_microphone_data(audio_rate):
         microphone_data = audio_analysis_queue.get()
         
         # Performs post-processing on live audio samples
-        reformed_microphone_data = librosa.resample(y = microphone_data, orig_sr = audio_rate, target_sr = 22050)
-#         reformed_microphone_data = librosa.util.normalize(reformed_microphone_data)
-        reformed_microphone_data = reformed_microphone_data * 16
-        reformed_microphone_data = reformed_microphone_data[:audio_rate]
-        reformed_microphone_data = reformed_microphone_data.reshape(-1, audio_rate, 1)
+        modified_microphone_data = librosa.resample(y = microphone_data, orig_sr = audio_rate, target_sr = 22050)
+        modified_microphone_data = normalize(modified_microphone_data)
+#         modified_microphone_data = modified_microphone_data * 16
+        modified_microphone_data = modified_microphone_data[:audio_rate]
+        modified_microphone_data = modified_microphone_data.reshape(-1, audio_rate, 1)
 
         # Passes a given audio sample into the model for prediction
-        probabilities = model.predict(reformed_microphone_data)
+        probabilities = model.predict(modified_microphone_data)
         logger_message = "Probabilities derived by the model: " + str(probabilities)
         logger.debug(logger_message)
-        if (probabilities[0][1] >= 0.8):
-            sms_alert_queue.put(1)
-            with sf.SoundFile("Gunshot Sound Sample #" + str(gunshot_sound_counter) + ".wav", mode = 'x', samplerate = 44100, channels = 1) as file:
-                file.write(microphone_data)
-            with sf.SoundFile("Gunshot Reformed Sound Sample #" + str(gunshot_sound_counter) + ".wav", mode = 'x', samplerate = 22050, channels = 1) as file:
-                file.write(reformed_microphone_data.reshape(44100))
+        if (probabilities[0][1] >= inference_model_threshold):
+            # Sends out an SMS alert
+            sms_alert_queue.put("Gunshot Detected")
+            
+            # Saves the original microphone data sample as a WAV file
+            microphone_data = pack('<' + ('h' * len(microphone_data)), *microphone_data)
+            wave_file = wave.open("Gunshot Sound Sample #" + str(gunshot_sound_counter) + ".wav", "wb")
+            wave_file.setnchannels(audio_channels)
+            wave_file.setsampwidth(2)
+            wave_file.setframerate(audio_rate)
+            wave_file.writeframes(microphone_data)
+            wave_file.close()
+            
+            # Saves the modified microphone data sample as a WAV file
+            modified_microphone_data = modified_microphone_data.reshape(44100)
+            modified_microphone_data = pack('<' + ('h' * len(modified_microphone_data)), *modified_microphone_data)
+            wave_file = wave.open("Modified Gunshot Sound Sample #" + str(gunshot_sound_counter) + ".wav", "wb")
+            wave_file.setnchannels(audio_channels)
+            wave_file.setsampwidth(2)
+            wave_file.setframerate(audio_rate / 2)
+            wave_file.writeframes(modified_microphone_data)
+            wave_file.close()
+            
+            # Increments the counter for gunshot sound file names
             gunshot_sound_counter += 1
 
 
 def send_sms_alert(phone_numbers_to_message):
+    
+    while True:
+        sms_alert_status = sms_alert_queue.get()
+        if sms_alert_status == "Gunshot Detected":
+            logger.debug("(Testing) ALERT: A Gunshot Has Been Detected (Testing)")
+    
+    """
     
     # Configuring the Modem Connection
     modem_port = '/dev/ttyUSB0'
@@ -198,11 +244,11 @@ def send_sms_alert(phone_numbers_to_message):
     # The SMS alert process will run indefinitely
     while True:
         sms_alert_status = sms_alert_queue.get()
-        if sms_alert_status == 1:
+        if sms_alert_status == "Gunshot Detected":
             try:
                 # At this point in execution, an attempt to send an SMS alert to local authorities will be made
                 modem.waitForNetworkCoverage(timeout=86400)
-                message = " (Testing) ALERT: A Gunshot Has Been Detected (Testing)"
+                message = "(Testing) ALERT: A Gunshot Has Been Detected (Testing)"
                 for number in phone_numbers_to_message:
                     modem.sendSms(number, message)
                 logger.debug(" *** Sent out an SMS alert to all designated recipients *** ")
@@ -211,6 +257,9 @@ def send_sms_alert(phone_numbers_to_message):
                 pass
             finally:
                 logger.debug(" ** Finished evaluating an audio sample with the model ** ")
+    
+    """
+    
 
 
 # ## Opening the Microphone Audio Stream
@@ -225,7 +274,8 @@ stream = pa.open(format = audio_format,
                  channels = audio_channels,
                  input_device_index = audio_device_index,
                  frames_per_buffer = audio_frames_per_buffer,
-                 input = True)
+                 input = True,
+                 output = True)
 
 
 # ## Capturing Microphone Audio
@@ -243,26 +293,20 @@ audio_analysis_process.start()
 sms_alert_process.start()
 
 while True:
-    sound_data = []
+    sound_data = array('h')
     
     # Loops through the stream and appends audio chunks to the frame array
     for i in range(0, int(audio_rate / audio_frames_per_buffer * audio_sample_duration)):
-        sound_buffer = stream.read(audio_frames_per_buffer, exception_on_overflow = False)
-        sound_data.append(np.frombuffer(sound_buffer, dtype=np.int16))
-    microphone_data = np.concatenate(sound_data)
-    logger_message = "The maximum frequency value for a given two-second audio sample: " + str(max(microphone_data))
+        sound_buffer = array('h', stream.read(audio_frames_per_buffer, exception_on_overflow = False))
+        if byteorder == 'big':
+            sound_buffer.byteswap()
+        sound_data.extend(sound_buffer)
+    logger_message = "The maximum frequency value for a given two-second audio sample: " + str(max(sound_data))
     logger.debug(logger_message)
     
     # If a sample meets a certain threshold, a new batch of microphone data is placed on the queue
-    if max(microphone_data) >= 100:
-        audio_analysis_queue.put(microphone_data)
+    if max(sound_data) >= audio_volume_threshold:
+        audio_analysis_queue.put(np.array(sound_data))
         
     # Closes all finished processes   
     multiprocessing.active_children()
-
-
-# In[ ]:
-
-
-
-
