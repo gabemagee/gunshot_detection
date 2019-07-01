@@ -31,6 +31,7 @@ import soundfile
 import re
 import cv2
 from sklearn.model_selection import KFold
+from sklearn.preprocessing import LabelBinarizer
 
 
 # ### Visualization Libraries
@@ -67,13 +68,12 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 # In[ ]:
 
 
-samples=[]
+samples = []
 labels = []
 gunshot_frequency_threshold = 0.25
 sample_rate = 22050
 sample_rate_per_two_seconds = 44100
-input_shape = (sample_rate_per_two_seconds, 1)
-base_dir = "/home/alexm/Datasets/"
+base_dir = "/home/amorehe/Datasets/"
 data_dir = base_dir + "REU_Samples_and_Labels/"
 sound_data_dir = data_dir + "Samples/"
 
@@ -160,7 +160,7 @@ np.save(base_dir + "gunshot_sound_labels.npy", labels)
 
 
 def time_shift(wav):
-    start_ = int(np.random.uniform(-wav.shape[0] * 0.5, wav.shape[0] * 0.5))
+    start_ = int(np.random.uniform(-7000, 7000))
     if start_ >= 0:
         wav_time_shift = np.r_[wav[start_:], np.random.uniform(-0.001, 0.001, start_)]
     else:
@@ -168,7 +168,7 @@ def time_shift(wav):
     return wav_time_shift
     
 def change_pitch(wav, sample_rate):
-    magnitude = int(np.random.uniform(-10, 10))
+    magnitude = (np.random.uniform(-0.1, 0.1))
     wav_pitch_change = librosa.effects.pitch_shift(wav, sample_rate, magnitude)
     return wav_pitch_change
     
@@ -178,9 +178,9 @@ def speed_change(wav):
     
     if len(wav_speed_tune) < len(wav):
         pad_len = len(wav) - len(wav_speed_tune)
-        wav_speed_tune = np.r_[np.random.uniform(-0.001, 0.001, int(pad_len / 2)),
+        wav_speed_tune = np.r_[np.random.uniform(-0.0001, 0.0001, int(pad_len / 2)),
                                wav_speed_tune,
-                               np.random.uniform(-0.001, 0.001, int(np.ceil(pad_len / 2)))]
+                               np.random.uniform(-0.0001, 0.0001, int(np.ceil(pad_len / 2)))]
     else: 
         cut_len = len(wav_speed_tune) - len(wav)
         wav_speed_tune = wav_speed_tune[int(cut_len / 2) : int(cut_len / 2) + len(wav)]
@@ -216,6 +216,7 @@ def add_background(wav, file, data_directory, label_to_avoid):
 # ## Augmenting data (i.e. time shifting, speed changing, etc.)
 
 # In[ ]:
+
 
 samples = np.array(samples)
 labels = np.array(labels)
@@ -276,11 +277,11 @@ np.save(base_dir + "gunshot_augmented_sound_labels.npy", labels)
 
 
 # i = 0  # You can change the value of 'i' to adjust which sample is being inspected.
-# sample=samples[i]
+# sample = samples[i]
 # print("The number of samples available to the model for training is " + str(len(samples)) + '.')
 # print("The maximum frequency value in sample slice #" + str(i) + " is " + str(np.max(abs(sample))) + '.')
 # print("The label associated with sample slice #" + str(i) + " is " + str(labels[i]) + '.')
-# ipd.Audio(sample, rate=sample_rate)
+# ipd.Audio(sample, rate = sample_rate)
 
 
 # ## Restructuring the label data
@@ -288,7 +289,13 @@ np.save(base_dir + "gunshot_augmented_sound_labels.npy", labels)
 # In[ ]:
 
 
-labels = keras.utils.to_categorical(labels, 2)
+labels = labels.astype("str")
+labels = np.array([("gun_shot" if label == "1" else "other") for label in labels])
+
+label_binarizer = LabelBinarizer()
+labels = label_binarizer.fit_transform(labels)
+
+labels = np.hstack((labels, 1 - labels))
 
 
 # ### Optional debugging of the label data's shape
@@ -304,7 +311,7 @@ print(labels.shape)
 # In[ ]:
 
 
-kf = KFold(n_splits=3, shuffle=True)
+kf = KFold(n_splits = 3, shuffle = True)
 samples = np.array(samples)
 labels = np.array(labels)
 for train_index, test_index in kf.split(samples):
@@ -361,8 +368,15 @@ number_of_epochs = 100
 number_of_classes = 2
 batch_size = 32
 optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
-input_tensor = Input(shape=input_shape)
+input_shape = (sample_rate_per_two_seconds, 1)
+input_tensor = Input(shape = input_shape)
 metrics = [auc, "accuracy"]
+
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+config = tf.ConfigProto()
+config.gpu_options.allow_growth=True
+sess = tf.Session(config=config)
+K.set_session(sess)
 
 
 # ## Model Architecture
@@ -370,32 +384,32 @@ metrics = [auc, "accuracy"]
 # In[ ]:
 
 
-x = layers.Conv1D(16, 9, activation="relu", padding="same")(input_tensor)
-x = layers.Conv1D(16, 9, activation="relu", padding="same")(x)
+x = layers.Conv1D(16, 9, activation = "relu", padding = "same")(input_tensor)
+x = layers.Conv1D(16, 9, activation = "relu", padding = "same")(x)
 x = layers.MaxPool1D(16)(x)
-x = layers.Dropout(rate=drop_out_rate)(x)
+x = layers.Dropout(rate = drop_out_rate)(x)
 
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
+x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
 x = layers.MaxPool1D(4)(x)
-x = layers.Dropout(rate=drop_out_rate)(x)
+x = layers.Dropout(rate = drop_out_rate)(x)
 
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
+x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
 x = layers.MaxPool1D(4)(x)
-x = layers.Dropout(rate=drop_out_rate)(x)
+x = layers.Dropout(rate = drop_out_rate)(x)
 
-x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
-x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
+x = layers.Conv1D(256, 3, activation = "relu", padding = "same")(x)
+x = layers.Conv1D(256, 3, activation = "relu", padding = "same")(x)
 x = layers.GlobalMaxPool1D()(x)
-x = layers.Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
+x = layers.Dropout(rate = (drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
 
-x = layers.Dense(64, activation="relu")(x)
-x = layers.Dense(1028, activation="relu")(x)
-output_tensor = layers.Dense(number_of_classes, activation="softmax")(x)
+x = layers.Dense(64, activation = "relu")(x)
+x = layers.Dense(1028, activation = "relu")(x)
+output_tensor = layers.Dense(number_of_classes, activation = "softmax")(x)
 
 model = tf.keras.Model(input_tensor, output_tensor)
-model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=metrics)
+model.compile(optimizer = optimizer, loss = keras.losses.binary_crossentropy, metrics = metrics)
 
 
 # ## Configuring model properties
@@ -406,15 +420,15 @@ model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metric
 model_filename = base_dir + "gunshot_sound_model.pkl"
 
 model_callbacks = [
-    EarlyStopping(monitor='val_acc',
-                  patience=10,
-                  verbose=1,
-                  mode='auto'),
+    EarlyStopping(monitor = 'val_acc',
+                  patience = 10,
+                  verbose = 1,
+                  mode = 'auto'),
     
-    ModelCheckpoint(model_filename, monitor='val_acc',
-                    verbose=1,
-                    save_best_only=True,
-                    mode='auto'),
+    ModelCheckpoint(model_filename, monitor = 'val_acc',
+                    verbose = 1,
+                    save_best_only = True,
+                    mode = 'auto'),
 ]
 
 
@@ -432,12 +446,12 @@ model.summary()
 
 
 History = model.fit(train_wav, train_label, 
-          validation_data=[test_wav, test_label],
-          epochs=number_of_epochs,
-          callbacks=model_callbacks,
-          verbose=1,
-          batch_size=batch_size,
-          shuffle=True)
+          validation_data = [test_wav, test_label],
+          epochs = number_of_epochs,
+          callbacks = model_callbacks,
+          verbose = 1,
+          batch_size = batch_size,
+          shuffle = True)
 
 model.save(base_dir + "gunshot_sound_model.h5")
 
@@ -452,7 +466,7 @@ model.save(base_dir + "gunshot_sound_model.h5")
 # plt.title('Model Accuracy')
 # plt.ylabel('Accuracy')
 # plt.xlabel('Epoch')
-# plt.legend(['Train', 'Test'], loc='upper left')
+# plt.legend(['Train', 'Test'], loc = 'upper left')
 # plt.show()
 
 
@@ -466,7 +480,7 @@ model.save(base_dir + "gunshot_sound_model.h5")
 # plt.title('Model Loss')
 # plt.ylabel('Loss')
 # plt.xlabel('Epoch')
-# plt.legend(['Train', 'Test'], loc='upper left')
+# plt.legend(['Train', 'Test'], loc = 'upper left')
 # plt.show()
 
 
@@ -476,8 +490,8 @@ model.save(base_dir + "gunshot_sound_model.h5")
 
 
 y_test_pred = model.predict(test_wav)
-y_predicted_classes_test = y_test_pred.argmax(axis=-1)
-y_actual_classes_test= test_label.argmax(axis=-1)
+y_predicted_classes_test = y_test_pred.argmax(axis = -1)
+y_actual_classes_test = test_label.argmax(axis = -1)
 wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
 print(wrong_examples)
 
@@ -487,9 +501,17 @@ print(wrong_examples)
 # In[ ]:
 
 
-# i = 9
+# i = 0
 # sample = np.reshape(test_wav[i], sample_rate_per_two_seconds, )
 # sample_rate = 22050
 # print(y_actual_classes_test[i], y_predicted_classes_test[i])
-# ipd.Audio(sample, rate=sample_rate)
+# ipd.Audio(sample, rate = sample_rate)
+
+
+# ### Converting labels to strings
+
+# In[ ]:
+
+
+# print(label_binarizer.inverse_transform(labels[:, 0]))
 
