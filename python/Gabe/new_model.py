@@ -56,7 +56,6 @@ for file in os.listdir(sound_data_dir):
                 padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
                 if prescribed_label != "gun_shot":
                     label = 0
-​
                 samples.append(padded_sample)
                 labels.append(label)
                 sound_file_names.append(file)
@@ -67,16 +66,13 @@ for file in os.listdir(sound_data_dir):
                         label = 0
                     elif np.max(abs(sample_slice)) < gunshot_frequency_threshold:
                         label = 0
-​
                     samples.append(sample_slice)
                     labels.append(label)
                     sound_file_names.append(file)
-​
         except:
             sample, sample_rate = soundfile.read(sound_data_dir + file)
             print("Sound(s) not recognized by Librosa:", file)
             pass
-​
 print("The number of samples available for training is currently " + str(len(samples)) + '.')
 print("The number of labels available for training is currently " + str(len(labels)) + '.')
 #Saving samples and labels as numpy array files
@@ -148,7 +144,7 @@ number_of_augmentations = 5
 augmented_samples = np.zeros((samples.shape[0] * (number_of_augmentations + 1), samples.shape[1]))
 augmented_labels = np.zeros((labels.shape[0] * (number_of_augmentations + 1),))
 j = 0
-​
+
 for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
     file = sound_file_names[j]
 
@@ -169,10 +165,10 @@ for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
     augmented_labels[i + 4] = labels[j]
     augmented_labels[i + 5] = labels[j]
     j += 1
-​
+
 samples = augmented_samples
 labels = augmented_labels
-​
+
 print("The number of samples available for training is currently " + str(len(samples)) + '.')
 print("The number of labels available for training is currently " + str(len(labels)) + '.')
 #Saving augmented samples and labels as numpy array files
@@ -180,7 +176,7 @@ np.save(base_dir + "gunshot_augmented_sound_samples.npy", samples)
 np.save(base_dir + "gunshot_augmented_sound_labels.npy", labels)
 #Loading augmented sample file and label file as numpy arrays
 
-exit()n
+exit()
 
 samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
 labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
@@ -229,31 +225,31 @@ x = layers.Conv1D(16, 9, activation="relu", padding="same")(input_tensor)
 x = layers.Conv1D(16, 9, activation="relu", padding="same")(x)
 x = layers.MaxPool1D(16)(x)
 x = layers.Dropout(rate=drop_out_rate)(x)
-​
+
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.MaxPool1D(4)(x)
 x = layers.Dropout(rate=drop_out_rate)(x)
-​
+
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.MaxPool1D(4)(x)
 x = layers.Dropout(rate=drop_out_rate)(x)
-​
+
 x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
 x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
 x = layers.GlobalMaxPool1D()(x)
 x = layers.Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
-​
+
 x = layers.Dense(64, activation="relu")(x)
 x = layers.Dense(1028, activation="relu")(x)
 output_tensor = layers.Dense(number_of_classes, activation="softmax")(x)
-​
+
 model = tf.keras.Model(input_tensor, output_tensor)
 model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=metrics)
 Configuring model properties
 model_filename = base_dir + "gunshot_sound_model.pkl"
-​
+
 model_callbacks = [
     EarlyStopping(monitor='val_acc',
                   patience=10,
@@ -275,7 +271,7 @@ History = model.fit(train_wav, train_label,
           verbose=1,
           batch_size=batch_size,
           shuffle=True)
-​
+
 model.save(base_dir + "gunshot_sound_model.h5")
 #Summarizing history for accuracy
 plt.plot(History.history['acc'])
