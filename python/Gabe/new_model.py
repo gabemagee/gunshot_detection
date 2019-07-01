@@ -247,7 +247,7 @@ output_tensor = layers.Dense(number_of_classes, activation="softmax")(x)
 
 model = tf.keras.Model(input_tensor, output_tensor)
 model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=metrics)
-Configuring model properties
+#Configuring model properties
 model_filename = base_dir + "gunshot_sound_model.pkl"
 
 model_callbacks = [
