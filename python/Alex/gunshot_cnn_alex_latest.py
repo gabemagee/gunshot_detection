@@ -193,8 +193,8 @@ def change_volume(wav, magnitude):
     
 def add_background(wav, file, data_directory, label_to_avoid):
     label_csv = data_directory + "labels.csv"
-    sound_directory = data_directory + "Samples/"
     sound_types = pd.read_csv(label_csv)
+    sound_directory = data_directory + "Samples/"
     bg_files = os.listdir(sound_directory)
     bg_files.remove(file)
     chosen_bg_file = bg_files[np.random.randint(len(bg_files))]
@@ -234,9 +234,9 @@ for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
     augmented_samples[i + 3,:] = speed_change(samples[j,:])
     augmented_samples[i + 4,:] = change_volume(samples[j,:], np.random.uniform())
     if labels[j] == 1:
-        augmented_samples[i + 5,:] = add_background(samples[j,:], file, sound_data_dir, "") 
+        augmented_samples[i + 5,:] = add_background(samples[j,:], file, data_dir, "") 
     else:
-        augmented_samples[i + 5,:] = add_background(samples[j,:], file, sound_data_dir, "gun_shot")
+        augmented_samples[i + 5,:] = add_background(samples[j,:], file, data_dir, "gun_shot")
     
     augmented_labels[i] = labels[j]
     augmented_labels[i + 1] = labels[j]
