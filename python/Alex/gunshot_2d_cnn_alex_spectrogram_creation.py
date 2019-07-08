@@ -73,7 +73,7 @@ labels = []
 gunshot_frequency_threshold = 0.25
 sample_rate = 22050
 sample_rate_per_two_seconds = 44100
-base_dir = "/home/alexm/Datasets/"
+base_dir = "/home/amorehe/Datasets/"
 data_dir = base_dir + "REU_Samples_and_Labels/"
 sound_data_dir = data_dir + "Samples/"
 
