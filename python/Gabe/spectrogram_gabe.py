@@ -141,9 +141,9 @@ K.set_session(sess)
 data_directory = "/home/gamagee/workspace/gunshot_detection/REU_Data/REU_Samples_and_Labels/"
 label_csv = data_directory + "labels.csv"
 sample_directory = data_directory + "Samples/"
-base_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/"
-sample_path = base_dir+"gabe_sample.npy"
-label_path = base_dir+"gabe_label.npy"
+base_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/"
+sample_path = base_dir+"gunshot_augmented_sound_samples.npy"
+label_path = base_dir+"gunshot_augmented_sound_labels.npy"
 samples = np.load(sample_path)
 labels = np.load(label_path)
 samples.reshape(-1,128,87,1)
