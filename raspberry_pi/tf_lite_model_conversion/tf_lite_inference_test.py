@@ -3,7 +3,7 @@ import tensorflow as tf
 import tensorflow.keras as keras
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path = "gunshot_sound_model.tflite")
+interpreter = tf.lite.Interpreter(model_path = "../models/gunshot_sound_model.tflite")
 interpreter.allocate_tensors()
 
 # Gets input and output tensors

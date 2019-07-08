@@ -270,7 +270,7 @@ print(labels.shape)
 
 
 kf = KFold(n_splits = 3, shuffle = True)
-samples = np.array(samples, dtype = "int16")
+samples = np.array(samples)
 labels = np.array(labels)
 for train_index, test_index in kf.split(samples):
     train_wav, test_wav = samples[train_index], samples[test_index]
@@ -327,7 +327,7 @@ number_of_classes = 2
 batch_size = 32
 optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
 input_shape = (sample_rate_per_two_seconds, 1)
-input_tensor = Input(shape = input_shape, dtype = "int16")
+input_tensor = Input(shape = input_shape)
 metrics = [auc, "accuracy"]
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
