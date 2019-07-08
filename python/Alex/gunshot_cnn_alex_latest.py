@@ -327,7 +327,7 @@ number_of_classes = 2
 batch_size = 32
 optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
 input_shape = (sample_rate_per_two_seconds, 1)
-input_tensor = Input(shape = input_shape)
+input_tensor = Input(shape = input_shape, dtype = "int16")
 metrics = [auc, "accuracy"]
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"

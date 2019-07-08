@@ -64,6 +64,6 @@ dependencies = {
 # tf.io.write_graph(frozen_graph, "~/Downloads", "gunshot_sound_model.pb", as_text = False)
 
 # Converting the model to a flat buffer (.tflite) file
-converter = tf.lite.TFLiteConverter.from_keras_model_file("gunshot_sound_model.h5", custom_objects = dependencies)
+converter = tf.lite.TFLiteConverter.from_keras_model_file("../models/gunshot_sound_model.h5", custom_objects = dependencies)
 tflite_model = converter.convert()
-open("gunshot_sound_model.tflite", "wb").write(tflite_model)
+open("../models/gunshot_sound_model.tflite", "wb").write(tflite_model)
