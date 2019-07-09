@@ -325,7 +325,7 @@ learning_rate = 0.001
 number_of_epochs = 100
 number_of_classes = 2
 batch_size = 32
-optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
+optimizer = optimizers.Adam(lr = learning_rate, decay = learning_rate / number_of_epochs)
 input_shape = (sample_rate_per_two_seconds, 1)
 input_tensor = Input(shape = input_shape)
 metrics = [auc, "accuracy"]
