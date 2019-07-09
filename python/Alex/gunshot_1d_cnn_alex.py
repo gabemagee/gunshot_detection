@@ -473,3 +473,13 @@ print(wrong_examples)
 
 # print(label_binarizer.inverse_transform(labels[:, 0]))
 
+# ## Converting model to TensorFlow Lite format
+
+
+# In[ ]:
+
+model_name = base_dir + "gunshot_sound_model"
+converter = tf.contrib.lite.TFLiteConverter.from_keras_model_file(model_name + ".h5")
+converter.post_training_quantize = True
+tflite_model = converter.convert()
+open(model_name + ".tflite", "wb").write(tflite_model)
