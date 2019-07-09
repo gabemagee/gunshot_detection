@@ -94,7 +94,7 @@ print("Finished loading all spectrograms into memory...")
 # In[ ]:
 
 
-samples = np.array(spectrograms).reshape(-1, 192, 192, 1)
+samples = np.array(spectrograms).reshape(-1, 192, 192, 3)
 samples = samples.astype("float32")
 samples /= 255
 
@@ -152,7 +152,7 @@ learning_rate = 0.001
 number_of_epochs = 100
 number_of_classes = 2
 batch_size = 32
-channel = 1
+channel = 3
 channelDimension = -1
 optimizer = Adam(lr = learning_rate, decay = learning_rate / number_of_epochs)
 input_shape = (192, 192)
