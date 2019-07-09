@@ -109,11 +109,12 @@ labels = label_binarizer.fit_transform(labels)
 labels = np.hstack((labels, 1 - labels))
 
 
-# ### Debugging of the label data's shape (optional)
+# ### Debugging of the sample and label data's shape (optional)
 
 # In[ ]:
 
 
+print("Shape of samples array:", samples.shape)
 print("Shape of labels array:", labels.shape)
 
 
