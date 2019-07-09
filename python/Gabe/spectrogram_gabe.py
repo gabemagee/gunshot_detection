@@ -146,6 +146,9 @@ sample_path = base_dir+"gunshot_augmented_sound_samples.npy"
 label_path = base_dir+"gunshot_augmented_sound_labels.npy"
 samples = np.load(sample_path)
 labels = np.load(label_path)
+
+print(samples.shape)
+
 samples.reshape(-1,128,87,1)
 sample_rate_per_two_seconds = 44100
 number_of_classes = 2
