@@ -284,7 +284,7 @@ def create_gunshot_wav_file(microphone_data, index, timestamp, number_of_audio_c
 # In[ ]:
 
 
-noise_sample_wav = "./noise_reduction/Noise Sample - Sizheng Microphone.wav"
+noise_sample_wav = "../noise_reduction/Noise Sample - Sizheng Microphone.wav"
 noise_sample_rate, noise_sample = wavfile.read(noise_sample_wav)
 noise_clip = noise_sample  # In this case, the whole sample is a clip of noise
 
