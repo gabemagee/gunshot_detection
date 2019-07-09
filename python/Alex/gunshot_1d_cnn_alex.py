@@ -320,13 +320,10 @@ def auc(y_true, y_pred):
 # In[ ]:
 
 
-drop_out_rate = 0.25
 number_of_epochs = 100
-number_of_classes = 2
 batch_size = 32
 optimizer = optimizers.Adam(lr = 0.001, decay = 0.001 / 100)
-input_shape = (sample_rate_per_two_seconds, 1)
-input_tensor = Input(shape = input_shape)
+input_tensor = Input(shape = (44100, 1))
 metrics = [auc, "accuracy"]
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
@@ -344,29 +341,29 @@ K.set_session(sess)
 x = layers.Conv1D(16, 9, activation = "relu", padding = "same")(input_tensor)
 x = layers.Conv1D(16, 9, activation = "relu", padding = "same")(x)
 x = layers.MaxPool1D(16)(x)
-x = layers.Dropout(rate = drop_out_rate)(x)
+x = layers.Dropout(rate = 0.25)(x)
 
 x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
 x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
 x = layers.MaxPool1D(4)(x)
-x = layers.Dropout(rate = drop_out_rate)(x)
+x = layers.Dropout(rate = 0.25)(x)
 
 x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
 x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
 x = layers.MaxPool1D(4)(x)
-x = layers.Dropout(rate = drop_out_rate)(x)
+x = layers.Dropout(rate = 0.25)(x)
 
 x = layers.Conv1D(256, 3, activation = "relu", padding = "same")(x)
 x = layers.Conv1D(256, 3, activation = "relu", padding = "same")(x)
 x = layers.GlobalMaxPool1D()(x)
-x = layers.Dropout(rate = (drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
+x = layers.Dropout(rate = (0.5))(x) # Increasing drop-out rate here to prevent overfitting
 
 x = layers.Dense(64, activation = "relu")(x)
 x = layers.Dense(1028, activation = "relu")(x)
-output_tensor = layers.Dense(number_of_classes, activation = "softmax")(x)
+output_tensor = layers.Dense(2, activation = "softmax")(x)
 
 model = tf.keras.Model(input_tensor, output_tensor)
-model.compile(optimizer = optimizer, loss = keras.losses.binary_crossentropy, metrics = metrics)
+model.compile(optimizer = optimizer, loss = "binary_crossentropy", metrics = metrics)
 
 
 # ## Configuring model properties

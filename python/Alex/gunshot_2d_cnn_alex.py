@@ -147,15 +147,10 @@ def auc(y_true, y_pred):
 # In[ ]:
 
 
-drop_out_rate = 0.25
 number_of_epochs = 100
-number_of_classes = 2
 batch_size = 32
-channel = 3
-channelDimension = -1
 optimizer = Adam(lr = 0.001, decay = 0.001 / 100)
-input_shape = (192, 192)
-input_tensor = Input(shape = input_shape)
+input_tensor = Input(shape = (192, 192))
 metrics = [auc, "accuracy"]
 
 
@@ -184,41 +179,41 @@ model = Sequential()
 """ Step 2: Create the input and hidden layers """
 
 # First Layer
-model.add(Conv2D(32, (3, 3), padding = "same", input_shape = (input_shape[0], input_shape[1], channel)))
+model.add(Conv2D(32, (3, 3), padding = "same", input_shape = (192, 192, 3)))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis = channelDimension))
+model.add(BatchNormalization(axis = -1))
 model.add(MaxPooling2D(pool_size = (3, 3)))
-model.add(Dropout(drop_out_rate))
+model.add(Dropout(0.25))
 
 # Second Layer: (CONV => RELU) * 2 => POOL
 model.add(Conv2D(64, (3, 3), padding = "same"))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis = channelDimension))
+model.add(BatchNormalization(axis = -1))
 model.add(Conv2D(64, (3, 3), padding = "same"))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis = channelDimension))
+model.add(BatchNormalization(axis = -1))
 model.add(MaxPooling2D(pool_size = (2, 2)))
-model.add(Dropout(drop_out_rate))
+model.add(Dropout(0.25))
 
 # Third Layer: (CONV => RELU) * 2 => POOL
 model.add(Conv2D(128, (3, 3), padding = "same"))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis = channelDimension))
+model.add(BatchNormalization(axis = -1))
 model.add(Conv2D(128, (3, 3), padding = "same"))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis = channelDimension))
+model.add(BatchNormalization(axis = -1))
 model.add(MaxPooling2D(pool_size = (2, 2)))
-model.add(Dropout(drop_out_rate))
+model.add(Dropout(0.25))
 
 # Fourth Layer: (CONV => RELU) * 2 => POOL
 model.add(Conv2D(256, (3, 3), padding = "same"))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis = channelDimension))
+model.add(BatchNormalization(axis = -1))
 model.add(Conv2D(256, (3, 3), padding = "same"))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis = channelDimension))
+model.add(BatchNormalization(axis = -1))
 model.add(MaxPooling2D(pool_size = (2, 2)))
-model.add(Dropout(drop_out_rate))
+model.add(Dropout(0.25))
 
 
 """ Step 3: Flatten the layers """
@@ -231,9 +226,9 @@ model.add(Flatten())
 model.add(Dense(1024))
 model.add(Activation("relu"))
 model.add(BatchNormalization())
-model.add(Dropout(drop_out_rate * 2))  # Increasing dropout here to prevent overfitting
+model.add(Dropout(0.5))  # Increasing dropout here to prevent overfitting
 
-model.add(Dense(number_of_classes))
+model.add(Dense(2))
 model.add(Activation("softmax"))
 
 
