@@ -1,6 +1,4 @@
 import os
-import librosa
-import librosa.display
 import glob
 import numpy as np
 import sys
@@ -43,11 +41,6 @@ def get_available_gpus():
 
 print(get_available_gpus())
 
-def make_spectrogram(y):
-    y = np.array(y)
-    print(type(y))
-    print(y.dtype)
-    return np.array(librosa.feature.melspectrogram(y=y, sr=22050))
 
 
 def get_categories():
