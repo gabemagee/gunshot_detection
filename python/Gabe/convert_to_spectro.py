@@ -43,8 +43,6 @@ from sklearn.model_selection import KFold
 
 def make_spectrogram(y):
     y = np.array(y)
-    print(type(y))
-    print(y.dtype)
     return np.array(librosa.feature.melspectrogram(y=y, sr=22050))
 
 data_directory = "/home/gamagee/workspace/gunshot_detection/REU_Data/REU_Samples_and_Labels/"
