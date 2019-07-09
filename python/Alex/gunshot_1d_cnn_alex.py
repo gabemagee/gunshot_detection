@@ -320,7 +320,7 @@ def auc(y_true, y_pred):
 # In[ ]:
 
 
-drop_out_rate = 0.1
+drop_out_rate = 0.25
 learning_rate = 0.001
 number_of_epochs = 100
 number_of_classes = 2
