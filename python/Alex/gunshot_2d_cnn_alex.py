@@ -86,19 +86,17 @@ for i in range(len(labels)):
     image = cv2.resize(image, (192, 192))
     spectrograms.append(image)
 
+print("Finished loading all spectrograms into memory...")
+
 
 # ## Restructuring spectrograms
 
 # In[ ]:
 
 
-samples = np.array(spectrograms).reshape(-1, 192, 192, 3)
-print("Samples after being reshaped:", samples)
+samples = np.array(spectrograms).reshape(-1, 192, 192, 1)
 samples = samples.astype("float32")
-print("Samples after being casted to 32-bit float space:", samples)
 samples /= 255
-print("Samples after being divided by 255:", samples)
-
 
 # ## Restructuring the label data
 

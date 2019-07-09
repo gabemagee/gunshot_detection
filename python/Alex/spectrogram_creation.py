@@ -17,7 +17,6 @@ import os
 
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 # ### Data Pre-Processing Libraries
@@ -33,27 +32,6 @@ import re
 import cv2
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelBinarizer
-
-
-# ### Visualization Libraries
-
-# In[ ]:
-
-
-import IPython.display as ipd
-
-
-# ### Deep Learning Libraries
-
-# In[ ]:
-
-
-import tensorflow as tf
-import tensorflow.keras as keras
-from tensorflow.keras import Input, layers, optimizers, backend as K
-from tensorflow.keras.models import load_model
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
 # # Initialization of Variables
@@ -72,13 +50,6 @@ sound_data_dir = data_dir + "Samples/"
 
 
 # # Data Pre-Processing
-
-# ## Reading in the CSV file of descriptors for many kinds of sounds
-
-# In[ ]:
-
-
-sound_types = pd.read_csv(data_dir + "labels.csv")
 
 
 # ## Loading augmented sample file and label file as numpy arrays
