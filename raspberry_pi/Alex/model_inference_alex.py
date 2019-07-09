@@ -265,11 +265,11 @@ def remove_noise(audio_clip,
 # Saves a two-second gunshot sample as a WAV file
 def create_gunshot_wav_file(microphone_data, index, timestamp, number_of_audio_channels = audio_channels, sample_width = 2, frame_rate = 44100):
     microphone_data = microphone_data.reshape(44100)
-    librosa.output.write_wav("./recordings/Gunshot Sound Sample #"
+    librosa.output.write_wav("../recordings/Gunshot Sound Sample #"
                             + str(index) + " ("
                             + str(timestamp) + ").wav", microphone_data, 22050)
     
-#     wav_file = wave.open("./recordings/Gunshot Sound Sample #"
+#     wav_file = wave.open("../recordings/Gunshot Sound Sample #"
 #                             + str(index) + " ("
 #                             + str(timestamp) + ").wav", "wb")
 #     wav_file.setnchannels(number_of_audio_channels)
@@ -500,7 +500,7 @@ logger.debug("--- Listening to Audio Stream ---")
 
 
 # # Loads TFLite model and allocate tensors
-# interpreter = tf.lite.Interpreter(model_path = "./models/gunshot_sound_model.tflite")
+# interpreter = tf.lite.Interpreter(model_path = "../models/gunshot_sound_model.tflite")
 # interpreter.allocate_tensors()
 
 # # Gets input and output tensors as well as the input shape
@@ -528,7 +528,7 @@ logger.debug("--- Listening to Audio Stream ---")
 
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path = "./models/gunshot_sound_model.tflite")
+interpreter = tf.lite.Interpreter(model_path = "../models/gunshot_sound_model.tflite")
 interpreter.allocate_tensors()
 
 # Gets input and output tensors as well as the input shape
@@ -537,10 +537,10 @@ output_details = interpreter.get_output_details()
 input_shape = input_details[0]['shape']
 
 # Loading 1D Time-Series Model
-# model = load_model_one("./models/gunshot_sound_model.h5")
+# model = load_model_one("../models/gunshot_sound_model.h5")
     
 # Loading 2D Spectrogram Model
-#   model = load_model_two("./models/gunshot_sound_model_spectrograph_model.h5")
+#   model = load_model_two("../models/gunshot_sound_model_spectrograph_model.h5")
     
 # An iterator variable for counting the number of gunshot sounds detected
 gunshot_sound_counter = 1
@@ -598,7 +598,7 @@ while True:
 
 
 # # Loads TFLite model and allocate tensors
-# interpreter = tf.lite.Interpreter(model_path = "./models/gunshot_sound_model.tflite")
+# interpreter = tf.lite.Interpreter(model_path = "../models/gunshot_sound_model.tflite")
 # interpreter.allocate_tensors()
 
 # # Gets input and output tensors as well as the input shape
@@ -607,7 +607,7 @@ while True:
 # input_shape = input_details[0]['shape']
 
 # # Loads in test sample WAV file
-# gunshot_training_sample, sr = librosa.load("./recordings/260600_8.wav")
+# gunshot_training_sample, sr = librosa.load("../recordings/260600_8.wav")
 # # training_sample = normalize(training_sample)
 # number_of_missing_hertz = 44100 - len(gunshot_training_sample)
 # gunshot_training_sample = np.array(gunshot_training_sample.tolist() + [0 for i in range(number_of_missing_hertz)], dtype = "float32")
