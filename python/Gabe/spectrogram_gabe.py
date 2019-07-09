@@ -155,7 +155,7 @@ number_of_classes = 2
 sr = 22050
 input_shape = (128, 87, 1)
 
-
+print(labels.shape)
 
 
 
