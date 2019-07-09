@@ -167,10 +167,10 @@ for train_index, test_index in kf.split(samples):
 
 def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.001,number_of_epochs = 100,batch_size = 64,filter_size = (3,3),maxpool_size = (3,3),activation = "relu"):
     optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
-    x = Input(shape=input_shape)
+    input_tensor = Input(shape=input_shape)
     metrics = [auc, "accuracy"]
     #Model Architecture
-    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(x)
+    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(input_tensor)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
