@@ -58,10 +58,14 @@ n = len(samples)
 c = 0
 
 placeholder = []
+show = True
 for sample in samples:
     pct = (100*(c/n))
-    if pct%2==0:
+    if not show and int(pct)%2==0:
+        show = True
+    if show:
         print(pct,"%")
+        show = False
     a = make_spectrogram(sample)
     placeholder.append(a)
     c = c + 1
