@@ -68,7 +68,7 @@ designated_alert_recipients = ["8163449956", "9176202840", "7857642331"]
 # In[ ]:
 
 
-labels = np.load("/home/alexm/Datasets/gunshot_augmented_sound_labels.npy")
+labels = np.load("/home/pi/Datasets/gunshot_augmented_sound_labels.npy")
 
 
 # ## Binarizing Labels
