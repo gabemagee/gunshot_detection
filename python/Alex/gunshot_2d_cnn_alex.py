@@ -148,13 +148,12 @@ def auc(y_true, y_pred):
 
 
 drop_out_rate = 0.25
-learning_rate = 0.001
 number_of_epochs = 100
 number_of_classes = 2
 batch_size = 32
 channel = 3
 channelDimension = -1
-optimizer = Adam(lr = learning_rate, decay = learning_rate / number_of_epochs)
+optimizer = Adam(lr = 0.001, decay = 0.001 / 100)
 input_shape = (192, 192)
 input_tensor = Input(shape = input_shape)
 metrics = [auc, "accuracy"]
