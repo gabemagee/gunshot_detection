@@ -165,7 +165,7 @@ metrics = [auc, "accuracy"]
 # In[ ]:
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 session = tf.Session(config = config)
