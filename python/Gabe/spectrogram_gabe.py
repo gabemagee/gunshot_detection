@@ -157,7 +157,11 @@ input_shape = (128, 87, 1)
 
 print(labels.shape)
 
+labels = keras.utils.to_categorical(labels, 2)
 
+print(labels.shape)
+
+print("~~~~~~~~~~~~~~~~")
 
 kf = KFold(n_splits=3, shuffle=True)
 for train_index, test_index in kf.split(samples):
