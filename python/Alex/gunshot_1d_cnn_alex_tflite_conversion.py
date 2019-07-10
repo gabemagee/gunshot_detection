@@ -45,6 +45,17 @@ batch_size = 32
 optimizer = optimizers.Adam(lr=0.001, decay=0.001 / 100)
 input_tensor = Input(shape=(44100, 1))
 
+# ## Configuration of GPU for training (optional)
+
+# In[ ]:
+
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.Session(config=config)
+K.set_session(session)
+
 # ## Model Architecture
 
 # In[ ]:
