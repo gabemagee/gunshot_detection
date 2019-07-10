@@ -106,33 +106,33 @@ for train_index, test_index in kf.split(samples):
 
 
 def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.001,number_of_epochs = 100,batch_size = 64,filter_size = (3,3),maxpool_size = (3,3),activation = "relu"):
-    optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
-    input_tensor = Input(shape=input_shape)
-    metrics = [auc,"accuracy"]
+    optimizer = optimizers.Adam(0.001, 0.001 / 100)
+    input_tensor = Input(shape=(128, 87, 1))
+    metrics = ["accuracy"]
     #Model Architecture
-    x = layers.Conv2D(16, filter_size, activation=activation, padding="same")(input_tensor)
+    x = layers.Conv2D(16, (3,3), activation="relu", padding="same")(input_tensor)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
-    x = layers.Conv2D(32, filter_size, activation=activation, padding="same")(x)
+    x = layers.Conv2D(32, (3,3), activation="relu", padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
-    x = layers.Conv2D(64, filter_size, activation=activation, padding="same")(x)
+    x = layers.Conv2D(64, (3,3), activation="relu", padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.MaxPool2D(maxpool_size)(x)
     x = layers.Dropout(rate=drop_out_rate)(x)
 
-    x = layers.Conv2D(256, filter_size, activation=activation, padding="same")(x)
+    x = layers.Conv2D(256, (3,3), activation="relu", padding="same")(x)
     x = layers.BatchNormalization()(x)
     x = layers.GlobalMaxPool2D()(x)
     x = layers.Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
 
-    x = layers.Dense(64, activation=activation)(x)
-    x = layers.Dense(1028, activation=activation)(x)
-    output_tensor = layers.Dense(number_of_classes, activation="softmax")(x)
+    x = layers.Dense(64, activation="relu")(x)
+    x = layers.Dense(1028, activation="relu")(x)
+    output_tensor = layers.Dense(2, activation="softmax")(x)
 
     model = tf.keras.Model(input_tensor, output_tensor)
     model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=metrics)
