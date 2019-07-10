@@ -63,7 +63,7 @@ designated_alert_recipients = ["8163449956", "9176202840", "7857642331"]
 # In[ ]:
 
 
-labels = np.load("/home/alexm/Datasets/gunshot_augmented_sound_labels.npy")
+labels = np.load("/home/pi/Datasets/gunshot_augmented_sound_labels.npy")
 
 
 # ## Binarizing Labels
@@ -264,17 +264,6 @@ def create_gunshot_wav_file(microphone_data, index, timestamp, number_of_audio_c
                             + str(index) + " ("
                             + str(timestamp) + ").wav", microphone_data, 22050)
 
-
-# ## Loading in Noise Sample
-
-# In[ ]:
-
-
-noise_sample_wav = "../noise_reduction/Noise Sample - Sizheng Microphone.wav"
-noise_sample_rate, noise_sample = wavfile.read(noise_sample_wav)
-noise_clip = noise_sample  # In this case, the whole sample is a clip of noise
-
-
 # ## ---
 
 # # Multithreaded Inference: A callback thread adds two second samples of microphone data to the audio analysis queue; The main thread, an audio analysis thread, detects the presence of gunshot sounds in samples retrieved from the audio analysis queue; And an SMS alert thread dispatches groups of messages to designated recipients.
@@ -345,6 +334,7 @@ def callback(in_data, frame_count, time_info, status):
         audio_analysis_queue.put(sound_data)
         current_time = time.ctime(time.time())
         audio_analysis_queue.put(current_time)
+        sound_data = np.zeros(0, dtype = "float32")
     return (sound_buffer, pyaudio.paContinue)
 
 pa = pyaudio.PyAudio()
@@ -396,22 +386,19 @@ logger.debug("--- Listening to Audio Stream ---")
 
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path = "../models/gunshot_sound_model.tflite")
-interpreter.allocate_tensors()
+# interpreter = tf.lite.Interpreter(model_path = "../models/gunshot_sound_model.tflite")
+# interpreter.allocate_tensors()
 
-# Gets input and output tensors as well as the input shape
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
-input_shape = input_details[0]['shape']
-
-# Loading 1D Time-Series Model
-# model = load_model_one("../models/gunshot_sound_model.h5")
-    
-# Loading 2D Spectrogram Model
-#   model = load_model_two("../models/gunshot_sound_model_spectrograph_model.h5")
+# # Gets input and output tensors as well as the input shape
+# input_details = interpreter.get_input_details()
+# output_details = interpreter.get_output_details()
+# input_shape = input_details[0]['shape']
     
 # An iterator variable for counting the number of gunshot sounds detected
 gunshot_sound_counter = 1
+
+# A sentinel for capturing two seconds of background noise from the microphone
+noise_sample_captured = False
 
 # The main (audio analysis) thread will run indefinitely
 while True:
@@ -434,22 +421,25 @@ while True:
         # Post-processes the microphone data
         modified_microphone_data = librosa.resample(y = microphone_data, orig_sr = audio_rate, target_sr = 22050)
         modified_microphone_data = normalize(modified_microphone_data)
-#         modified_microphone_data = remove_noise(audio_clip = modified_microphone_data, noise_clip = noise_clip)  # As a substitute for normalization
-#         number_of_missing_hertz = 44100 - len(modified_microphone_data)
-#         modified_microphone_data = np.array(modified_microphone_data.tolist() + [0 for i in range(number_of_missing_hertz)], dtype = "float32")
+        if noise_sample_captured:
+                # Acts as a substitute for normalization
+                modified_microphone_data = remove_noise(audio_clip = modified_microphone_data, noise_clip = noise_sample)
+                number_of_missing_hertz = 44100 - len(modified_microphone_data)
+                modified_microphone_data = np.array(modified_microphone_data.tolist() + [0 for i in range(number_of_missing_hertz)], dtype = "float32")
         modified_microphone_data = modified_microphone_data[:44100]
         modified_microphone_data = modified_microphone_data.reshape(input_shape)
 
         # Passes a given audio sample into the model for prediction
 #         probabilities = model.predict(modified_microphone_data)
-        interpreter.set_tensor(input_details[0]["index"], modified_microphone_data)
-        interpreter.invoke()
-        probabilities = interpreter.get_tensor(output_details[0]["index"])
-        logger.debug("The model-predicted probability values: " + str(probabilities[0]))
-        logger.debug("Model-predicted sample class: " + label_binarizer.inverse_transform(probabilities[:, 0])[0])
+#         interpreter.set_tensor(input_details[0]["index"], modified_microphone_data)
+#         interpreter.invoke()
+#         probabilities = interpreter.get_tensor(output_details[0]["index"])
+#         logger.debug("The model-predicted probability values: " + str(probabilities[0]))
+#         logger.debug("Model-predicted sample class: " + label_binarizer.inverse_transform(probabilities[:, 0])[0])
 
         # Determines if a gunshot sound was detected by the model
-        if (probabilities[0][1] >= inference_model_confidence_threshold):
+#         if (probabilities[0][1] >= inference_model_confidence_threshold):
+        if np.random.random_sample() < 0.5:
             # Sends out an SMS alert
             sms_alert_queue.put("Gunshot Detected")
             
@@ -458,6 +448,13 @@ while True:
 
             # Increments the counter for gunshot sound file names
             gunshot_sound_counter += 1
+    
+    # Allows us to capture two seconds of background noise from the microphone for noise reduction
+    elif not noise_sample_captured:
+        noise_sample = librosa.resample(y = microphone_data, orig_sr = audio_rate, target_sr = 22050)
+        noise_sample = normalize(noise_sample)
+        noise_sample = noise_sample[:44100]
+        noise_sample_captured = True
 
 
 # ## Testing A Model with Sample Audio (Optional)
