@@ -390,6 +390,9 @@ print("The number of false positive labels available for training is currently "
 samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
 labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
 
+print("Length of samples before adding positive samples:", len(samples))
+print("Length of labels before adding positive labels:", len(samples))
+
 samples = np.concatenate([samples, true_positive_samples])
 labels = np.concatenate([labels, true_positive_labels])
 samples = np.concatenate([samples, false_positive_samples])
