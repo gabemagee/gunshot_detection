@@ -131,17 +131,6 @@ for train_index, test_index in kf.split(samples):
 
 # # Model
 
-# ## ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
-
-# In[ ]:
-
-
-def auc(y_true, y_pred):
-    auc = tf.metrics.auc(y_true, y_pred)[1]
-    K.get_session().run(tf.local_variables_initializer())
-    return auc
-
-
 # ## Model Parameters
 
 # In[ ]:
@@ -151,8 +140,6 @@ number_of_epochs = 100
 batch_size = 32
 optimizer = Adam(lr = 0.001, decay = 0.001 / 100)
 input_tensor = Input(shape = (192, 192))
-metrics = [auc, "accuracy"]
-
 
 # ## Configuration of GPU for training (optional)
 
@@ -234,7 +221,7 @@ model.add(Activation("softmax"))
 
 """ Step 5: Compile the model """
 
-model.compile(optimizer = optimizer, loss = "binary_crossentropy", metrics = metrics)
+model.compile(optimizer = optimizer, loss = "binary_crossentropy", metrics = ["accuracy"])
 
 
 # ## Configuring model properties
@@ -291,19 +278,12 @@ y_actual_classes_test = test_label.argmax(axis = -1)
 wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
 print(wrong_examples)
 
-# ### Converting labels to strings
-
-# In[ ]:
-
-
-print(label_binarizer.inverse_transform(labels[:, 0]))
-
 # ## Converting model to TensorFlow Lite format
 
 # In[ ]:
 
 
-model_name = base_dir + "gunshot_spectrogram_sound_model"
+model_name = base_dir + "gunshot_2d_spectrogram_model"
 converter = tf.contrib.lite.TFLiteConverter.from_keras_model_file(model_name + ".h5")
 converter.post_training_quantize = True
 tflite_model = converter.convert()
