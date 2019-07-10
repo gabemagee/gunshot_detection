@@ -147,11 +147,11 @@ input_tensor = Input(shape=(192, 192))
 # In[ ]:
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-session = tf.Session(config=config)
-K.set_session(session)
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# config = tf.ConfigProto()
+# config.gpu_options.allow_growth = True
+# session = tf.Session(config=config)
+# K.set_session(session)
 
 # ## Model Architecture
 
