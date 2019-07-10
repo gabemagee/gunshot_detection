@@ -427,7 +427,8 @@ while True:
                 number_of_missing_hertz = 44100 - len(modified_microphone_data)
                 modified_microphone_data = np.array(modified_microphone_data.tolist() + [0 for i in range(number_of_missing_hertz)], dtype = "float32")
         modified_microphone_data = modified_microphone_data[:44100]
-        modified_microphone_data = modified_microphone_data.reshape(input_shape)
+#         modified_microphone_data = modified_microphone_data.reshape(input_shape)
+        modified_microphone_data = modified_microphone_data.reshape(-1, 44100, 1)
 
         # Passes a given audio sample into the model for prediction
 #         probabilities = model.predict(modified_microphone_data)
