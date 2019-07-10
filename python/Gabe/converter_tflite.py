@@ -8,7 +8,7 @@ def auc(y_true, y_pred):
     return auc
 
 
-saved_model_dir = "/home/gamagee/workspace/gunshot_detection/raspberry_pi/models/new_spectrogram_model.h5"
+saved_model_dir = os.getcwd()+"/raspberry_pi/models/new_spectrogram_model.h5"
 converter = tf.lite.TFLiteConverter.from_keras_model_file(saved_model_dir,custom_objects={"auc":auc})
 #converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_dir)
 tflite_model = converter.convert()
