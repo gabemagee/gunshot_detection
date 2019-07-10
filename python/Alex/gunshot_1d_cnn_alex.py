@@ -66,125 +66,6 @@ data_dir = base_dir + "REU_Samples_and_Labels/"
 sound_data_dir = data_dir + "Samples/"
 
 
-# # Data Pre-Processing
-
-# ## Reading in the CSV file of descriptors for many kinds of sounds
-
-# In[ ]:
-
-
-sound_types = pd.read_csv(data_dir + "labels.csv")
-
-
-# ## Reading in all of the sound data WAV files
-
-# In[ ]:
-
-
-print("...Parsing sound data...")
-
-for file in os.listdir(sound_data_dir):
-    if file.endswith(".wav"):
-        try:
-            # Adding 2 second-long samples to the list of samples
-            sound_file_id = int(re.search(r'\d+', file).group())
-            sample, sample_rate = librosa.load(sound_data_dir + file)
-            sample_source = sound_types.loc[sound_types["ID"] == sound_file_id, "Source"].values[0]
-            
-            if len(sample) <= sample_rate_per_two_seconds:
-                sample_weight = 1
-                
-                # Upscales the weights for samples recorded on the Raspberry Pi
-                if "recorded_on_raspberry_pi" in sample_source:
-                    sample_weight = 50
-
-                sound_file_names.append(file)
-                sample_weights.append(sample_weight)
-                print("Added a sample weight of", sample_weight)
-                
-            else:
-                for i in range(0, sample.size - sample_rate_per_two_seconds, sample_rate_per_two_seconds):
-                    sample_weight = 1
-                    
-                    # Upscales the weights for samples recorded on the Raspberry Pi
-                    if "recorded_on_raspberry_pi" in sample_source:
-                        sample_weight = 50
-
-                    sound_file_names.append(file)
-                    sample_weights.append(sample_weight)
-                    print("Added a sample weight of", sample_weight)
-
-        except:
-            sample, sample_rate = soundfile.read(sound_data_dir + file)
-            print("Sound(s) not recognized by Librosa:", file)
-            pass
-
-
-# ## Caching NumPy arrays as NumPy files
-
-# In[ ]:
-
-np.save(base_dir + "gunshot_sound_file_names.npy", sound_file_names)
-np.save(base_dir + "gunshot_sound_sample_weights.npy", sample_weights)
-
-
-# ## Loading NumPy files as NumPy arrays
-
-# In[ ]:
-
-
-samples = np.load(base_dir + "gunshot_sound_samples.npy")
-labels = np.load(base_dir + "gunshot_sound_labels.npy")
-
-
-# ## Augmenting data (i.e. time shifting, speed changing, etc.)
-
-# In[ ]:
-
-
-samples = np.array(samples)
-labels = np.array(labels)
-number_of_augmentations = 5
-augmented_samples = np.zeros((samples.shape[0] * (number_of_augmentations + 1), samples.shape[1]))
-augmented_labels = np.zeros((labels.shape[0] * (number_of_augmentations + 1),))
-augmented_sound_file_names = []
-augmented_sample_weights = []
-j = 0
-
-for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
-    file = sound_file_names[j]
-    augmented_sample_weight = sample_weights[j]
-    
-    augmented_sound_file_names.append(file)
-    augmented_sound_file_names.append(file)
-    augmented_sound_file_names.append(file)
-    augmented_sound_file_names.append(file)
-    augmented_sound_file_names.append(file)
-    augmented_sound_file_names.append(file)
-    
-    augmented_sample_weights.append(augmented_sample_weight)
-    augmented_sample_weights.append(augmented_sample_weight)
-    augmented_sample_weights.append(augmented_sample_weight)
-    augmented_sample_weights.append(augmented_sample_weight)
-    augmented_sample_weights.append(augmented_sample_weight)
-    augmented_sample_weights.append(augmented_sample_weight)
-    
-    j += 1
-
-    print("Added six sample weights of", augmented_sample_weight)
-
-sound_file_names = np.array(augmented_sound_file_names)
-sample_weights = np.array(augmented_sample_weights)
-
-
-# ## Saving augmented NumPy arrays as NumPy files
-
-# In[ ]:
-
-np.save(base_dir + "gunshot_augmented_sound_file_names.npy", sound_file_names)
-np.save(base_dir + "gunshot_augmented_sound_sample_weights.npy", sample_weights)
-
-
 # ## Loading augmented NumPy files as NumPy arrays
 
 # In[ ]:
@@ -192,6 +73,9 @@ np.save(base_dir + "gunshot_augmented_sound_sample_weights.npy", sample_weights)
 
 samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
 labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
+
+sample_weights = np.array([1 for normally_recorded_sample in range(len(samples) - 660)] + [50 for raspberry_pi_recorded_sample in range(660)])
+print("Shape of samples weights before splitting:", sample_weights.shape)
 
 
 # ## Restructuring the label data
@@ -223,6 +107,7 @@ kf = KFold(n_splits = 3, shuffle = True)
 for train_index, test_index in kf.split(samples):
     train_wav, test_wav = samples[train_index], samples[test_index]
     train_label, test_label = labels[train_index], labels[test_index]
+    train_weights, test_weights = sample_weights[train_index], sample_weights[test_index]
 
 
 # ## Reshaping the sound data
@@ -343,7 +228,7 @@ History = model.fit(train_wav, train_label,
           callbacks = model_callbacks,
           verbose = 1,
           batch_size = batch_size,
-          sample_weight = sample_weights,
+          sample_weight = train_weights,
           shuffle = True)
 
 model.save(base_dir + "gunshot_sound_model.h5")
@@ -367,7 +252,7 @@ print(wrong_examples)
 
 
 model_name = base_dir + "gunshot_sound_model"
-converter = tf.contrib.lite.TFLiteConverter.from_keras_model_file(model_name + ".h5")
+converter = tf.contrib.lite.TFLiteConverter.from_keras_model_file(model_name + ".h5", custom_objects = {"auc" : auc})
 converter.post_training_quantize = True
 tflite_model = converter.convert()
 open(model_name + ".tflite", "wb").write(tflite_model)
