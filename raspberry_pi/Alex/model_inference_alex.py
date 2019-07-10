@@ -45,7 +45,7 @@ logger.addHandler(ch)
 audio_format = pyaudio.paFloat32
 audio_rate = 44100
 audio_channels = 1
-audio_device_index = 6
+audio_device_index = 1
 audio_frames_per_buffer = 4410
 audio_sample_duration = 2
 audio_analysis_queue = Queue()
