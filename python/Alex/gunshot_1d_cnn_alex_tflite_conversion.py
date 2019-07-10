@@ -95,7 +95,7 @@ output_tensor = layers.Dense(2, activation="softmax")(x)
 model = tf.keras.Model(input_tensor, output_tensor)
 model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=[auc, "accuracy"])
 
-model = load_model(base_dir + "gunshot_sound_model.h5")
+model = load_model(base_dir + "gunshot_sound_model.h5", custom_objects={"auc": auc})
 
 # ## Converting model to TensorFlow Lite format
 

@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="803be349-513d-4b27-9840-52c6e4d20f62" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_tflite_conversion.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_tflite_conversion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -12,32 +11,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_tflite_conversion.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
-              <folding>
-                <element signature="e#103#112#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" selection-start-line="5" selection-end-line="10" selection-end-column="9" />
-              <folding>
-                <element signature="e#103#112#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf />
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -151,16 +125,15 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1562793828651</updated>
-      <workItem from="1562793833999" duration="4702000" />
+      <workItem from="1562793833999" duration="5068000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="4702000" />
+    <option name="totallyTimeSpent" value="5068000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-4" y="44" width="1928" height="1040" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2497332" />
@@ -394,7 +367,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
+        <state relative-caret-position="-3419">
           <caret line="5" selection-start-line="5" selection-end-line="10" selection-end-column="9" />
           <folding>
             <element signature="e#103#112#0" expanded="true" />
@@ -404,8 +377,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_tflite_conversion.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
+        <state relative-caret-position="286">
+          <caret line="59" column="40" lean-forward="true" selection-start-line="59" selection-start-column="40" selection-end-line="59" selection-end-column="40" />
           <folding>
             <element signature="e#103#112#0" expanded="true" />
           </folding>
