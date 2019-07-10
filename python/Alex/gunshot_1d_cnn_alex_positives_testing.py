@@ -398,13 +398,16 @@ labels = np.concatenate([labels, true_positive_labels])
 samples = np.concatenate([samples, false_positive_samples])
 labels = np.concatenate([labels, false_positive_labels])
 
+print("Length of samples after adding positive samples:", len(samples))
+print("Length of labels after adding positive labels:", len(samples))
+
 # ## Saving augmented samples and labels as numpy array files
 
 # In[ ]:
 
 
-np.save(base_dir + "gunshot_augmented_sound_samples.npy", samples)
-np.save(base_dir + "gunshot_augmented_sound_labels.npy", labels)
+# np.save(base_dir + "gunshot_augmented_sound_samples.npy", samples)
+# np.save(base_dir + "gunshot_augmented_sound_labels.npy", labels)
 
 
 # ### Optional debugging after processing the data
