@@ -10,7 +10,6 @@ import pyaudio
 import librosa
 import logging
 import time
-import wave
 import scipy.signal
 import IPython.display as ipd
 import numpy as np
@@ -21,10 +20,6 @@ from array import array
 from scipy.io import wavfile
 from queue import Queue
 from sklearn.preprocessing import LabelBinarizer
-# from tensorflow.keras import Input, layers, optimizers, backend as K
-# from tensorflow.keras.models import load_model
-# from tensorflow.keras.layers import Dense, Dropout
-# from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 #from gsmmodem.modem import GsmModem
 
 
@@ -68,7 +63,7 @@ designated_alert_recipients = ["8163449956", "9176202840", "7857642331"]
 # In[ ]:
 
 
-labels = np.load("/home/pi/Datasets/gunshot_augmented_sound_labels.npy")
+labels = np.load("/home/alexm/Datasets/gunshot_augmented_sound_labels.npy")
 
 
 # ## Binarizing Labels
@@ -268,15 +263,6 @@ def create_gunshot_wav_file(microphone_data, index, timestamp, number_of_audio_c
     librosa.output.write_wav("../recordings/Gunshot Sound Sample #"
                             + str(index) + " ("
                             + str(timestamp) + ").wav", microphone_data, 22050)
-    
-#     wav_file = wave.open("../recordings/Gunshot Sound Sample #"
-#                             + str(index) + " ("
-#                             + str(timestamp) + ").wav", "wb")
-#     wav_file.setnchannels(number_of_audio_channels)
-#     wav_file.setsampwidth(sample_width)
-#     wav_file.setframerate(frame_rate)
-#     wav_file.writeframes(np.int32(microphone_data / np.max(np.abs(microphone_data)) * 32767))
-#     wav_file.close()
 
 
 # ## Loading in Noise Sample
@@ -287,124 +273,6 @@ def create_gunshot_wav_file(microphone_data, index, timestamp, number_of_audio_c
 noise_sample_wav = "../noise_reduction/Noise Sample - Sizheng Microphone.wav"
 noise_sample_rate, noise_sample = wavfile.read(noise_sample_wav)
 noise_clip = noise_sample  # In this case, the whole sample is a clip of noise
-
-
-# ## Model Construction Functions
-
-# #### ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
-
-# In[ ]:
-
-
-# def auc(y_true, y_pred):
-#     auc = tf.metrics.auc(y_true, y_pred)[1]
-#     K.get_session().run(tf.local_variables_initializer())
-#     return auc
-
-
-# #### 1D Time-Series Model
-
-# In[ ]:
-
-
-# def load_model_one(weights_file):
-#     # Initializing 1D Time-Series Model Parameters
-#     drop_out_rate = 0.1
-#     learning_rate = 0.001
-#     number_of_epochs = 100
-#     number_of_classes = 2
-#     batch_size = 32
-#     optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
-#     input_shape = (44100, 1)
-#     input_tensor = Input(shape = input_shape)
-#     metrics = [auc, "accuracy"]
-    
-#     # Reconstructing 1D Time-Series Model
-#     x = layers.Conv1D(16, 9, activation = "relu", padding = "same")(input_tensor)
-#     x = layers.Conv1D(16, 9, activation = "relu", padding = "same")(x)
-#     x = layers.MaxPool1D(16)(x)
-#     x = layers.Dropout(rate = drop_out_rate)(x)
-
-#     x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
-#     x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
-#     x = layers.MaxPool1D(4)(x)
-#     x = layers.Dropout(rate = drop_out_rate)(x)
-
-#     x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
-#     x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
-#     x = layers.MaxPool1D(4)(x)
-#     x = layers.Dropout(rate = drop_out_rate)(x)
-
-#     x = layers.Conv1D(256, 3, activation = "relu", padding = "same")(x)
-#     x = layers.Conv1D(256, 3, activation = "relu", padding = "same")(x)
-#     x = layers.GlobalMaxPool1D()(x)
-#     x = layers.Dropout(rate = (drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
-
-#     x = layers.Dense(64, activation = "relu")(x)
-#     x = layers.Dense(1028, activation = "relu")(x)
-    
-#     # Compiling 1D Time-Series Model
-#     output_tensor = layers.Dense(number_of_classes, activation = "softmax")(x)
-#     model = tf.keras.Model(input_tensor, output_tensor)
-#     model.compile(optimizer = optimizer, loss = keras.losses.binary_crossentropy, metrics = metrics)
-    
-#     # Loading 1D Time-Series Model Weights
-#     model.load_weights(weights_file)
-    
-#     return model
-
-
-# #### 2D Spectrogram Model
-
-# In[ ]:
-
-
-# def load_model_two(weights_file):
-#     # 2D Spectrogram Model Parameters
-#     input_shape = (128, 87, 1)
-#     input_tensor = Input(shape = input_shape)
-#     learning_rate = 0.001
-#     optimizer = optimizers.Adam(learning_rate, learning_rate / 100)
-#     filter_size = (3,3)
-#     maxpool_size = (3,3)
-#     activation = "relu"
-#     drop_out_rate = 0.1
-#     number_of_classes = 2
-#     metrics = [auc, "accuracy"]
-    
-#     # Reconstructing 2D Spectrogram Model
-#     x = layers.Conv2D(16, filter_size, activation = activation, padding = "same")(input_tensor)
-#     x = layers.BatchNormalization()(x)
-#     x = layers.MaxPool2D(maxpool_size)(x)
-#     x = layers.Dropout(rate = drop_out_rate)(x)
-
-#     x = layers.Conv2D(32, filter_size, activation = activation, padding = "same")(x)
-#     x = layers.BatchNormalization()(x)
-#     x = layers.MaxPool2D(maxpool_size)(x)
-#     x = layers.Dropout(rate = drop_out_rate)(x)
-
-#     x = layers.Conv2D(64, filter_size, activation = activation, padding = "same")(x)
-#     x = layers.BatchNormalization()(x)
-#     x = layers.MaxPool2D(maxpool_size)(x)
-#     x = layers.Dropout(rate = drop_out_rate)(x)
-
-#     x = layers.Conv2D(256, filter_size, activation = activation, padding = "same")(x)
-#     x = layers.BatchNormalization()(x)
-#     x = layers.GlobalMaxPool2D()(x)
-#     x = layers.Dropout(rate = (drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
-
-#     x = layers.Dense(64, activation = activation)(x)
-#     x = layers.Dense(1028, activation = activation)(x)
-    
-#     # Compiling 2D Spectrogram Model
-#     output_tensor = layers.Dense(number_of_classes, activation = "softmax")(x)
-#     spec_model = tf.keras.Model(input_tensor, output_tensor)
-#     spec_model.compile(optimizer = optimizer, loss = keras.losses.binary_crossentropy, metrics = metrics)
-
-#     # Loading 2D Spectrogram Model Weights
-#     spec_model.load_weights(weights_file)
-    
-#     return spec_model
 
 
 # ## ---
