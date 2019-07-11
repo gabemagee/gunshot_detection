@@ -65,17 +65,17 @@ labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
 
 
 def convert_to_spectrogram(data, sample_rate):
-    return np.array(librosa.feature.melspectrogram(y = data, sr = sample_rate), dtype = "float32")
+    return np.array(librosa.feature.melspectrogram(y=data, sr=sample_rate), dtype="float32")
 
 
-def power_to_db(S, ref = 1.0, amin = 1e-10, top_db = 80.0):
+def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
     S = np.asarray(S)
     if amin <= 0:
         logger.debug('ParameterError: amin must be strictly positive')
     if np.issubdtype(S.dtype, np.complexfloating):
         logger.debug('Warning: power_to_db was called on complex input so phase '
-                      'information will be discarded. To suppress this warning, '
-                      'call power_to_db(np.abs(D)**2) instead.')
+                     'information will be discarded. To suppress this warning, '
+                     'call power_to_db(np.abs(D)**2) instead.')
         magnitude = np.abs(S)
     else:
         magnitude = S
@@ -95,30 +95,30 @@ def power_to_db(S, ref = 1.0, amin = 1e-10, top_db = 80.0):
 
 def convert_spectrogram_to_image(spectrogram):
     plt.interactive(False)
-    
-    figure = plt.figure(figsize = [0.72, 0.72], dpi = 400)
-    plt.tight_layout(pad = 0)
+
+    figure = plt.figure(figsize=[0.72, 0.72], dpi=400)
+    plt.tight_layout(pad=0)
     ax = figure.add_subplot(111)
     ax.axes.get_xaxis().set_visible(False)
     ax.axes.get_yaxis().set_visible(False)
     ax.set_frame_on(False)
-    
-    librosa.display.specshow(power_to_db(spectrogram, ref = np.max))
-    
+
+    librosa.display.specshow(power_to_db(spectrogram, ref=np.max))
+
     canvas = FigureCanvas(figure)
     canvas.draw()
     s, (width, height) = canvas.print_to_buffer()
 
-    image = np.fromstring(figure.canvas.tostring_rgb(), dtype = "uint8")
+    image = np.fromstring(figure.canvas.tostring_rgb(), dtype="uint8")
     image = image.reshape((width, height, 3))
     image = cv2.resize(image, (192, 192))
 
     # Cleaning up the matplotlib instance
-    plt.close()    
+    plt.close()
     figure.clf()
     plt.close(figure)
     plt.close("all")
-    
+
     # Returns a NumPy array containing an image of a spectrogram
     return image
 
@@ -136,7 +136,6 @@ for sample in samples:
     spectrograms.append(spectrogram)
     print("Converted a sample into a spectrogram...")
 
-    
 # ### Restructuring spectrograms
 
 # In[ ]:
@@ -146,7 +145,6 @@ samples = np.array(spectrograms).reshape(-1, 192, 192, 3)
 samples = samples.astype("float32")
 samples /= 255
 print("Finished loading all spectrograms into memory...")
-
 
 # ## Saving spectrograms as a NumPy array
 

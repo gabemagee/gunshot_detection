@@ -20,7 +20,6 @@ from tensorflow.keras import Input, layers, backend as K
 from tensorflow.keras.models import load_model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Dropout, Activation, BatchNormalization, Flatten
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 # # Initialization of Variables
 
