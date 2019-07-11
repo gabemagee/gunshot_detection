@@ -15,6 +15,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import cv2
+import six
 from threading import Thread
 from array import array
 from datetime import timedelta as td
@@ -265,6 +266,31 @@ def convert_to_spectrogram(data, sample_rate):
     return np.array(librosa.feature.melspectrogram(y = data, sr = sample_rate), dtype = "float32")
 
 
+def power_to_db(S, ref = 1.0, amin = 1e-10, top_db = 80.0):
+    S = np.asarray(S)
+    if amin <= 0:
+        logger.debug('ParameterError: amin must be strictly positive')
+    if np.issubdtype(S.dtype, np.complexfloating):
+        logger.debug('Warning: power_to_db was called on complex input so phase '
+                      'information will be discarded. To suppress this warning, '
+                      'call power_to_db(np.abs(D)**2) instead.')
+        magnitude = np.abs(S)
+    else:
+        magnitude = S
+    if six.callable(ref):
+        # User supplied a function to calculate reference power
+        ref_value = ref(magnitude)
+    else:
+        ref_value = np.abs(ref)
+    log_spec = 10.0 * np.log10(np.maximum(amin, magnitude))
+    log_spec -= 10.0 * np.log10(np.maximum(amin, ref_value))
+    if top_db is not None:
+        if top_db < 0:
+            logger.debug('ParameterError: top_db must be non-negative')
+        log_spec = np.maximum(log_spec, log_spec.max() - top_db)
+    return log_spec
+
+
 def convert_spectrogram_to_image(spectrogram):
     plt.interactive(False)
     
@@ -275,13 +301,13 @@ def convert_spectrogram_to_image(spectrogram):
     ax.axes.get_yaxis().set_visible(False)
     ax.set_frame_on(False)
     
-    librosa.display.specshow(librosa.power_to_db(spectrogram, ref = np.max))
+    librosa.display.specshow(power_to_db(spectrogram, ref = np.max))
 
     canvas = FigureCanvas(figure)
     canvas.draw()
     s, (width, height) = canvas.print_to_buffer()
     
-    image = np.fromstring(figure.canvas.tostring_argb(), dtype = "uint8")
+    image = np.fromstring(figure.canvas.tostring_rgb(), dtype = "uint8")
     image = image.reshape((width, height, 3))
     image = cv2.resize(image, (192, 192))
 
@@ -455,6 +481,8 @@ while True:
         elif USING_2D_IMAGE_SPECTROGRAM_MODEL:
             processed_data = convert_to_spectrogram(data = modified_microphone_data, sample_rate = 22050)
             processed_data = convert_spectrogram_to_image(spectrogram = processed_data)
+            processed_data = processed_data.astype("Float32") / 255
+
             
         # Reshapes the modified microphone data accordingly
         processed_data = processed_data.reshape(input_shape)
