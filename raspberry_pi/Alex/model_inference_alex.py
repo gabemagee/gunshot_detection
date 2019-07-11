@@ -13,6 +13,7 @@ import time
 import scipy.signal
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from threading import Thread
 from array import array
 from datetime import timedelta as td
@@ -47,17 +48,22 @@ AUDIO_DEVICE_INDEX = 1
 NUMBER_OF_FRAMES_PER_BUFFER = 4410
 SAMPLE_DURATION = 2
 AUDIO_VOLUME_THRESHOLD = 0.5
+NOISE_REDUCTION_ENABLED = False
 MODEL_CONFIDENCE_THRESHOLD = 0.95
 MAXIMUM_AUDIO_FRAME_INTEGER_VALUE = 2 ** 15 - 1
 SOUND_NORMALIZATION_THRESHOLD = 10 ** (-1.0 / 20)
 DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
-sound_data = np.zeros(0, dtype="float32")
-audio_analysis_queue = Queue()
-gunshot_sound_counter = 1
-noise_reduction_enabled = False
+sound_data = np.zeros(0, dtype = "float32")
 noise_sample_captured = False
+gunshot_sound_counter = 1
 noise_sample = []
+audio_analysis_queue = Queue()
 sms_alert_queue = Queue()
+
+# Only one of these state variables may be set to true at a given point in time
+USING_1D_TIME_SERIES_MODEL = True
+USING_1D_SPECTROGRAM_MODEL = False
+USING_2D_SPECTROGRAM_MODEL = False
 
 # ## Loading in Augmented Labels
 
@@ -249,6 +255,54 @@ def remove_noise(audio_clip,
     return recovered_signal
 
 
+# ## Converting 1D Sound Arrays into Spectrograms
+
+# In[ ]:
+
+
+def convert_to_spectrogram(data, sample_rate):
+    return np.array(librosa.feature.melspectrogram(y = data, sr = sample_rate))
+
+def convert_figure_to_image(figure):
+    """
+    @brief: Converts a Matplotlib figure to a 4D numpy array with RGBA channels and return it
+    @param figure: A matplotlib figure
+    @return: A NumPy 3D array of RGBA values
+    """
+    
+    # Draws the renderer
+    figure.canvas.draw()
+
+    # Gets the RGBA buffer from the figure
+    width, height = figure.canvas.get_width_height()
+    data = np.fromstring(figure.canvas.tostring_argb(), dtype = np.uint8)
+    data.shape = (width, height, 4)
+
+    # Calling figure.canvas.tostring_argb will give a pixmap in ARGB mode;
+    # We can then roll the ALPHA channel to have it in RGBA mode
+    data = np.roll(data, 3, axis = 2)
+    return data
+
+def convert_spectrogram_to_image(spectrogram):
+    plt.interactive(False)
+    figure = plt.figure(figsize = [0.72, 0.72])
+    ax = figure.add_subplot(111)
+    ax.axes.get_xaxis().set_visible(False)
+    ax.axes.get_yaxis().set_visible(False)
+    ax.set_frame_on(False)
+    librosa.display.specshow(librosa.power_to_db(spectrogram, ref = np.max))
+    image = convert_figure_to_image(figure = figure)
+
+    # Cleaning up the matplotlib instance
+    plt.close()    
+    figure.clf()
+    plt.close(figure)
+    plt.close("all")
+    
+    # Returns a NumPy array containing an image of a spectrogram
+    return image
+
+
 # ### WAV File Composition Function
 
 # In[ ]:
@@ -395,17 +449,26 @@ while True:
         # Post-processes the microphone data
         modified_microphone_data = librosa.resample(y=microphone_data, orig_sr=AUDIO_RATE, target_sr=22050)
         modified_microphone_data = normalize(modified_microphone_data)
-        if noise_sample_captured:
+        if NOISE_REDUCTION_ENABLED and noise_sample_captured:
             # Acts as a substitute for normalization
             modified_microphone_data = remove_noise(audio_clip=modified_microphone_data, noise_clip=noise_sample)
             number_of_missing_hertz = 44100 - len(modified_microphone_data)
             modified_microphone_data = np.array(
                 modified_microphone_data.tolist() + [0 for i in range(number_of_missing_hertz)], dtype="float32")
         modified_microphone_data = modified_microphone_data[:44100]
+        
+        # Passes an audio sample of an appropriate format into the model for inference
+        if USING_1D_TIME_SERIES_MODEL:
+            modified_microphone_data = modified_microphone_data
+        elif USING_1D_SPECTROGRAM_MODEL:
+            modified_microphone_data = convert_to_spectrogram(data = modified_microphone_data, sample_rate = 22050)
+        elif USING_2D_SPECTROGRAM_MODEL:
+            modified_microphone_data = convert_to_spectrogram(data = modified_microphone_data, sample_rate = 22050)
+            modified_microphone_data = convert_spectrogram_to_image(spectrogram = modified_microphone_data)
+            
+        # Reshapes the modified microphone data accordingly
         modified_microphone_data = modified_microphone_data.reshape(input_shape)
-
-        # Passes a given audio sample into the model for prediction
-        #         probabilities = model.predict(modified_microphone_data)
+        
         interpreter.set_tensor(input_details[0]["index"], modified_microphone_data)
         interpreter.invoke()
         probabilities = interpreter.get_tensor(output_details[0]["index"])
@@ -424,7 +487,7 @@ while True:
             gunshot_sound_counter += 1
 
     # Allows us to capture two seconds of background noise from the microphone for noise reduction
-    elif noise_reduction_enabled and not noise_sample_captured:
+    elif NOISE_REDUCTION_ENABLED and not noise_sample_captured:
         noise_sample = librosa.resample(y=microphone_data, orig_sr=AUDIO_RATE, target_sr=22050)
         noise_sample = normalize(noise_sample)
         noise_sample = noise_sample[:44100]
