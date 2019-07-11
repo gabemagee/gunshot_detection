@@ -1,8 +1,9 @@
 import numpy as np
 import tensorflow as tf
+import os
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="../models/gunshot_2d_spectrogram_model.tflite")
+interpreter = tf.lite.Interpreter(model_path=os.getcwd()+"/raspberry_pi/models/spectro_no_variables.tflite")
 interpreter.allocate_tensors()
 
 # Gets input and output tensors
