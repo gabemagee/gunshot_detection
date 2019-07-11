@@ -344,7 +344,7 @@ labels = np.array(labels)
 for train_index, test_index in kf.split(samples):
     train_wav, test_wav = samples[train_index], samples[test_index]
     train_label, test_label = labels[train_index], labels[test_index]
-    train_weight, test_weight = samples_weights[train_index], sample_weights[test_index]
+    train_weights, test_weights = samples_weights[train_index], sample_weights[test_index]
 
 # ## Reshaping the sound data
 
@@ -473,7 +473,7 @@ History = model.fit(train_wav, train_label,
                     callbacks=model_callbacks,
                     verbose=1,
                     batch_size=batch_size,
-                    sample_weight=train_weight,
+                    sample_weight=train_weights,
                     shuffle=True)
 
 model.save(base_dir + "gunshot_sound_model.h5")

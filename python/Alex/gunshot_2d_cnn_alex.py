@@ -60,12 +60,11 @@ sound_data_dir = data_dir + "Samples/"
 
 # In[ ]:
 
-
+samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
 labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
 
 sample_weights = np.array(
     [1 for normally_recorded_sample in range(len(samples) - 660)] + [50 for raspberry_pi_recorded_sample in range(660)])
-print("Shape of samples weights before splitting:", sample_weights.shape)
 
 # ## Reading spectrograms into memory
 
