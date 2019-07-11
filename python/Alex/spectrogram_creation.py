@@ -29,14 +29,18 @@ import matplotlib.pyplot as plt
 # In[ ]:
 
 
+GUNSHOT_FREQUENCY_THESHOLD = 0.25
+SAMPLE_RATE_PER_SECOND = 22050
+SAMPLE_RATE_PER_TWO_SECONDS = 44100
+SOUND_FILE_ID = 0
+BASE_DIRECTORY = "/home/alexm/Datasets/"
+DATA_DIRECTORY = BASE_DIRECTORY + "REU_Samples_and_Labels/"
+SPECTROGRAM_DIRECTORY = BASE_DIRECTORY + "Spectrograms/"
+SOUND_DATA_DIRECTORY = DATA_DIRECTORY + "Samples/"
 samples = []
 labels = []
-gunshot_frequency_threshold = 0.25
-sample_rate = 22050
-sample_rate_per_two_seconds = 44100
-base_dir = "/home/amorehe/Datasets/"
-data_dir = base_dir + "REU_Samples_and_Labels/"
-sound_data_dir = data_dir + "Samples/"
+sound_file_names = []
+sample_weights = []
 
 # # Data Pre-Processing
 
@@ -46,8 +50,8 @@ sound_data_dir = data_dir + "Samples/"
 # In[ ]:
 
 
-samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
-labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
+samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_samples.npy")
+labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
 
 
 # ## Converting Augmented Samples to Spectrograms

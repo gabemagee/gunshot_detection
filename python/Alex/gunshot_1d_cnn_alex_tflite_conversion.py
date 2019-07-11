@@ -25,14 +25,17 @@ from tensorflow.keras.models import load_model
 # In[ ]:
 
 
+GUNSHOT_FREQUENCY_THESHOLD = 0.25
+SAMPLE_RATE_PER_SECOND = 22050
+SAMPLE_RATE_PER_TWO_SECONDS = 44100
+SOUND_FILE_ID = 0
+BASE_DIRECTORY = "/home/alexm/Datasets/"
+DATA_DIRECTORY = BASE_DIRECTORY + "REU_Samples_and_Labels/"
+SOUND_DATA_DIRECTORY = DATA_DIRECTORY + "Samples/"
 samples = []
 labels = []
-gunshot_frequency_threshold = 0.25
-sample_rate = 22050
-sample_rate_per_two_seconds = 44100
-base_dir = "/home/amorehe/Datasets/"
-data_dir = base_dir + "REU_Samples_and_Labels/"
-sound_data_dir = data_dir + "Samples/"
+sound_file_names = []
+sample_weights = []
 
 
 # ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
@@ -95,14 +98,14 @@ output_tensor = layers.Dense(2, activation="softmax")(x)
 model = tf.keras.Model(input_tensor, output_tensor)
 model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metrics=[auc, "accuracy"])
 
-model = load_model(base_dir + "gunshot_sound_model.h5", custom_objects={"auc": auc})
+model = load_model(BASE_DIRECTORY + "gunshot_sound_model.h5", custom_objects={"auc": auc})
 
 # ## Converting model to TensorFlow Lite format
 
 
 # In[ ]:
 
-model_name = base_dir + "gunshot_sound_model"
+model_name = BASE_DIRECTORY + "gunshot_sound_model"
 converter = tf.lite.TFLiteConverter.from_keras_model_file(model_name + ".h5", custom_objects={"auc": auc})
 converter.post_training_quantize = True
 tflite_model = converter.convert()
