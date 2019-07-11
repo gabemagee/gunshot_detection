@@ -16,12 +16,15 @@ import os
 
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 # ### Data Pre-Processing Libraries
 
 # In[ ]:
 
 
+import librosa
+import librosa.display
 import cv2
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelBinarizer
@@ -43,28 +46,35 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 # In[ ]:
 
 
+GUNSHOT_FREQUENCY_THESHOLD = 0.25
+SAMPLE_RATE_PER_SECOND = 22050
+SAMPLE_RATE_PER_TWO_SECONDS = 44100
+SOUND_FILE_ID = 0
+BASE_DIRECTORY = "/home/alexm/Datasets/"
+DATA_DIRECTORY = BASE_DIRECTORY + "REU_Samples_and_Labels/"
+SPECTROGRAM_DIRECTORY = BASE_DIRECTORY + "Spectrograms/"
+SOUND_DATA_DIRECTORY = DATA_DIRECTORY + "Samples/"
 samples = []
 labels = []
 sound_file_names = []
 sample_weights = []
-sound_file_id = 0
-gunshot_frequency_threshold = 0.25
-sample_rate = 22050
-sample_rate_per_two_seconds = 44100
-base_dir = "/home/amorehe/Datasets/"
-data_dir = base_dir + "REU_Samples_and_Labels/"
-spectrogram_dir = base_dir + "Spectrograms/"
-sound_data_dir = data_dir + "Samples/"
 
-# ## Loading augmented NumPy file as a NumPy array
+# ## Loading augmented NumPy files as NumPy arrays
 
 # In[ ]:
 
-samples = np.load(base_dir + "gunshot_augmented_sound_samples.npy")
-labels = np.load(base_dir + "gunshot_augmented_sound_labels.npy")
+
+samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_samples.npy")
+labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
+
+# ## Instantiating a sample weights NumPy array
+
+# In[ ]:
+
 
 sample_weights = np.array(
     [1 for normally_recorded_sample in range(len(samples) - 660)] + [50 for raspberry_pi_recorded_sample in range(660)])
+print("Shape of samples weights before splitting:", sample_weights.shape)
 
 # ## Reading spectrograms into memory
 
@@ -73,7 +83,7 @@ sample_weights = np.array(
 
 spectrograms = []
 for i in range(len(labels)):
-    image = cv2.imread(spectrogram_dir + str(i) + ".png")
+    image = cv2.imread(SPECTROGRAM_DIRECTORY + str(i) + ".png")
     image = cv2.resize(image, (192, 192))
     spectrograms.append(image)
 
@@ -146,11 +156,11 @@ input_tensor = Input(shape=(192, 192))
 # In[ ]:
 
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-# config = tf.ConfigProto()
-# config.gpu_options.allow_growth = True
-# session = tf.Session(config=config)
-# K.set_session(session)
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.Session(config=config)
+K.set_session(session)
 
 # ## Model Architecture
 
@@ -223,7 +233,7 @@ model.compile(optimizer=optimizer, loss="binary_crossentropy", metrics=[auc, "ac
 # In[ ]:
 
 
-model_filename = base_dir + "gunshot_2d_spectrogram_model.pkl"
+model_filename = BASE_DIRECTORY + "gunshot_2d_spectrogram_model.pkl"
 
 model_callbacks = [
     EarlyStopping(monitor="val_acc",
@@ -258,7 +268,7 @@ History = model.fit(train_wav, train_label,
                     sample_weight=train_weights,
                     shuffle=True)
 
-model.save(base_dir + "gunshot_2d_spectrogram_model.h5")
+model.save(BASE_DIRECTORY + "gunshot_2d_spectrogram_model.h5")
 
 # ### Debugging of incorrectly-labeled examples (optional)
 
@@ -276,8 +286,8 @@ print(wrong_examples)
 # In[ ]:
 
 
-model_name = base_dir + "gunshot_2d_spectrogram_model"
-converter = tf.contrib.lite.TFLiteConverter.from_keras_model_file(model_name + ".h5", custom_objects={"auc": auc})
+model_name = BASE_DIRECTORY + "gunshot_2d_spectrogram_model"
+converter = tf.lite.TFLiteConverter.from_keras_model_file(model_name + ".h5", custom_objects={"auc": auc})
 converter.post_training_quantize = True
 tflite_model = converter.convert()
 open(model_name + ".tflite", "wb").write(tflite_model)

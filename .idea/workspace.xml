@@ -2,7 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="803be349-513d-4b27-9840-52c6e4d20f62" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_positives_testing (deprecated).py" beforeDir="false" afterPath="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_positives_testing (deprecated).py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/R_User_Library.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gunshot_detection.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gunshot_detection.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -12,25 +17,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="62" selection-start-line="62" selection-end-line="63" selection-end-column="65" />
-              <folding>
-                <element signature="e#103#112#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.ipynb">
-          <provider selected="true" editor-type-id="jupyter-editor" />
-        </entry>
-      </file>
-    </leaf>
+    <leaf />
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -40,6 +27,8 @@
       <find>scipy</find>
       <find>tf</find>
       <find>pi</find>
+      <find>sound_file_id</find>
+      <find>sample_rate</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -63,19 +52,10 @@
         <option value="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_original.py" />
         <option value="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_tflite_conversion.py" />
         <option value="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_positives_testing (deprecated).py" />
+        <option value="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex.ipynb" />
+        <option value="$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.ipynb" />
         <option value="$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.py" />
-      </list>
-    </option>
-  </component>
-  <component name="ProjectConfigurationFiles">
-    <option name="files">
-      <list>
-        <option value="$PROJECT_DIR$/.idea/gunshot_detection.iml" />
-        <option value="$PROJECT_DIR$/.idea/misc.xml" />
-        <option value="$PROJECT_DIR$/.idea/modules.xml" />
-        <option value="$PROJECT_DIR$/.idea/vcs.xml" />
-        <option value="$PROJECT_DIR$/.idea/dictionaries/alexm.xml" />
-        <option value="$PROJECT_DIR$/.idea/other.xml" />
+        <option value="$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex.py" />
       </list>
     </option>
   </component>
@@ -145,26 +125,20 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1562793828651</updated>
-      <workItem from="1562793833999" duration="5871000" />
+      <workItem from="1562793833999" duration="7394000" />
+      <workItem from="1562805977683" duration="1419000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="5871000" />
+    <option name="totallyTimeSpent" value="8813000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-4" y="44" width="1928" height="1040" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2497332" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2524013" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Database Changes" />
-      <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Python Console" />
-      <window_info anchor="bottom" id="Terminal" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32929516" />
       <window_info anchor="bottom" id="Run" order="2" />
@@ -172,11 +146,19 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="SciView" />
-      <window_info anchor="right" id="Database" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="bottom" id="Database Changes" order="9" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
+      <window_info anchor="bottom" id="Terminal" order="11" />
+      <window_info anchor="bottom" id="Python Console" order="12" />
+      <window_info anchor="right" id="R Graphics" />
+      <window_info anchor="right" id="R Packages" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="SciView" order="3" />
+      <window_info anchor="right" id="Database" order="4" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -341,44 +323,15 @@
     <entry file="file://$PROJECT_DIR$/arduino/libraries/readme.txt">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/python/Alex/microphone_experimentation_SoundDevice.ipynb">
-      <provider selected="true" editor-type-id="jupyter-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python/Alex/microphone_experimentation_PyAudio.ipynb">
-      <provider selected="true" editor-type-id="jupyter-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_original.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="540">
-          <caret line="36" selection-start-line="36" selection-end-line="36" />
-          <folding>
-            <element signature="e#68#79#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex.ipynb">
-      <provider selected="true" editor-type-id="jupyter-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/python/Alex/microphone_experimentation_SoundDevice.ipynb" />
+    <entry file="file://$PROJECT_DIR$/python/Alex/microphone_experimentation_PyAudio.ipynb" />
+    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_original.py" />
     <entry file="file://$PROJECT_DIR$/python/Alex/spectrogram_creation.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="451">
           <caret line="70" column="54" selection-start-line="70" selection-start-column="54" selection-end-line="70" selection-end-column="54" />
           <folding>
             <element signature="e#93#111#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_tflite_conversion.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="286">
-          <caret line="59" column="40" lean-forward="true" selection-start-line="59" selection-start-column="40" selection-end-line="59" selection-end-column="40" />
-          <folding>
-            <element signature="e#103#112#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -393,18 +346,41 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.py">
+    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex.ipynb">
+      <provider selected="true" editor-type-id="jupyter-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.ipynb">
+      <provider selected="true" editor-type-id="jupyter-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="62" selection-start-line="62" selection-end-line="63" selection-end-column="65" />
+        <state relative-caret-position="2070">
+          <caret line="138" column="40" lean-forward="true" selection-start-line="138" selection-start-column="40" selection-end-line="138" selection-end-column="40" />
           <folding>
             <element signature="e#103#112#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.ipynb">
-      <provider selected="true" editor-type-id="jupyter-editor" />
+    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_2d_cnn_alex.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="735">
+          <caret line="131" lean-forward="true" selection-start-line="131" selection-end-line="131" />
+          <folding>
+            <element signature="e#103#112#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python/Alex/gunshot_1d_cnn_alex_tflite_conversion.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="331">
+          <caret line="62" column="17" selection-start-line="62" selection-start-column="17" selection-end-line="62" selection-end-column="17" />
+          <folding>
+            <element signature="e#103#112#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
     </entry>
   </component>
 </project>
