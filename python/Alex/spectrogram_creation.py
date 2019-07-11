@@ -17,6 +17,9 @@ import numpy as np
 
 import librosa
 import librosa.display
+import cv2
+import six
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 # ### Graph Libraries
 
@@ -33,7 +36,7 @@ GUNSHOT_FREQUENCY_THESHOLD = 0.25
 SAMPLE_RATE_PER_SECOND = 22050
 SAMPLE_RATE_PER_TWO_SECONDS = 44100
 SOUND_FILE_ID = 0
-BASE_DIRECTORY = "/home/alexm/Datasets/"
+BASE_DIRECTORY = "/home/amorehe/Datasets/"
 DATA_DIRECTORY = BASE_DIRECTORY + "REU_Samples_and_Labels/"
 SPECTROGRAM_DIRECTORY = BASE_DIRECTORY + "Spectrograms/"
 SOUND_DATA_DIRECTORY = DATA_DIRECTORY + "Samples/"
@@ -62,23 +65,62 @@ labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
 
 
 def convert_to_spectrogram(data, sample_rate):
-    return np.array(librosa.feature.melspectrogram(y=data, sr=sample_rate))
+    return np.array(librosa.feature.melspectrogram(y = data, sr = sample_rate), dtype = "float32")
 
 
-def save_spectrogram_as_png(spectrogram, index):
+def power_to_db(S, ref = 1.0, amin = 1e-10, top_db = 80.0):
+    S = np.asarray(S)
+    if amin <= 0:
+        logger.debug('ParameterError: amin must be strictly positive')
+    if np.issubdtype(S.dtype, np.complexfloating):
+        logger.debug('Warning: power_to_db was called on complex input so phase '
+                      'information will be discarded. To suppress this warning, '
+                      'call power_to_db(np.abs(D)**2) instead.')
+        magnitude = np.abs(S)
+    else:
+        magnitude = S
+    if six.callable(ref):
+        # User supplied a function to calculate reference power
+        ref_value = ref(magnitude)
+    else:
+        ref_value = np.abs(ref)
+    log_spec = 10.0 * np.log10(np.maximum(amin, magnitude))
+    log_spec -= 10.0 * np.log10(np.maximum(amin, ref_value))
+    if top_db is not None:
+        if top_db < 0:
+            logger.debug('ParameterError: top_db must be non-negative')
+        log_spec = np.maximum(log_spec, log_spec.max() - top_db)
+    return log_spec
+
+
+def convert_spectrogram_to_image(spectrogram):
     plt.interactive(False)
-    fig = plt.figure(figsize=[0.72, 0.72])
-    ax = fig.add_subplot(111)
+    
+    figure = plt.figure(figsize = [0.72, 0.72], dpi = 400)
+    plt.tight_layout(pad = 0)
+    ax = figure.add_subplot(111)
     ax.axes.get_xaxis().set_visible(False)
     ax.axes.get_yaxis().set_visible(False)
     ax.set_frame_on(False)
-    librosa.display.specshow(librosa.power_to_db(spectrogram, ref=np.max))
-    plt.savefig("~/Datasets/Spectrograms/" + str(index) + ".png", dpi=400, bbox_inches="tight", pad_inches=0)
+    
+    librosa.display.specshow(power_to_db(spectrogram, ref = np.max))
+    
+    canvas = FigureCanvas(figure)
+    canvas.draw()
+    s, (width, height) = canvas.print_to_buffer()
 
-    plt.close()
-    fig.clf()
-    plt.close(fig)
-    plt.close('all')
+    image = np.fromstring(figure.canvas.tostring_rgb(), dtype = "uint8")
+    image = image.reshape((width, height, 3))
+    image = cv2.resize(image, (192, 192))
+
+    # Cleaning up the matplotlib instance
+    plt.close()    
+    figure.clf()
+    plt.close(figure)
+    plt.close("all")
+    
+    # Returns a NumPy array containing an image of a spectrogram
+    return image
 
 
 # ### Iteratively Converting All Augmented Samples into Spectrograms
@@ -86,10 +128,30 @@ def save_spectrogram_as_png(spectrogram, index):
 # In[ ]:
 
 
-spectogram_index = 0
+spectograms = []
 
 for sample in samples:
-    spectrogram = convert_to_spectrogram(sample, sample_rate)
-    save_spectrogram_as_png(spectrogram, spectogram_index)
-    print("Successfully saved augmented sample #" + str(spectogram_index) + " as a spectrogram...")
-    spectogram_index += 1
+    spectrogram = convert_to_spectrogram(sample, SAMPLE_RATE_PER_SECOND)
+    spectrogram = convert_spectrogram_to_image(spectrogram)
+    spectrograms.append(spectrogram)
+    print("Converted a sample into a spectrogram...")
+
+    
+# ### Restructuring spectrograms
+
+# In[ ]:
+
+
+samples = np.array(spectrograms).reshape(-1, 192, 192, 3)
+samples = samples.astype("float32")
+samples /= 255
+print("Finished loading all spectrograms into memory...")
+
+
+# ## Saving spectrograms as a NumPy array
+
+# In[ ]:
+
+
+np.save(BASE_DIRECTORY + "gunshot_augmented_sample_spectrograms.npy", samples)
+print("Successfully saved all spectrograms as a NumPy array...")

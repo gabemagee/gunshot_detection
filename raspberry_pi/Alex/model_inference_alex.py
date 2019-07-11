@@ -481,9 +481,14 @@ while True:
         elif USING_2D_IMAGE_SPECTROGRAM_MODEL:
             processed_data = convert_to_spectrogram(data = modified_microphone_data, sample_rate = 22050)
             processed_data = convert_spectrogram_to_image(spectrogram = processed_data)
-            processed_data = processed_data.astype("Float32") / 255
-
+            processed_data = processed_data.reshape(input_shape)
+            processed_data = processed_data.astype("float32")
+            processed_data /= 255
             
+        if not USING_2D_IMAGE_SPECTROGRAM_MODEL:
+            # Reshapes the modified microphone data accordingly
+            processed_data = processed_data.reshape(input_shape)
+
         # Reshapes the modified microphone data accordingly
         processed_data = processed_data.reshape(input_shape)
         
