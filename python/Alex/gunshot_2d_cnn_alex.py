@@ -146,7 +146,7 @@ def convert_spectrogram_to_image(spectrogram):
 # In[ ]:
 
 
-spectograms = []
+spectrograms = []
 
 for sample in samples:
     spectrogram = convert_to_spectrogram(sample, SAMPLE_RATE_PER_SECOND)
