@@ -66,8 +66,11 @@ sample_weights = []
 # In[ ]:
 
 
-samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_samples.npy")
+samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sample_spectrograms.npy")
 labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
+
+print("Successfully loaded all spectrograms and labels as NumPy arrays...")
+print("Type of the spectrograms array:", samples.dtype)
 
 # ## Instantiating a sample weights NumPy array
 
@@ -77,15 +80,6 @@ labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
 sample_weights = np.array(
     [1 for normally_recorded_sample in range(len(samples) - 660)] + [50 for raspberry_pi_recorded_sample in range(660)])
 print("Shape of samples weights before splitting:", sample_weights.shape)
-
-# ## Loading a NumPy file as spectrograms
-
-# In [ ]:
-
-
-samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sample_spectrograms.npy")
-print("Successfully loaded all spectrograms as a NumPy array...")
-print("Type of the spectrograms:", samples.dtype)
 
 # ## Restructuring the label data
 
@@ -146,11 +140,11 @@ input_tensor = Input(shape=(192, 192))
 # In[ ]:
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-session = tf.Session(config=config)
-K.set_session(session)
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# config = tf.ConfigProto()
+# config.gpu_options.allow_growth = True
+# session = tf.Session(config=config)
+# K.set_session(session)
 
 # ## Model Architecture
 
