@@ -301,7 +301,7 @@ def convert_spectrogram_to_image(spectrogram):
 
 # Saves a two-second gunshot sample as a WAV file
 def create_gunshot_wav_file(microphone_data, index, timestamp):
-    librosa.output.write_wav("~/Gunshot\ Detection\ System\ Recordings/Gunshot Sound Sample #"
+    librosa.output.write_wav("~/Gunshot Detection System Recordings/Gunshot Sound Sample #"
                              + str(index) + " ("
                              + str(timestamp) + ").wav", microphone_data, 22050)
 
