@@ -60,6 +60,14 @@ samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_samples.npy")
 labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
 sound_file_names = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_file_names.npy")
 
+# ## Normalizing all augmented samples
+
+# In[ ]:
+
+
+for sample in samples:
+    sample = normalize(sample)
+
 # ## Instantiating a sample weights NumPy array
 
 # In[ ]:

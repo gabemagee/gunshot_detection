@@ -64,6 +64,16 @@ labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
 # In[ ]:
 
 
+def normalize(sound_data):
+    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_INTEGER_VALUE) / max(abs(i) for i in sound_data)
+    
+    # Averages the volume out
+    r = array('f')
+    for datum in sound_data:
+        r.append(int(datum * normalization_factor))
+    return np.array(r, dtype = np.float32)
+
+
 def convert_to_spectrogram(data, sample_rate):
     return np.array(librosa.feature.melspectrogram(y=data, sr=sample_rate), dtype="float32")
 
@@ -131,6 +141,7 @@ def convert_spectrogram_to_image(spectrogram):
 spectrograms = []
 
 for sample in samples:
+    sample = normalize(sample)  # Normalizes augmented samples after loading them
     spectrogram = convert_to_spectrogram(sample, SAMPLE_RATE_PER_SECOND)
     spectrogram = convert_spectrogram_to_image(spectrogram)
     spectrograms.append(spectrogram)
