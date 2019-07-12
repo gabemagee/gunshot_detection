@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ## Package Imports
-
-# In[ ]:
-
+# Package Imports #
 
 import pyaudio
 import librosa
@@ -25,10 +22,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 # from gsmmodem.modem import GsmModem
 
 
-# ## Configuring the Logger
-
-# In[ ]:
-
+# Configuring the Logger #
 
 logger = logging.getLogger('debugger')
 logger.setLevel(logging.DEBUG)
@@ -38,10 +32,8 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-# ## Variable Initializations
 
-# In[ ]:
-
+# Variable Initializations #
 
 AUDIO_FORMAT = pyaudio.paFloat32
 AUDIO_RATE = 44100
@@ -68,17 +60,13 @@ USING_1D_TIME_SERIES_MODEL = False
 USING_2D_RAW_SPECTROGRAM_MODEL = True
 USING_2D_IMAGE_SPECTROGRAM_MODEL = False
 
-# ## Loading in Augmented Labels
 
-# In[ ]:
-
+# Loading in Augmented Labels #
 
 labels = np.load("/home/pi/Datasets/gunshot_augmented_sound_labels.npy")
 
-# ## Binarizing Labels
 
-# In[ ]:
-
+# Binarizing Labels #
 
 labels = np.array([("gun_shot" if label == 1 else "other") for label in labels])
 label_binarizer = LabelBinarizer()
@@ -86,10 +74,7 @@ labels = label_binarizer.fit_transform(labels)
 labels = np.hstack((labels, 1 - labels))
 
 
-# ## Sound Post-Processing Functions
-
-# In[ ]:
-
+# Sound Post-Processing Functions #
 
 def normalize(sound_data):
     normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_INTEGER_VALUE) / max(
@@ -101,11 +86,7 @@ def normalize(sound_data):
         r.append(int(datum * normalization_factor))
     return np.array(r, dtype=np.float32)
 
-
-# ### Librosa Wrapper Function Definitions
-
-# In[ ]:
-
+## Librosa Wrapper Function Definitions ##
 
 def _stft(y, n_fft, hop_length, win_length):
     return librosa.stft(y=y, n_fft=n_fft, hop_length=hop_length, win_length=win_length)
@@ -123,10 +104,7 @@ def _db_to_amp(x):
     return librosa.core.perceptual_weighting(x, frequencies=1.0)  # Librosa 0.4.2 functionality
 
 
-# ### Custom Noise Reduction Function Definition
-
-# In[ ]:
-
+# Custom Noise Reduction Function Definition #
 
 def remove_noise(audio_clip,
                  noise_clip,
@@ -258,10 +236,7 @@ def remove_noise(audio_clip,
     return recovered_signal
 
 
-# ## Converting 1D Sound Arrays into Spectrograms
-
-# In[ ]:
-
+# Converting 1D Sound Arrays into Spectrograms #
 
 def convert_to_spectrogram(data, sample_rate):
     return np.array(librosa.feature.melspectrogram(y = data, sr = sample_rate), dtype = "float32")
@@ -322,25 +297,19 @@ def convert_spectrogram_to_image(spectrogram):
     return image
 
 
-# ### WAV File Composition Function
-
-# In[ ]:
-
+# WAV File Composition Function #
 
 # Saves a two-second gunshot sample as a WAV file
 def create_gunshot_wav_file(microphone_data, index, timestamp):
-    librosa.output.write_wav("../recordings/Gunshot Sound Sample #"
+    librosa.output.write_wav("./recordings/Gunshot Sound Sample #"
                              + str(index) + " ("
                              + str(timestamp) + ").wav", microphone_data, 22050)
 
 
-# ### Loading in the model
-
-# In[ ]:
-
+# Loading in the model #
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="../models/spectro_no_variables.tflite")
+interpreter = tf.lite.Interpreter(model_path="./models/spectro_no_variables.tflite")
 interpreter.allocate_tensors()
 
 # Gets input and output tensors as well as the input shape
@@ -349,20 +318,18 @@ output_details = interpreter.get_output_details()
 input_shape = input_details[0]['shape']
 
 
-# ## ---
+### --- ###
 
-# # Multithreaded Inference: A callback thread adds two second samples of microphone data to the audio analysis
+# Multithreaded Inference: A callback thread adds two second samples of microphone data to the audio analysis
 # queue; The main thread, an audio analysis thread, detects the presence of gunshot sounds in samples retrieved from
 # the audio analysis queue; And an SMS alert thread dispatches groups of messages to designated recipients.
 
-# ## ---
+### --- ###
 
-# ## Defining Threads
 
-# ### SMS Alert Thread
+# Defining Threads #
 
-# In[ ]:
-
+## SMS Alert Thread ##
 
 # The SMS alert thread will run indefinitely
 def send_sms_alert():
@@ -409,10 +376,7 @@ sms_alert_thread = Thread(target = send_sms_alert)
 sms_alert_thread.start()
 
 
-# ### Callback Thread
-
-# In[ ]:
-
+## Callback Thread ##
 
 def callback(in_data, frame_count, time_info, status):
     global sound_data
@@ -440,10 +404,8 @@ stream = pa.open(format=AUDIO_FORMAT,
 stream.start_stream()
 logger.debug("--- Listening to Audio Stream ---")
 
-# In[ ]:
 
-
-### Main (Audio Analysis) Thread
+## Main (Audio Analysis) Thread ##
 
 # The main (audio analysis) thread will run indefinitely
 while True:
@@ -516,38 +478,3 @@ while True:
         noise_sample = normalize(noise_sample)
         noise_sample = noise_sample[:44100]
         noise_sample_captured = True
-
-# ## Testing A Model with Sample Audio (Optional)
-
-# In[ ]:
-
-
-# Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="../models/gunshot_2d__model.tflite")
-interpreter.allocate_tensors()
-
-# Gets input and output tensors as well as the input shape
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
-input_shape = input_details[0]['shape']
-
-# Loads in test sample WAV file
-gunshot_training_sample, sr = librosa.load("../recordings/260600_8.wav")
-# training_sample = normalize(training_sample)
-number_of_missing_hertz = 44100 - len(gunshot_training_sample)
-gunshot_training_sample = np.array(gunshot_training_sample.tolist() + [0 for i in range(number_of_missing_hertz)],
-                                   dtype="float32")
-gunshot_training_sample = gunshot_training_sample.reshape(input_shape)
-
-# In[ ]:
-
-
-# Performs inference with the TensorFlow Lite model
-interpreter.set_tensor(input_details[0]["index"], gunshot_training_sample)
-# interpreter.set_tensor(input_details[0]["index"], np.array(np.random.random_sample(input_shape), dtype = "float32"))
-interpreter.invoke()
-probabilities = interpreter.get_tensor(output_details[0]["index"])
-logger.debug("The model-predicted probability values: " + str(probabilities[0]))
-logger.debug("Model-predicted sample class: " + label_binarizer.inverse_transform(probabilities[:, 0])[0])
-
-# In[ ]:
