@@ -69,7 +69,13 @@ sound_file_names = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_file_names.
 
 
 def normalize(sound_data):
-    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_INTEGER_VALUE) / max(abs(i) for i in sound_data)
+    absolute_maximum_sound_datum = max(abs(i) for i in sound_data)
+    
+    # Prevents a divide by zero scenario
+    if absolute_maximum_sound_datum == 0.0:
+        absolute_maximum_sound_datum = 0.001
+    
+    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_INTEGER_VALUE) / absolute_maximum_sound_datum
     
     # Averages the volume out
     r = array('f')
