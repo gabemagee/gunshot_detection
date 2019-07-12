@@ -22,6 +22,7 @@ import numpy as np
 # In[ ]:
 
 
+from array import array
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelBinarizer
 

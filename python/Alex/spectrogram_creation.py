@@ -19,6 +19,7 @@ import librosa
 import librosa.display
 import cv2
 import six
+from array import array
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 # ### Graph Libraries
