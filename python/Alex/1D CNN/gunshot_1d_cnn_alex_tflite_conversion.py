@@ -74,22 +74,22 @@ K.set_session(session)
 x = layers.Conv1D(16, 9, activation="relu", padding="same")(input_tensor)
 x = layers.Conv1D(16, 9, activation="relu", padding="same")(x)
 x = layers.MaxPool1D(16)(x)
-x = layers.Dropout(rate=0.25)(x)
+x = layers.Dropout(rate=0.5)(x)
 
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.MaxPool1D(4)(x)
-x = layers.Dropout(rate=0.25)(x)
+x = layers.Dropout(rate=0.5)(x)
 
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.MaxPool1D(4)(x)
-x = layers.Dropout(rate=0.25)(x)
+x = layers.Dropout(rate=0.5)(x)
 
 x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
 x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
 x = layers.GlobalMaxPool1D()(x)
-x = layers.Dropout(rate=0.5)(x)  # Increasing drop-out rate here to prevent overfitting
+x = layers.Dropout(rate=0.75)(x)  # Increasing drop-out rate here to prevent overfitting
 
 x = layers.Dense(64, activation="relu")(x)
 x = layers.Dense(1028, activation="relu")(x)

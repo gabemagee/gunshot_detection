@@ -162,7 +162,7 @@ model.add(Conv2D(32, (3, 3), padding="same", input_shape=(192, 192, 3)))
 model.add(Activation("relu"))
 model.add(BatchNormalization(axis=-1))
 model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(Dropout(0.25))
+model.add(Dropout(0.5))
 
 # Second Layer: (CONV => RELU) * 2 => POOL
 model.add(Conv2D(64, (3, 3), padding="same"))
@@ -172,7 +172,7 @@ model.add(Conv2D(64, (3, 3), padding="same"))
 model.add(Activation("relu"))
 model.add(BatchNormalization(axis=-1))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+model.add(Dropout(0.5))
 
 # Third Layer: (CONV => RELU) * 2 => POOL
 model.add(Conv2D(128, (3, 3), padding="same"))
@@ -182,7 +182,7 @@ model.add(Conv2D(128, (3, 3), padding="same"))
 model.add(Activation("relu"))
 model.add(BatchNormalization(axis=-1))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+model.add(Dropout(0.5))
 
 # Fourth Layer: (CONV => RELU) * 2 => POOL
 model.add(Conv2D(256, (3, 3), padding="same"))
@@ -192,7 +192,7 @@ model.add(Conv2D(256, (3, 3), padding="same"))
 model.add(Activation("relu"))
 model.add(BatchNormalization(axis=-1))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+model.add(Dropout(0.5))
 
 """ Step 3: Flatten the layers """
 
@@ -203,7 +203,7 @@ model.add(Flatten())
 model.add(Dense(1024))
 model.add(Activation("relu"))
 model.add(BatchNormalization())
-model.add(Dropout(0.5))  # Increasing dropout here to prevent overfitting
+model.add(Dropout(0.75))  # Increasing dropout here to prevent overfitting
 
 model.add(Dense(2))
 model.add(Activation("softmax"))
