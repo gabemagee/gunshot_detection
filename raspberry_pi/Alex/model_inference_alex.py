@@ -73,7 +73,7 @@ USING_2D_IMAGE_SPECTROGRAM_MODEL = False
 # In[ ]:
 
 
-labels = np.load("/home/pi/Datasets/gunshot_augmented_sound_labels.npy")
+labels = np.load("/home/alexm/Datasets/gunshot_augmented_sound_labels.npy")
 
 # ## Binarizing Labels
 
@@ -329,7 +329,7 @@ def convert_spectrogram_to_image(spectrogram):
 
 # Saves a two-second gunshot sample as a WAV file
 def create_gunshot_wav_file(microphone_data, index, timestamp):
-    librosa.output.write_wav("~/Gunshot Detection System Recordings/Gunshot Sound Sample #"
+    librosa.output.write_wav("/home/alexm/Gunshot Detection System Recordings/Gunshot Sound Sample #"
                              + str(index) + " ("
                              + str(timestamp) + ").wav", microphone_data, 22050)
 
