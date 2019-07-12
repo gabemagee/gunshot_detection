@@ -43,6 +43,8 @@ GUNSHOT_FREQUENCY_THESHOLD = 0.25
 SAMPLE_RATE_PER_SECOND = 22050
 SAMPLE_RATE_PER_TWO_SECONDS = 44100
 SOUND_FILE_ID = 0
+MAXIMUM_AUDIO_FRAME_INTEGER_VALUE = 2 ** 15 - 1
+SOUND_NORMALIZATION_THRESHOLD = 10 ** (-1.0 / 20)
 BASE_DIRECTORY = "/home/alexm/Datasets/"
 DATA_DIRECTORY = BASE_DIRECTORY + "REU_Samples_and_Labels/"
 SOUND_DATA_DIRECTORY = DATA_DIRECTORY + "Samples/"
@@ -64,6 +66,15 @@ sound_file_names = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_file_names.
 
 # In[ ]:
 
+
+def normalize(sound_data):
+    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_INTEGER_VALUE) / max(abs(i) for i in sound_data)
+    
+    # Averages the volume out
+    r = array('f')
+    for datum in sound_data:
+        r.append(int(datum * normalization_factor))
+    return np.array(r, dtype = np.float32)
 
 for sample in samples:
     sample = normalize(sample)
