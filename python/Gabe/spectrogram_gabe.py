@@ -180,7 +180,7 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
 drop_out_rates = 0.1,0.05,0.01,0.25
 learning_rates = 0.1,0.05,0.01
 filter_sizes = (4,4),(5,5),(6,6),(3,3)
-name = "model"
+name = "weighted_spectrogram"
 print(model(train_wav, train_label, test_label, test_wav, name= name))
 
 
