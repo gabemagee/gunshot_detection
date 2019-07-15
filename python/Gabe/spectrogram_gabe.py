@@ -100,12 +100,17 @@ labels = keras.utils.to_categorical(labels, 2)
 
 print(labels.shape)
 
+sample_weights = np.array(
+    [1 for normally_recorded_sample in range(len(samples) - 660)] + [50 for raspberry_pi_recorded_sample in range(660)])
+print("Shape of samples weights before splitting:", sample_weights.shape)
+
 print("~~~~~~~~~~~~~~~~")
 
 kf = KFold(n_splits=3, shuffle=True)
 for train_index, test_index in kf.split(samples):
     train_wav, test_wav = samples[train_index], samples[test_index]
     train_label, test_label = labels[train_index], labels[test_index]
+    train_weights, test_weights = sample_weights[train_index], sample_weights[test_index]
 
 
 def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.001,number_of_epochs = 100,batch_size = 64,filter_size = (3,3),maxpool_size = (3,3),activation = "relu"):
@@ -167,6 +172,7 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
               callbacks=model_callbacks,
               verbose=verbose,
               batch_size=batch_size,
+              sample_weight=train_weights,
               shuffle=True)
     model.save(base_dir + "gunshot_sound_model_spectrograph_"+name+".h5")
     return model.evaluate(test_wav, test_label, batch_size=batch_size)
@@ -174,7 +180,7 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
 drop_out_rates = 0.1,0.05,0.01,0.25
 learning_rates = 0.1,0.05,0.01
 filter_sizes = (4,4),(5,5),(6,6),(3,3)
-name = "model"
+name = "weighted_spectrogram"
 print(model(train_wav, train_label, test_label, test_wav, name= name))
 
 
