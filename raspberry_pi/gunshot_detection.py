@@ -44,7 +44,7 @@ SAMPLE_DURATION = 2
 AUDIO_VOLUME_THRESHOLD = 0.5
 NOISE_REDUCTION_ENABLED = False
 MODEL_CONFIDENCE_THRESHOLD = 0.90
-MAXIMUM_AUDIO_FRAME_INTEGER_VALUE = 2 ** 15 - 1
+MAXIMUM_AUDIO_FRAME_FLOAT_VALUE = 2 ** 31 - 1
 SOUND_NORMALIZATION_THRESHOLD = 10 ** (-1.0 / 20)
 SMS_ALERTS_ENABLED = False
 DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
@@ -83,7 +83,7 @@ def normalize(sound_data):
     if absolute_maximum_sound_datum == 0.0:
         absolute_maximum_sound_datum = 0.001
     
-    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_INTEGER_VALUE) / absolute_maximum_sound_datum
+    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_FLOAT_VALUE) / absolute_maximum_sound_datum
 
     # Averages the volume out
     r = array('f')

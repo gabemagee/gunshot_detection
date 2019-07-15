@@ -37,7 +37,7 @@ GUNSHOT_FREQUENCY_THESHOLD = 0.25
 SAMPLE_RATE_PER_SECOND = 22050
 SAMPLE_RATE_PER_TWO_SECONDS = 44100
 SOUND_FILE_ID = 0
-MAXIMUM_AUDIO_FRAME_INTEGER_VALUE = 2 ** 15 - 1
+MAXIMUM_AUDIO_FRAME_FLOAT_VALUE = 2 ** 31 - 1
 SOUND_NORMALIZATION_THRESHOLD = 10 ** (-1.0 / 20)
 BASE_DIRECTORY = "/home/amorehe/Datasets/"
 DATA_DIRECTORY = BASE_DIRECTORY + "REU_Samples_and_Labels/"
@@ -74,7 +74,7 @@ def normalize(sound_data):
     if absolute_maximum_sound_datum == 0.0:
         absolute_maximum_sound_datum = 0.001
     
-    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_INTEGER_VALUE) / absolute_maximum_sound_datum
+    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_FLOAT_VALUE) / absolute_maximum_sound_datum
     
     # Averages the volume out
     r = array('f')

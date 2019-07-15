@@ -52,7 +52,7 @@ SAMPLE_DURATION = 2
 AUDIO_VOLUME_THRESHOLD = 0.5
 NOISE_REDUCTION_ENABLED = False
 MODEL_CONFIDENCE_THRESHOLD = 0.90
-MAXIMUM_AUDIO_FRAME_INTEGER_VALUE = 2 ** 15 - 1
+MAXIMUM_AUDIO_FRAME_FLOAT_VALUE = 2 ** 31 - 1
 SOUND_NORMALIZATION_THRESHOLD = 10 ** (-1.0 / 20)
 SMS_ALERTS_ENABLED = False
 DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
@@ -98,7 +98,7 @@ def normalize(sound_data):
     if absolute_maximum_sound_datum == 0.0:
         absolute_maximum_sound_datum = 0.001
     
-    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_INTEGER_VALUE) / absolute_maximum_sound_datum
+    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_FLOAT_VALUE) / absolute_maximum_sound_datum
 
     # Averages the volume out
     r = array('f')
@@ -528,7 +528,7 @@ while True:
 
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="../models/gunshot_2d__model.tflite")
+interpreter = tf.lite.Interpreter(model_path="../models/gunshot_2d_spectrogram_model.tflite")
 interpreter.allocate_tensors()
 
 # Gets input and output tensors as well as the input shape
@@ -537,7 +537,7 @@ output_details = interpreter.get_output_details()
 input_shape = input_details[0]['shape']
 
 # Loads in test sample WAV file
-gunshot_training_sample, sr = librosa.load("../recordings/260600_8.wav")
+gunshot_training_sample, sr = librosa.load("../recordings/8795.wav")
 # training_sample = normalize(training_sample)
 number_of_missing_hertz = 44100 - len(gunshot_training_sample)
 gunshot_training_sample = np.array(gunshot_training_sample.tolist() + [0 for i in range(number_of_missing_hertz)],
