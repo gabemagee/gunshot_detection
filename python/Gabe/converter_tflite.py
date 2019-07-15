@@ -8,7 +8,7 @@ def auc(y_true, y_pred):
     return auc
 
 
-saved_model_dir = os.getcwd()+"/raspberry_pi/models/spectro_model_no_variables.h5"
+saved_model_dir = os.getcwd()+"/raspberry_pi/models/spectrogram_revised_gabe.h5"
 converter = tf.lite.TFLiteConverter.from_keras_model_file(saved_model_dir)
 #converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_dir)
 tflite_model = converter.convert()
