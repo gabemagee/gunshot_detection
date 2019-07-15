@@ -16,17 +16,7 @@ import numpy as np
 
 
 import librosa
-import librosa.display
-import cv2
 import six
-from array import array
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-
-# ### Graph Libraries
-
-# In [ ]:
-
-import matplotlib.pyplot as plt
 
 # # Initialization of Variables
 
@@ -36,9 +26,11 @@ import matplotlib.pyplot as plt
 GUNSHOT_FREQUENCY_THESHOLD = 0.25
 SAMPLE_RATE_PER_SECOND = 22050
 SAMPLE_RATE_PER_TWO_SECONDS = 44100
-SOUND_FILE_ID = 0
-MAXIMUM_AUDIO_FRAME_FLOAT_VALUE = 2 ** 31 - 1
-SOUND_NORMALIZATION_THRESHOLD = 10 ** (-1.0 / 20)
+HOP_LENGTH = 345 * 2
+MINIMUM_FREQUENCY = 20
+MAXIMUM_FREQUENCY = SAMPLE_RATE_PER_SECOND
+NUMBER_OF_MELS = 128
+NUMBER_OF_FFTS = NUMBER_OF_MELS * 20
 BASE_DIRECTORY = "/home/amorehe/Datasets/"
 DATA_DIRECTORY = BASE_DIRECTORY + "REU_Samples_and_Labels/"
 SPECTROGRAM_DIRECTORY = BASE_DIRECTORY + "Spectrograms/"
@@ -67,34 +59,23 @@ labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
 # In[ ]:
 
 
-def normalize(sound_data):
-    absolute_maximum_sound_datum = max(abs(i) for i in sound_data)
-    
-    # Prevents a divide by zero scenario
-    if absolute_maximum_sound_datum == 0.0:
-        absolute_maximum_sound_datum = 0.001
-    
-    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_FLOAT_VALUE) / absolute_maximum_sound_datum
-    
-    # Averages the volume out
-    r = array('f')
-    for datum in sound_data:
-        r.append(int(datum * normalization_factor))
-    return np.array(r, dtype = np.float32)
-
-
-def convert_to_spectrogram(data, sample_rate):
-    return np.array(librosa.feature.melspectrogram(y=data, sr=sample_rate), dtype="float32")
-
+def convert_audio_to_spectrogram(data):
+    spectrogram = librosa.feature.melspectrogram(y=data, sr=SAMPLE_RATE_PER_TWO_SECONDS,
+                                                 hop_length=HOP_LENGTH,
+                                                 fmin=MINIMUM_FREQUENCY,
+                                                 fmax=MAXIMUM_FREQUENCY,
+                                                 n_mels=NUMBER_OF_MELS,
+                                                 n_fft=NUMBER_OF_FFTS)
+    spectrogram = power_to_db(spectrogram)
+    spectrogram = spectrogram.astype(np.float32)
+    return spectrogram
 
 def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
     S = np.asarray(S)
     if amin <= 0:
-        logger.debug('ParameterError: amin must be strictly positive')
+        logger.debug("ParameterError: amin must be strictly positive")
     if np.issubdtype(S.dtype, np.complexfloating):
-        logger.debug('Warning: power_to_db was called on complex input so phase '
-                     'information will be discarded. To suppress this warning, '
-                     'call power_to_db(np.abs(D)**2) instead.')
+        logger.debug("Warning: power_to_db was called on complex input so phase information will be discarded.")
         magnitude = np.abs(S)
     else:
         magnitude = S
@@ -107,39 +88,9 @@ def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
     log_spec -= 10.0 * np.log10(np.maximum(amin, ref_value))
     if top_db is not None:
         if top_db < 0:
-            logger.debug('ParameterError: top_db must be non-negative')
+            logger.debug("ParameterError: top_db must be non-negative")
         log_spec = np.maximum(log_spec, log_spec.max() - top_db)
     return log_spec
-
-
-def convert_spectrogram_to_image(spectrogram):
-    plt.interactive(False)
-
-    figure = plt.figure(figsize=[0.72, 0.72], dpi=400)
-    plt.tight_layout(pad=0)
-    ax = figure.add_subplot(111)
-    ax.axes.get_xaxis().set_visible(False)
-    ax.axes.get_yaxis().set_visible(False)
-    ax.set_frame_on(False)
-
-    librosa.display.specshow(power_to_db(spectrogram, ref=np.max))
-
-    canvas = FigureCanvas(figure)
-    canvas.draw()
-    s, (width, height) = canvas.print_to_buffer()
-
-    image = np.fromstring(figure.canvas.tostring_rgb(), dtype="uint8")
-    image = image.reshape((width, height, 3))
-    image = cv2.resize(image, (192, 192))
-
-    # Cleaning up the matplotlib instance
-    plt.close()
-    figure.clf()
-    plt.close(figure)
-    plt.close("all")
-
-    # Returns a NumPy array containing an image of a spectrogram
-    return image
 
 
 # ### Iteratively Converting All Augmented Samples into Spectrograms
@@ -150,9 +101,8 @@ def convert_spectrogram_to_image(spectrogram):
 spectrograms = []
 
 for sample in samples:
-    sample = normalize(sample)  # Normalizes augmented samples after loading them
-    spectrogram = convert_to_spectrogram(sample, SAMPLE_RATE_PER_SECOND)
-    spectrogram = convert_spectrogram_to_image(spectrogram)
+    spectrogram = convert_audio_to_spectrogram(sample)
+    print(spectrogram.shape)
     spectrograms.append(spectrogram)
     print("Converted a sample into a spectrogram...")
 
@@ -161,9 +111,9 @@ for sample in samples:
 # In[ ]:
 
 
-samples = np.array(spectrograms).reshape(-1, 192, 192, 3)
-samples = samples.astype("float32")
-samples /= 255
+# samples = np.array(spectrograms).reshape(128, 84, 1)
+# samples = samples.astype("float32")
+# samples /= 255
 print("Finished loading all spectrograms into memory...")
 
 # ## Saving spectrograms as a NumPy array
