@@ -157,8 +157,8 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
     #Optional debugging of the model's architecture
     model.summary()
 
-    test_wav = test_wav.reshape(-1,128,87,1)
-    train_wav = train_wav.reshape(-1,128, 87, 1)
+    test_wav = test_wav.reshape(-1,128,64,1)
+    train_wav = train_wav.reshape(-1,128, 64, 1)
 
     #Training & caching the model
     History = model.fit(train_wav, train_label,
