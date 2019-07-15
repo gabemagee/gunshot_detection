@@ -274,11 +274,11 @@ def remove_noise(audio_clip,
 
 def convert_audio_to_spectrogram(data):
     spectrogram = librosa.feature.melspectrogram(y=data, sr=AUDIO_RATE,
-                                                 #hop_length=HOP_LENGTH,
-                                                 #fmin=MINIMUM_FREQUENCY,
-                                                 #fmax=MAXIMUM_FREQUENCY,
-                                                 #n_mels=NUMBER_OF_MELS,
-                                                 #n_fft=NUMBER_OF_FFTS
+                                                 hop_length=HOP_LENGTH,
+                                                 fmin=MINIMUM_FREQUENCY,
+                                                 fmax=MAXIMUM_FREQUENCY,
+                                                 n_mels=NUMBER_OF_MELS,
+                                                 n_fft=NUMBER_OF_FFTS
                                                 )
     spectrogram = power_to_db(spectrogram)
     spectrogram = spectrogram.astype(np.float32)
@@ -326,7 +326,7 @@ def create_gunshot_wav_file(microphone_data, index, timestamp):
 
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="../models/RYAN_gunshot_2d_spectrogram_model.tflite")
+interpreter = tf.lite.Interpreter(model_path="../models/converted_model_weights.tflite")
 interpreter.allocate_tensors()
 
 # Gets input and output tensors as well as the input shape

@@ -70,7 +70,6 @@ samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sample_spectrograms.npy")
 labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
 
 print("Successfully loaded all spectrograms and labels as NumPy arrays...")
-print("Type of the spectrograms array:", samples.dtype)
 
 # ## Instantiating a sample weights NumPy array
 
@@ -158,7 +157,7 @@ model = Sequential()
 """ Step 2: Create the input and hidden layers """
 
 # First Layer
-model.add(Conv2D(32, (3, 3), padding = "same", input_shape = (128, 64)))
+model.add(Conv2D(32, (3, 3), padding = "same", input_shape = (128, 64, 1)))
 model.add(Activation("relu"))
 model.add(BatchNormalization(axis = -1))
 model.add(MaxPooling2D(pool_size = (3, 3)))

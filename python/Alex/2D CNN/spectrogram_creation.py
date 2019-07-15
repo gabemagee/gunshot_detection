@@ -110,7 +110,7 @@ for sample in samples:
 # In[ ]:
 
 
-samples = np.array(spectrograms).reshape(-1, 128, 84)
+samples = np.array(spectrograms).reshape(-1, 128, 84, 1)
 samples = samples.astype("float32")
 print("Finished loading all spectrograms into memory...")
 
