@@ -35,7 +35,10 @@ src_np = base_dir + "gunshot_augmented_sound_samples.npy"
 samples = np.array(np.load(src_np))
 
 s = []
+i = 0
 for sample in samples:
+    print(i)
+    i = i + 1
     s.append(audio_to_melspectrogram(sample))
 
 s = np.array(s)
