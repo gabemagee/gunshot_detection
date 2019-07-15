@@ -78,11 +78,14 @@ data_directory = "/home/gamagee/workspace/gunshot_detection/REU_Data/REU_Samples
 label_csv = data_directory + "labels.csv"
 sample_directory = data_directory + "Samples/"
 base_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/"
-sample_path = base_dir+"spectrogram_samples_power_to_db.npy"
+sample_path = base_dir+"gunshot_augmented_sound_samples_spectro.npy"
+sample_path_2 = base_dir+"spectrogram_samples_power_to_db.npy"
 label_path = base_dir+"gunshot_augmented_sound_labels.npy"
-samples = np.load(sample_path)
+samples_2 = np.load(sample_path)
+samples = np.load(sample_path_2)
 labels = np.load(label_path)
 
+print(samples_2.shape)
 print(samples.shape)
 
 samples.reshape(-1,128,87,1)
