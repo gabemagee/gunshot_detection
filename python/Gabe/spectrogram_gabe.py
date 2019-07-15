@@ -88,7 +88,7 @@ labels = np.load(label_path)
 print(samples_2.shape)
 print(samples.shape)
 
-samples.reshape(-1,128,87,1)
+samples.reshape(-1,128,64,1)
 sample_rate_per_two_seconds = 44100
 number_of_classes = 2
 sr = 22050
@@ -110,7 +110,7 @@ for train_index, test_index in kf.split(samples):
 
 def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.001,number_of_epochs = 100,batch_size = 64,filter_size = (3,3),maxpool_size = (3,3),activation = "relu"):
     optimizer = optimizers.Adam(0.001, 0.001 / 100)
-    input_tensor = Input(shape=(128, 87, 1))
+    input_tensor = Input(shape=(128, 64, 1))
     metrics = ["accuracy"]
     #Model Architecture
     x = layers.Conv2D(16, (3,3), activation="relu", padding="same")(input_tensor)
