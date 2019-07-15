@@ -44,8 +44,6 @@ GUNSHOT_FREQUENCY_THESHOLD = 0.25
 SAMPLE_RATE_PER_SECOND = 22050
 SAMPLE_RATE_PER_TWO_SECONDS = 44100
 SOUND_FILE_ID = 0
-MAXIMUM_AUDIO_FRAME_INTEGER_VALUE = 2 ** 15 - 1
-SOUND_NORMALIZATION_THRESHOLD = 10 ** (-1.0 / 20)
 BASE_DIRECTORY = "/home/amorehe/Datasets/"
 DATA_DIRECTORY = BASE_DIRECTORY + "REU_Samples_and_Labels/"
 SOUND_DATA_DIRECTORY = DATA_DIRECTORY + "Samples/"
@@ -63,36 +61,13 @@ samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_samples.npy")
 labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
 sound_file_names = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_file_names.npy")
 
-# ## Normalizing all augmented samples
-
-# In[ ]:
-
-
-def normalize(sound_data):
-    absolute_maximum_sound_datum = max(abs(i) for i in sound_data)
-    
-    # Prevents a divide by zero scenario
-    if absolute_maximum_sound_datum == 0.0:
-        absolute_maximum_sound_datum = 0.001
-    
-    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_INTEGER_VALUE) / absolute_maximum_sound_datum
-    
-    # Averages the volume out
-    r = array('f')
-    for datum in sound_data:
-        r.append(int(datum * normalization_factor))
-    return np.array(r, dtype = np.float32)
-
-for sample in samples:
-    sample = normalize(sample)
-
 # ## Instantiating a sample weights NumPy array
 
 # In[ ]:
 
 
 sample_weights = np.array(
-    [1 for normally_recorded_sample in range(len(samples) - 660)] + [50 for raspberry_pi_recorded_sample in range(660)])
+    [1 for normally_recorded_sample in range(len(samples) - 660)] + [20 for raspberry_pi_recorded_sample in range(660)])
 print("Shape of samples weights before splitting:", sample_weights.shape)
 
 # ## Restructuring the label data
