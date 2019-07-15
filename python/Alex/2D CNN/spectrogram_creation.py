@@ -102,7 +102,6 @@ spectrograms = []
 
 for sample in samples:
     spectrogram = convert_audio_to_spectrogram(sample)
-    print(spectrogram.shape)
     spectrograms.append(spectrogram)
     print("Converted a sample into a spectrogram...")
 
@@ -111,9 +110,8 @@ for sample in samples:
 # In[ ]:
 
 
-# samples = np.array(spectrograms).reshape(128, 84, 1)
-# samples = samples.astype("float32")
-# samples /= 255
+samples = np.array(spectrograms).reshape(-1, 128, 84)
+samples = samples.astype("float32")
 print("Finished loading all spectrograms into memory...")
 
 # ## Saving spectrograms as a NumPy array
