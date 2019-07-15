@@ -36,7 +36,7 @@ samples = np.array(np.load(src_np))
 
 s = []
 for sample in samples:
-    s.append(make_spectrogram(sample))
+    s.append(audio_to_melspectrogram(sample))
 
 s = np.array(s)
 
