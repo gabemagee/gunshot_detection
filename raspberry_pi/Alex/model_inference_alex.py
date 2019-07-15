@@ -52,8 +52,6 @@ SAMPLE_DURATION = 2
 AUDIO_VOLUME_THRESHOLD = 0.5
 NOISE_REDUCTION_ENABLED = False
 MODEL_CONFIDENCE_THRESHOLD = 0.90
-MAXIMUM_AUDIO_FRAME_FLOAT_VALUE = 2 ** 31 - 1
-SOUND_NORMALIZATION_THRESHOLD = 10 ** (-1.0 / 20)
 HOP_LENGTH = 345 * 2
 MINIMUM_FREQUENCY = 20
 MAXIMUM_FREQUENCY = AUDIO_RATE // 2
@@ -88,28 +86,6 @@ labels = np.array([("gun_shot" if label == 1 else "other") for label in labels])
 label_binarizer = LabelBinarizer()
 labels = label_binarizer.fit_transform(labels)
 labels = np.hstack((labels, 1 - labels))
-
-
-# ## Sound Post-Processing Functions
-
-# In[ ]:
-
-
-def normalize(sound_data):
-    absolute_maximum_sound_datum = max(abs(i) for i in sound_data)
-    
-    # Prevents a divide by zero scenario
-    if absolute_maximum_sound_datum == 0.0:
-        absolute_maximum_sound_datum = 0.001
-    
-    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_FLOAT_VALUE) / absolute_maximum_sound_datum
-
-    # Averages the volume out
-    r = array('f')
-    for datum in sound_data:
-        r.append(int(datum * normalization_factor))
-    return np.array(r, dtype=np.float32)
-
 
 # ### Librosa Wrapper Function Definitions
 
@@ -274,11 +250,11 @@ def remove_noise(audio_clip,
 
 def convert_audio_to_spectrogram(data):
     spectrogram = librosa.feature.melspectrogram(y=data, sr=AUDIO_RATE,
-                                                 hop_length=HOP_LENGTH,
-                                                 fmin=MINIMUM_FREQUENCY,
-                                                 fmax=MAXIMUM_FREQUENCY,
-                                                 n_mels=NUMBER_OF_MELS,
-                                                 n_fft=NUMBER_OF_FFTS
+                                                 #hop_length=HOP_LENGTH,
+                                                 #fmin=MINIMUM_FREQUENCY,
+                                                 #fmax=MAXIMUM_FREQUENCY,
+                                                 #n_mels=NUMBER_OF_MELS,
+                                                 #n_fft=NUMBER_OF_FFTS
                                                 )
     spectrogram = power_to_db(spectrogram)
     spectrogram = spectrogram.astype(np.float32)
@@ -326,7 +302,7 @@ def create_gunshot_wav_file(microphone_data, index, timestamp):
 
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="../models/converted_model_weights.tflite")
+interpreter = tf.lite.Interpreter(model_path="../models/RYAN2_gunshot_2d_spectrogram_model.tflite")
 interpreter.allocate_tensors()
 
 # Gets input and output tensors as well as the input shape
@@ -451,7 +427,6 @@ while True:
 
         # Post-processes the microphone data
         modified_microphone_data = librosa.resample(y=microphone_data, orig_sr=AUDIO_RATE, target_sr=22050)
-        modified_microphone_data = normalize(modified_microphone_data)
         if NOISE_REDUCTION_ENABLED and noise_sample_captured:
             # Acts as a substitute for normalization
             modified_microphone_data = remove_noise(audio_clip=modified_microphone_data, noise_clip=noise_sample)
@@ -489,7 +464,6 @@ while True:
     # Allows us to capture two seconds of background noise from the microphone for noise reduction
     elif NOISE_REDUCTION_ENABLED and not noise_sample_captured:
         noise_sample = librosa.resample(y=microphone_data, orig_sr=AUDIO_RATE, target_sr=22050)
-        noise_sample = normalize(noise_sample)
         noise_sample = noise_sample[:44100]
         noise_sample_captured = True
 
@@ -509,7 +483,6 @@ input_shape = input_details[0]['shape']
 
 # Loads in test sample WAV file
 gunshot_training_sample, sr = librosa.load("../recordings/8795.wav")
-# training_sample = normalize(training_sample)
 number_of_missing_hertz = 44100 - len(gunshot_training_sample)
 gunshot_training_sample = np.array(gunshot_training_sample.tolist() + [0 for i in range(number_of_missing_hertz)],
                                    dtype="float32")
