@@ -29,7 +29,7 @@ def audio_to_melspectrogram(audio):
     return spectrogram
 
 
-base_dir = "/home/gamagee/workspace/gunshot_detection/"
+base_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/"
 src_np = base_dir + "gunshot_augmented_sound_samples.npy"
 
 samples = np.array(np.load(src_np))
