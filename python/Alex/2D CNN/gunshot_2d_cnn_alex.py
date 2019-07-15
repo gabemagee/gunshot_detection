@@ -78,7 +78,7 @@ print("Type of the spectrograms array:", samples.dtype)
 
 
 sample_weights = np.array(
-    [1 for normally_recorded_sample in range(len(samples) - 660)] + [50 for raspberry_pi_recorded_sample in range(660)])
+    [1 for normally_recorded_sample in range(len(samples) - 660)] + [20 for raspberry_pi_recorded_sample in range(660)])
 print("Shape of samples weights before splitting:", sample_weights.shape)
 
 # ## Restructuring the label data
@@ -133,7 +133,6 @@ def auc(y_true, y_pred):
 number_of_epochs = 100
 batch_size = 32
 optimizer = Adam(lr=0.001, decay=0.001 / 100)
-input_tensor = Input(shape=(192, 192))
 
 # ## Configuration of GPU for training (optional)
 
@@ -155,62 +154,56 @@ input_tensor = Input(shape=(192, 192))
 
 model = Sequential()
 
+
 """ Step 2: Create the input and hidden layers """
 
 # First Layer
-model.add(Conv2D(32, (3, 3), padding="same", input_shape=(192, 192, 3)))
+model.add(Conv2D(32, (3, 3), padding = "same", input_shape = (128, 64)))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis=-1))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(Dropout(0.5))
+model.add(BatchNormalization(axis = -1))
+model.add(MaxPooling2D(pool_size = (3, 3)))
+model.add(Dropout(0.25))
 
 # Second Layer: (CONV => RELU) * 2 => POOL
-model.add(Conv2D(64, (3, 3), padding="same"))
+model.add(Conv2D(64, (3, 3), padding = "same"))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis=-1))
-model.add(Conv2D(64, (3, 3), padding="same"))
+model.add(BatchNormalization(axis = -1))
+model.add(Conv2D(64, (3, 3), padding = "same"))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis=-1))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.5))
+model.add(BatchNormalization(axis = -1))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Dropout(0.25))
 
 # Third Layer: (CONV => RELU) * 2 => POOL
-model.add(Conv2D(128, (3, 3), padding="same"))
+model.add(Conv2D(128, (3, 3), padding = "same"))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis=-1))
-model.add(Conv2D(128, (3, 3), padding="same"))
+model.add(BatchNormalization(axis = -1))
+model.add(Conv2D(128, (3, 3), padding = "same"))
 model.add(Activation("relu"))
-model.add(BatchNormalization(axis=-1))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.5))
+model.add(BatchNormalization(axis = -1))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Dropout(0.25))
 
-# Fourth Layer: (CONV => RELU) * 2 => POOL
-model.add(Conv2D(256, (3, 3), padding="same"))
-model.add(Activation("relu"))
-model.add(BatchNormalization(axis=-1))
-model.add(Conv2D(256, (3, 3), padding="same"))
-model.add(Activation("relu"))
-model.add(BatchNormalization(axis=-1))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.5))
 
 """ Step 3: Flatten the layers """
 
 model.add(Flatten())
+
 
 """ Step 4: Fully-connect the layers """
 
 model.add(Dense(1024))
 model.add(Activation("relu"))
 model.add(BatchNormalization())
-model.add(Dropout(0.75))  # Increasing dropout here to prevent overfitting
+model.add(Dropout(0.5))  # Increasing dropout here to prevent overfitting
 
 model.add(Dense(2))
 model.add(Activation("softmax"))
 
+
 """ Step 5: Compile the model """
 
-model.compile(optimizer=optimizer, loss="binary_crossentropy", metrics=[auc, "accuracy"])
+model.compile(optimizer = optimizer, loss = "binary_crossentropy", metrics = [auc, "accuracy"])
 
 # ## Configuring model properties
 
