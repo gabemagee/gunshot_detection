@@ -41,7 +41,7 @@ def get_available_gpus():
 
 print("available gpus:",get_available_gpus())
 
-
+SELF_RECORDING_WEIGHT = 50
 
 def get_categories():
     s = []
