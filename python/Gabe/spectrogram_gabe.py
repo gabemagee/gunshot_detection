@@ -78,17 +78,20 @@ data_directory = "/home/gamagee/workspace/gunshot_detection/REU_Data/REU_Samples
 label_csv = data_directory + "labels.csv"
 sample_directory = data_directory + "Samples/"
 base_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/"
-sample_path = base_dir+"gunshot_augmented_sound_samples_spectro.npy"
-sample_path_2 = base_dir+"spectrogram_samples_power_to_db.npy"
-label_path = base_dir+"gunshot_augmented_sound_labels.npy"
-samples_2 = np.load(sample_path)
-samples = np.load(sample_path_2)
-labels = np.load(label_path)
+sample_path = base_dir+"samples_and_labels/training/samples_2.npy"
+label_path = base_dir+"samples_and_labels/training/labels.npy"
+weights_dir = base_dir+"samples_and_labels/training/weights.npy"
 
-print(samples_2.shape)
+
+
+samples = np.load(sample_path)
+labels = np.load(label_path)
+sample_weights = np.load(weights-path)
+
+
 print(samples.shape)
 
-samples.reshape(-1,128,64,1)
+samples.reshape(-1,128,87,1)
 sample_rate_per_two_seconds = 44100
 number_of_classes = 2
 sr = 22050
@@ -100,8 +103,7 @@ labels = keras.utils.to_categorical(labels, 2)
 
 print(labels.shape)
 
-sample_weights = np.array(
-    [1 for normally_recorded_sample in range(len(samples) - 660)] + [50 for raspberry_pi_recorded_sample in range(660)])
+#sample_weights = np.array( [1 for normally_recorded_sample in range(len(samples) - 660)] + [50 for raspberry_pi_recorded_sample in range(660)])
 print("Shape of samples weights before splitting:", sample_weights.shape)
 
 print("~~~~~~~~~~~~~~~~")
@@ -115,7 +117,7 @@ for train_index, test_index in kf.split(samples):
 
 def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.001,number_of_epochs = 100,batch_size = 64,filter_size = (3,3),maxpool_size = (3,3),activation = "relu"):
     optimizer = optimizers.Adam(0.001, 0.001 / 100)
-    input_tensor = Input(shape=(128, 64, 1))
+    input_tensor = Input(shape=(128, 87, 1))
     metrics = ["accuracy"]
     #Model Architecture
     x = layers.Conv2D(16, (3,3), activation="relu", padding="same")(input_tensor)
@@ -162,8 +164,8 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
     #Optional debugging of the model's architecture
     model.summary()
 
-    test_wav = test_wav.reshape(-1,128,64,1)
-    train_wav = train_wav.reshape(-1,128, 64, 1)
+    test_wav = test_wav.reshape(-1,128,87,1)
+    train_wav = train_wav.reshape(-1,128, 87, 1)
 
     #Training & caching the model
     History = model.fit(train_wav, train_label,
