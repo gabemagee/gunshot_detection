@@ -40,17 +40,9 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 # In[ ]:
 
 
-GUNSHOT_FREQUENCY_THESHOLD = 0.25
 SAMPLE_RATE_PER_SECOND = 22050
 SAMPLE_RATE_PER_TWO_SECONDS = 44100
-SOUND_FILE_ID = 0
 BASE_DIRECTORY = "/home/amorehe/Datasets/"
-DATA_DIRECTORY = BASE_DIRECTORY + "REU_Samples_and_Labels/"
-SOUND_DATA_DIRECTORY = DATA_DIRECTORY + "Samples/"
-samples = []
-labels = []
-sound_file_names = []
-sample_weights = []
 
 # ## Loading augmented NumPy files as NumPy arrays
 
@@ -137,11 +129,11 @@ input_tensor = Input(shape=(44100, 1))
 # In[ ]:
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-session = tf.Session(config=config)
-K.set_session(session)
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# config = tf.ConfigProto()
+# config.gpu_options.allow_growth = True
+# session = tf.Session(config=config)
+# K.set_session(session)
 
 # ## Model Architecture
 
@@ -151,22 +143,22 @@ K.set_session(session)
 x = layers.Conv1D(16, 9, activation="relu", padding="same")(input_tensor)
 x = layers.Conv1D(16, 9, activation="relu", padding="same")(x)
 x = layers.MaxPool1D(16)(x)
-x = layers.Dropout(rate=0.5)(x)
+x = layers.Dropout(rate=0.25)(x)
 
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.MaxPool1D(4)(x)
-x = layers.Dropout(rate=0.5)(x)
+x = layers.Dropout(rate=0.25)(x)
 
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
 x = layers.MaxPool1D(4)(x)
-x = layers.Dropout(rate=0.5)(x)
+x = layers.Dropout(rate=0.25)(x)
 
 x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
 x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
 x = layers.GlobalMaxPool1D()(x)
-x = layers.Dropout(rate=(0.75))(x)  # Increasing drop-out rate here to prevent overfitting
+x = layers.Dropout(rate=(0.5))(x)  # Increasing drop-out rate here to prevent overfitting
 
 x = layers.Dense(64, activation="relu")(x)
 x = layers.Dense(1028, activation="relu")(x)
