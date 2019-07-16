@@ -48,18 +48,10 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 # In[ ]:
 
 
-GUNSHOT_FREQUENCY_THESHOLD = 0.25
 SAMPLE_RATE_PER_SECOND = 22050
 SAMPLE_RATE_PER_TWO_SECONDS = 44100
-SOUND_FILE_ID = 0
 BASE_DIRECTORY = "/home/amorehe/Datasets/"
-DATA_DIRECTORY = BASE_DIRECTORY + "REU_Samples_and_Labels/"
 SPECTROGRAM_DIRECTORY = BASE_DIRECTORY + "Spectrograms/"
-SOUND_DATA_DIRECTORY = DATA_DIRECTORY + "Samples/"
-samples = []
-labels = []
-sound_file_names = []
-sample_weights = []
 
 # ## Loading augmented NumPy files as NumPy arrays
 

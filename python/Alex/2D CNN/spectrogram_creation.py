@@ -23,7 +23,6 @@ import six
 # In[ ]:
 
 
-GUNSHOT_FREQUENCY_THESHOLD = 0.25
 SAMPLE_RATE_PER_SECOND = 22050
 SAMPLE_RATE_PER_TWO_SECONDS = 44100
 HOP_LENGTH = 345 * 2
@@ -32,13 +31,6 @@ MAXIMUM_FREQUENCY = SAMPLE_RATE_PER_SECOND
 NUMBER_OF_MELS = 128
 NUMBER_OF_FFTS = NUMBER_OF_MELS * 20
 BASE_DIRECTORY = "/home/amorehe/Datasets/"
-DATA_DIRECTORY = BASE_DIRECTORY + "REU_Samples_and_Labels/"
-SPECTROGRAM_DIRECTORY = BASE_DIRECTORY + "Spectrograms/"
-SOUND_DATA_DIRECTORY = DATA_DIRECTORY + "Samples/"
-samples = []
-labels = []
-sound_file_names = []
-sample_weights = []
 
 # # Data Pre-Processing
 
@@ -110,7 +102,7 @@ for sample in samples:
 # In[ ]:
 
 
-samples = np.array(spectrograms).reshape(-1, 128, 84, 1)
+samples = np.array(spectrograms).reshape(-1, 128, 64, 1)
 samples = samples.astype("float32")
 print("Finished loading all spectrograms into memory...")
 
