@@ -80,7 +80,7 @@ sample_directory = data_directory + "Samples/"
 base_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/"
 sample_path = base_dir+"samples_and_labels/training/samples_2.npy"
 label_path = base_dir+"samples_and_labels/training/labels.npy"
-weights_path = base_dir+"samples_and_labels/training/weightsg.npy"
+weights_path = base_dir+"samples_and_labels/training/weights.npy"
 
 
 
