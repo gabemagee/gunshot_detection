@@ -84,6 +84,11 @@ print(len(indexes))
 
 print(n*TESTING_RATIO)
 
-print(indexes)
+
+for i in range(n):
+    if i in indexes:
+        print("in:",i)
+    else:
+        print("not:",i)
 
 #samples
