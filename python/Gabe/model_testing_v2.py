@@ -80,6 +80,10 @@ print(n)
 
 indexes = np.sort(np.random.choice(n,int(n*TESTING_RATIO),replace=False))
 
+print(len(indexes))
+
+print(n*TESTING_RATIO)
+
 print(indexes)
 
 #samples
