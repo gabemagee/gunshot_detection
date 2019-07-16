@@ -78,7 +78,7 @@ n = augmented_labels.shape[0]
 
 print(n)
 
-indexes = np.random.choice(n,int(n*TESTING_RATIO),replace=False)
+indexes = np.sort(np.random.choice(n,int(n*TESTING_RATIO),replace=False))
 
 print(indexes)
 
