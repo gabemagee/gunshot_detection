@@ -13,15 +13,11 @@ import time
 import scipy.signal
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
-import cv2
 import six
 from threading import Thread
-from array import array
 from datetime import timedelta as td
 from queue import Queue
 from sklearn.preprocessing import LabelBinarizer
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 # from gsmmodem.modem import GsmModem
 
 
@@ -51,7 +47,7 @@ NUMBER_OF_FRAMES_PER_BUFFER = 4410
 SAMPLE_DURATION = 2
 AUDIO_VOLUME_THRESHOLD = 0.5
 NOISE_REDUCTION_ENABLED = False
-MODEL_CONFIDENCE_THRESHOLD = 0.90
+MODEL_CONFIDENCE_THRESHOLD = 0.9
 HOP_LENGTH = 345 * 2
 MINIMUM_FREQUENCY = 20
 MAXIMUM_FREQUENCY = AUDIO_RATE // 2
@@ -250,12 +246,11 @@ def remove_noise(audio_clip,
 
 def convert_audio_to_spectrogram(data):
     spectrogram = librosa.feature.melspectrogram(y=data, sr=AUDIO_RATE,
-                                                 #hop_length=HOP_LENGTH,
-                                                 #fmin=MINIMUM_FREQUENCY,
-                                                 #fmax=MAXIMUM_FREQUENCY,
-                                                 #n_mels=NUMBER_OF_MELS,
-                                                 #n_fft=NUMBER_OF_FFTS
-                                                )
+                                                 hop_length=HOP_LENGTH,
+                                                 fmin=MINIMUM_FREQUENCY,
+                                                 fmax=MAXIMUM_FREQUENCY,
+                                                 n_mels=NUMBER_OF_MELS,
+                                                 n_fft=NUMBER_OF_FFTS)
     spectrogram = power_to_db(spectrogram)
     spectrogram = spectrogram.astype(np.float32)
     return spectrogram
@@ -302,7 +297,7 @@ def create_gunshot_wav_file(microphone_data, index, timestamp):
 
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="../models/RYAN2_gunshot_2d_spectrogram_model.tflite")
+interpreter = tf.lite.Interpreter(model_path="../models/SAME_INDEX_gunshot_2d_spectrogram_model.tflite")
 interpreter.allocate_tensors()
 
 # Gets input and output tensors as well as the input shape
@@ -466,37 +461,3 @@ while True:
         noise_sample = librosa.resample(y=microphone_data, orig_sr=AUDIO_RATE, target_sr=22050)
         noise_sample = noise_sample[:44100]
         noise_sample_captured = True
-
-# ## Testing A Model with Sample Audio (Optional)
-
-# In[ ]:
-
-
-# Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="../models/RYAN_gunshot_2d_spectrogram_model.tflite")
-interpreter.allocate_tensors()
-
-# Gets input and output tensors as well as the input shape
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
-input_shape = input_details[0]['shape']
-
-# Loads in test sample WAV file
-gunshot_training_sample, sr = librosa.load("../recordings/8795.wav")
-number_of_missing_hertz = 44100 - len(gunshot_training_sample)
-gunshot_training_sample = np.array(gunshot_training_sample.tolist() + [0 for i in range(number_of_missing_hertz)],
-                                   dtype="float32")
-gunshot_training_sample = gunshot_training_sample.reshape(input_shape)
-
-# In[ ]:
-
-
-# Performs inference with the TensorFlow Lite model
-interpreter.set_tensor(input_details[0]["index"], gunshot_training_sample)
-# interpreter.set_tensor(input_details[0]["index"], np.array(np.random.random_sample(input_shape), dtype = "float32"))
-interpreter.invoke()
-probabilities = interpreter.get_tensor(output_details[0]["index"])
-logger.debug("The model-predicted probability values: " + str(probabilities[0]))
-logger.debug("Model-predicted sample class: " + label_binarizer.inverse_transform(probabilities[:, 0])[0])
-
-# In[ ]:

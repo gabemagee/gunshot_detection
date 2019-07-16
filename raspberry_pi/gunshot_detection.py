@@ -10,16 +10,12 @@ import time
 import scipy.signal
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
-import cv2
 import six
 from threading import Thread
-from array import array
 from datetime import timedelta as td
 from queue import Queue
 from sklearn.preprocessing import LabelBinarizer
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-# from gsmmodem.modem import GsmModem
+from gsmmodem.modem import GsmModem
 
 
 # Configuring the Logger #
@@ -43,9 +39,12 @@ NUMBER_OF_FRAMES_PER_BUFFER = 4410
 SAMPLE_DURATION = 2
 AUDIO_VOLUME_THRESHOLD = 0.5
 NOISE_REDUCTION_ENABLED = False
-MODEL_CONFIDENCE_THRESHOLD = 0.90
-MAXIMUM_AUDIO_FRAME_FLOAT_VALUE = 2 ** 31 - 1
-SOUND_NORMALIZATION_THRESHOLD = 10 ** (-1.0 / 20)
+MODEL_CONFIDENCE_THRESHOLD = 0.9
+HOP_LENGTH = 345 * 2
+MINIMUM_FREQUENCY = 20
+MAXIMUM_FREQUENCY = AUDIO_RATE // 2
+NUMBER_OF_MELS = 128
+NUMBER_OF_FFTS = NUMBER_OF_MELS * 20
 SMS_ALERTS_ENABLED = False
 DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
 sound_data = np.zeros(0, dtype = "float32")
@@ -57,8 +56,7 @@ sms_alert_queue = Queue()
 
 # Only one of these state variables may be set to true at a given point in time
 USING_1D_TIME_SERIES_MODEL = False
-USING_2D_RAW_SPECTROGRAM_MODEL = True
-USING_2D_IMAGE_SPECTROGRAM_MODEL = False
+USING_2D_SPECTROGRAM_MODEL = True
 
 
 # Loading in Augmented Labels #
@@ -73,23 +71,6 @@ label_binarizer = LabelBinarizer()
 labels = label_binarizer.fit_transform(labels)
 labels = np.hstack((labels, 1 - labels))
 
-
-# Sound Post-Processing Functions #
-
-def normalize(sound_data):
-    absolute_maximum_sound_datum = max(abs(i) for i in sound_data)
-    
-    # Prevents a divide by zero scenario
-    if absolute_maximum_sound_datum == 0.0:
-        absolute_maximum_sound_datum = 0.001
-    
-    normalization_factor = float(SOUND_NORMALIZATION_THRESHOLD * MAXIMUM_AUDIO_FRAME_FLOAT_VALUE) / absolute_maximum_sound_datum
-
-    # Averages the volume out
-    r = array('f')
-    for datum in sound_data:
-        r.append(int(datum * normalization_factor))
-    return np.array(r, dtype=np.float32)
 
 ## Librosa Wrapper Function Definitions ##
 
@@ -243,18 +224,24 @@ def remove_noise(audio_clip,
 
 # Converting 1D Sound Arrays into Spectrograms #
 
-def convert_to_spectrogram(data, sample_rate):
-    return np.array(librosa.feature.melspectrogram(y = data, sr = sample_rate), dtype = "float32")
+def convert_audio_to_spectrogram(data):
+    spectrogram = librosa.feature.melspectrogram(y=data, sr=AUDIO_RATE,
+                                                 hop_length=HOP_LENGTH,
+                                                 fmin=MINIMUM_FREQUENCY,
+                                                 fmax=MAXIMUM_FREQUENCY,
+                                                 n_mels=NUMBER_OF_MELS,
+                                                 n_fft=NUMBER_OF_FFTS)
+    spectrogram = power_to_db(spectrogram)
+    spectrogram = spectrogram.astype(np.float32)
+    return spectrogram
 
 
-def power_to_db(S, ref = 1.0, amin = 1e-10, top_db = 80.0):
+def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
     S = np.asarray(S)
     if amin <= 0:
-        logger.debug('ParameterError: amin must be strictly positive')
+        logger.debug("ParameterError: amin must be strictly positive")
     if np.issubdtype(S.dtype, np.complexfloating):
-        logger.debug('Warning: power_to_db was called on complex input so phase '
-                      'information will be discarded. To suppress this warning, '
-                      'call power_to_db(np.abs(D)**2) instead.')
+        logger.debug("Warning: power_to_db was called on complex input so phase information will be discarded.")
         magnitude = np.abs(S)
     else:
         magnitude = S
@@ -267,40 +254,9 @@ def power_to_db(S, ref = 1.0, amin = 1e-10, top_db = 80.0):
     log_spec -= 10.0 * np.log10(np.maximum(amin, ref_value))
     if top_db is not None:
         if top_db < 0:
-            logger.debug('ParameterError: top_db must be non-negative')
+            logger.debug("ParameterError: top_db must be non-negative")
         log_spec = np.maximum(log_spec, log_spec.max() - top_db)
     return log_spec
-
-
-def convert_spectrogram_to_image(spectrogram):
-    plt.interactive(False)
-    
-    figure = plt.figure(figsize = [0.72, 0.72], dpi = 400)
-    plt.tight_layout(pad = 0)
-    ax = figure.add_subplot(111)
-    ax.axes.get_xaxis().set_visible(False)
-    ax.axes.get_yaxis().set_visible(False)
-    ax.set_frame_on(False)
-    
-    librosa.display.specshow(power_to_db(spectrogram, ref = np.max))
-
-    canvas = FigureCanvas(figure)
-    canvas.draw()
-    s, (width, height) = canvas.print_to_buffer()
-    
-    image = np.fromstring(figure.canvas.tostring_rgb(), dtype = "uint8")
-    image = image.reshape((width, height, 3))
-    image = cv2.resize(image, (192, 192))
-
-    # Cleaning up the matplotlib instance
-    plt.close()    
-    figure.clf()
-    plt.close(figure)
-    plt.close("all")
-    
-    # Returns a NumPy array containing an image of a spectrogram
-    return image
-
 
 # WAV File Composition Function #
 
@@ -444,19 +400,9 @@ while True:
         # Passes an audio sample of an appropriate format into the model for inference
         if USING_1D_TIME_SERIES_MODEL:
             processed_data = modified_microphone_data
-        elif USING_2D_RAW_SPECTROGRAM_MODEL:
-            processed_data = convert_to_spectrogram(data = modified_microphone_data, sample_rate = 22050)
-        elif USING_2D_IMAGE_SPECTROGRAM_MODEL:
-            processed_data = convert_to_spectrogram(data = modified_microphone_data, sample_rate = 22050)
-            processed_data = convert_spectrogram_to_image(spectrogram = processed_data)
-            processed_data = processed_data.reshape(input_shape)
-            processed_data = processed_data.astype("float32")
-            processed_data /= 255
+        elif USING_2D_SPECTROGRAM_MODEL:
+            processed_data = convert_audio_to_spectrogram(data = modified_microphone_data)
             
-        if not USING_2D_IMAGE_SPECTROGRAM_MODEL:
-            # Reshapes the modified microphone data accordingly
-            processed_data = processed_data.reshape(input_shape)
-
         # Reshapes the modified microphone data accordingly
         processed_data = processed_data.reshape(input_shape)
         
@@ -480,6 +426,5 @@ while True:
     # Allows us to capture two seconds of background noise from the microphone for noise reduction
     elif NOISE_REDUCTION_ENABLED and not noise_sample_captured:
         noise_sample = librosa.resample(y=microphone_data, orig_sr=AUDIO_RATE, target_sr=22050)
-        noise_sample = normalize(noise_sample)
         noise_sample = noise_sample[:44100]
         noise_sample_captured = True
