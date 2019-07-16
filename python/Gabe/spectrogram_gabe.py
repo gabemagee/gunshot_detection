@@ -220,6 +220,7 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
               sample_weight=train_weights,
               shuffle=True)
     model.save(base_dir + "gunshot_sound_model_spectrograph_"+name+".h5")
+    print("saved at: ",base_dir + "gunshot_sound_model_spectrograph_"+name+".h5")
     print(model.evaluate(test_wav, test_label, batch_size=batch_size))
     return model
 
