@@ -36,6 +36,7 @@ from sklearn.model_selection import KFold
 
 
 TESTING_RATIO = 0.7
+SELF_RECORDING_WEIGHT = 50
 
 #models
 base_dir = "/home/gamagee/workspace/gunshot_detection/"
@@ -60,8 +61,7 @@ spectrograph_samples_1 = np.load(spectrograph_samples_1_fn)
 spectrograph_samples_2 = np.load(spectrograph_samples_2_fn)
 
 
-sample_weights = np.array(
-    [1 for normally_recorded_sample in range(len(augmented_samples) - 660)] + [50 for raspberry_pi_recorded_sample in range(660)])
+sample_weights = np.array([1 for normally_recorded_sample in range(len(augmented_samples) - 660)] + [SELF_RECORDING_WEIGHT for raspberry_pi_recorded_sample in range(660)])
 print("Shape of samples weights before splitting:", sample_weights.shape)
 
 print("labels:",augmented_labels.shape)
@@ -73,5 +73,13 @@ print("samples_2:",spectrograph_samples_1.shape)
 print("samples_3:",spectrograph_samples_2.shape)
 
 print("finished loading")
+
+n = augmented_labels.shape[0]
+
+print(n)
+
+indexes = np.random.choice(n,int(n*TESTING_RATIO),replace=False)
+
+print(indexes)
 
 #samples
