@@ -82,7 +82,6 @@ print(len(rrr))
 l = []
 while len(l)<int(n*TESTING_RATIO/2):
     i = np.random.choice(len(rrr),1)[0]
-    print(i)
     l.append(rrr[i])
     del rrr[i]
 
