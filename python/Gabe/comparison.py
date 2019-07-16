@@ -34,6 +34,9 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import KFold
 
+from texttable import Texttable
+
+
 
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
@@ -126,12 +129,33 @@ validation_weights = np.array(validation_weights)
 
 print("finished split")
 
-
+model_list = []
 
 print("loaded models")
+
+models_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/models/"
+
+CNN_2D_Model = load_model(models_dir+"spectrogram_gunshot_model_1.h5")
+
 
 
 for i in range(len(validation_wav)):
     print(i)
     x = validation_wav[i]
     y = validation_label[i]
+    for model in model_list:
+        model.predict(x)
+
+
+t = Texttable()
+table = []
+table.append(["metric"]+model_list)
+for metric in metrics:
+    l = []
+    #metric name
+    l.append(metric.name)
+    for model in model_list:
+        #score for that metric for that model
+        l.append(metric(model))
+t.add_rows(table)
+print(t.draw())
