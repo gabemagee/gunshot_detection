@@ -35,7 +35,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import KFold
 
 
-TESTING_RATIO = 0.7
+TESTING_RATIO = (2/3)
 SELF_RECORDING_WEIGHT = 50
 
 #models
@@ -76,9 +76,31 @@ n = augmented_labels.shape[0]
 
 print(n)
 
-indexes = np.sort(np.random.choice(n,int(n*TESTING_RATIO),replace=False))
+train_test_indexes = np.sort(np.random.choice(n,int(n*TESTING_RATIO),replace=False))
+rrr = list(train_test_indexes)
+print(len(rrr))
+l = []
+while len(l)<int(n*TESTING_RATIO/2):
+    i = p.random.choice(len(l),1)
+    l.append(rrr.pop(i))
 
-np.save(sample_dir+"training_set_indexes.npy",indexes)
+#training
+
+print(len(l))
+
+print(len(rrr))
+
+training_indexes = np.array(rrr)
+np.save(sample_dir+"training_set_indexes.npy",training_indexes)
+
+#TESTING
+
+testing_indexes = np.array(l)
+np.save(sample_dir+"testing_set_indexes.npy",testing_indexes)
+
+#validation
+
+#np.save(sample_dir+"training_set_indexes.npy",indexes)
 
 print(len(indexes))
 
@@ -120,6 +142,9 @@ for i in range(n):
         samples_2_validation.append(spectrograph_samples_1[i])
         samples_3_validation.append(spectrograph_samples_2[i])
         weights_validation.append(sample_weights[i])
+
+
+
 
 print("finished looping")
 
