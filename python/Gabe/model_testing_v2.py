@@ -81,7 +81,7 @@ rrr = list(train_test_indexes)
 print(len(rrr))
 l = []
 while len(l)<int(n*TESTING_RATIO/2):
-    i = np.random.choice(len(l),1)
+    i = np.random.choice(len(rrr),1)
     l.append(rrr.pop(i))
 
 #training
