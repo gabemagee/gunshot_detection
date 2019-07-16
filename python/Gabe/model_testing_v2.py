@@ -72,8 +72,6 @@ print("samples_2:",spectrograph_samples_1.shape)
 
 print("samples_3:",spectrograph_samples_2.shape)
 
-print("finished loading")
-
 n = augmented_labels.shape[0]
 
 print(n)
@@ -84,11 +82,72 @@ print(len(indexes))
 
 print(n*TESTING_RATIO)
 
+#TESTING
+
+labels_testing = []
+samples_1_testing = []
+samples_2_testing = []
+samples_3_testing = []
+weights_testing = []
+
+
+
+#VALIDATION
+
+labels_validation = []
+samples_1_validation = []
+samples_2_validation = []
+samples_3_validation = []
+weights_validation = []
+
+print("about to loop")
 
 for i in range(n):
+    print(i)
     if i in indexes:
         print("in:",i)
+        labels_testing.append(augmented_labels[i])
+        samples_1_testing.append(augmented_samples[i])
+        samples_2_testing.append(spectrograph_samples_1[i])
+        samples_3_testing.append(spectrograph_samples_2[i])
+        weights_testing.append(sample_weights[i])
     else:
         print("not:",i)
+        labels_validation.append(augmented_labels[i])
+        samples_1_validation.append(augmented_samples[i])
+        samples_2_validation.append(spectrograph_samples_1[i])
+        samples_3_validation.append(spectrograph_samples_2[i])
+        weights_validation.append(sample_weights[i])
 
-#samples
+print("finished looping")
+
+labels_testing = np.array(labels_testing)
+samples_1_testing = np.array(samples_1_testing)
+samples_2_testing = np.array(samples_2_testing)
+samples_3_testing = np.array(samples_3_testing)
+weights_testing = np.array(weights_testing)
+
+
+labels_validation = np.array(labels_validation)
+samples_1_validation = np.array(samples_1_validation)
+samples_2_validation = np.array(samples_2_validation)
+samples_3_validation = np.array(samples_3_validation)
+weights_validation = np.array(weights_validation)
+
+validation_dir = sample_dir+"validation/"
+training_dir = sample_dir+"training/"
+
+print("about to save")
+
+
+np.save(training_dir+"labels.npy", labels_testing)
+np.save(training_dir+"samples_1.npy", samples_1_testing)
+np.save(training_dir+"samples_2.npy", samples_2_testing)
+np.save(training_dir+"samples_3.npy", samples_3_testing)
+np.save(training_dir+"weights.npy", weights_testing)
+
+np.save(validation_dir+"labels.npy", labels_validation)
+np.save(validation_dir+"samples_1.npy", samples_1_validation)
+np.save(validation_dir+"samples_2.npy", samples_2_validation)
+np.save(validation_dir+"samples_3.npy", samples_3_validation)
+np.save(validation_dir+"weights.npy", weights_validation)
