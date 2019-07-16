@@ -74,19 +74,23 @@ config.gpu_options.allow_growth=True
 sess = tf.Session(config=config)
 K.set_session(sess)
 
-data_directory = "/home/gamagee/workspace/gunshot_detection/REU_Data/REU_Samples_and_Labels/"
-label_csv = data_directory + "labels.csv"
-sample_directory = data_directory + "Samples/"
-base_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/"
-sample_path = base_dir+"samples_and_labels/training/samples_2.npy"
-label_path = base_dir+"samples_and_labels/training/labels.npy"
-weights_path = base_dir+"samples_and_labels/training/weights.npy"
+base_dir = "/home/gamagee/workspace/gunshot_detection/"
+model_dir = base_dir+"raspberry_pi/models/"
 
+sample_dir = base_dir+"REU_Data/spectrogram_training/samples_and_labels/"
 
+label_path = sample_dir+"gunshot_augmented_sound_labels.npy"
+
+#sample_path = sample_dir+"gunshot_augmented_sound_samples.npy"
+
+sample_path = sample_dir+"gunshot_augmented_sound_samples_spectro.npy"
+
+spectrograph_samples_2_fn = sample_dir+"spectrogram_samples_power_to_db.npy"
 
 samples = np.load(sample_path)
 labels = np.load(label_path)
-sample_weights = np.load(weights_path)
+
+sample_weights = np.array([1 for normally_recorded_sample in range(len(samples) - 660)] + [SELF_RECORDING_WEIGHT for raspberry_pi_recorded_sample in range(660)])
 
 
 print(samples.shape)
@@ -99,6 +103,15 @@ input_shape = (128, 87, 1)
 
 print(labels.shape)
 
+
+testing_indexes_path = base_dir+"raspberry_pi/indexes/testing_set_indexes.npy"
+
+testing_indexes = np.load(testing_indexes_path)
+
+training_indexes_path = base_dir+"raspberry_pi/indexes/training_set_indexes.npy"
+
+training_indexes = np.load(training_indexes_path)
+
 labels = keras.utils.to_categorical(labels, 2)
 
 print(labels.shape)
@@ -108,11 +121,41 @@ print("Shape of samples weights before splitting:", sample_weights.shape)
 
 print("~~~~~~~~~~~~~~~~")
 
-kf = KFold(n_splits=3, shuffle=True)
-for train_index, test_index in kf.split(samples):
-    train_wav, test_wav = samples[train_index], samples[test_index]
-    train_label, test_label = labels[train_index], labels[test_index]
-    train_weights, test_weights = sample_weights[train_index], sample_weights[test_index]
+train_wav = []
+train_label = []
+train_weights = []
+test_wav = []
+test_label = []
+test_weights = []
+validation_wav = []
+validation_label = []
+validation_weights = []
+
+for i in range(len(labels)):
+    if i in training_indexes:
+        train_wav.append(samples[i])
+        train_label.append(labels[i])
+        train_weights.append(sample_weights[i])
+    elif i in testing_indexes:
+        test_wav.append(samples[i])
+        test_label.append(labels[i])
+        test_weights.append(sample_weights[i])
+    else:
+        validation_wav.append(samples[i])
+        validation_label.append(labels[i])
+        validation_weights.append(sample_weights[i])
+
+train_wav = np.array(train_wav)
+train_label = np.array(train_label)
+train_weights = np.array(train_weights)
+test_wav = np.array(test_wav)
+test_label = np.array(test_label)
+test_weights = np.array(test_weights)
+validation_wav = np.array(validation_wav)
+validation_label = np.array(validation_label)
+validation_weights = np.array(validation_weights)
+
+print("finished split")
 
 
 def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_rate = 0.1,learning_rate = 0.001,number_of_epochs = 100,batch_size = 64,filter_size = (3,3),maxpool_size = (3,3),activation = "relu"):
@@ -177,16 +220,25 @@ def model(train_wav, train_label, test_label, test_wav, name,verbose=1,drop_out_
               sample_weight=train_weights,
               shuffle=True)
     model.save(base_dir + "gunshot_sound_model_spectrograph_"+name+".h5")
-    return model.evaluate(test_wav, test_label, batch_size=batch_size)
+    print(model.evaluate(test_wav, test_label, batch_size=batch_size))
+    return model
 
 drop_out_rates = 0.1,0.05,0.01,0.25
 learning_rates = 0.1,0.05,0.01
 filter_sizes = (4,4),(5,5),(6,6),(3,3)
 name = "weighted_spectrogram"
-print(model(train_wav, train_label, test_label, test_wav, name= name))
+md = model(train_wav, train_label, test_label, test_wav, name= name)
 
+print(md.evaluate(validation_wav,validation_label))
 
 """
+kf = KFold(n_splits=3, shuffle=True)
+for train_index, test_index in kf.split(samples):
+    train_wav, test_wav = samples[train_index], samples[test_index]
+    train_label, test_label = labels[train_index], labels[test_index]
+    train_weights, test_weights = sample_weights[train_index], sample_weights[test_index]
+
+
 norm_samples = np.load(base_dir + "gunshot_sound_samples.npy")
 norm_labels = np.load(base_dir + "gunshot_sound_labels.npy")
 
