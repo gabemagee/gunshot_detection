@@ -78,6 +78,8 @@ print(n)
 
 indexes = np.sort(np.random.choice(n,int(n*TESTING_RATIO),replace=False))
 
+np.save(sample_dir+"training_set_indexes.npy",indexes)
+
 print(len(indexes))
 
 print(n*TESTING_RATIO)
