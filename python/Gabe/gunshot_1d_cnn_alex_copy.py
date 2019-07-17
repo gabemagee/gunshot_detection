@@ -227,7 +227,7 @@ model.compile(optimizer=optimizer, loss="binary_crossentropy", metrics=[auc, "ac
 # In[ ]:
 
 
-model_filename = BASE_DIRECTORY + "gunshot_sound_model.pkl"
+model_filename = base_dir + "gunshot_sound_model.pkl"
 
 model_callbacks = [
     EarlyStopping(monitor='val_acc',
@@ -264,9 +264,9 @@ History = model.fit(train_wav, train_label,
 
 
 
-model.save(BASE_DIRECTORY + "gunshot_sound_model_1d.h5")
+model.save(base_dir + "gunshot_sound_model_1d.h5")
 
-print("saved at: ",BASE_DIRECTORY + "gunshot_sound_model.h5")
+print("saved at: ",base_dir + "gunshot_sound_model.h5")
 
 # ### Debugging of incorrectly-labeled examples (optional)
 
