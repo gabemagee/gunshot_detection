@@ -252,7 +252,7 @@ for i in range(len(validation_wav)):
     for model in model_list:
         nm = name_dict[model]
         #x = audio_to_melspectrogram(x)
-        x = make_spectrogram(x).reshape(model.layers[0].input_shape[0])
+        x = make_spectrogram(x).reshape((-1, 128, 87, 1))
         print(x.shape)
         print(model.layers[0].input_shape[0])
         output = model.predict(x)[0][1]
