@@ -174,7 +174,7 @@ def auc(y_true, y_pred):
 # In[ ]:
 
 
-number_of_epochs = 77
+number_of_epochs = 95
 batch_size = 32
 optimizer = optimizers.Adam(lr=0.001, decay=0.001 / 100)
 input_tensor = Input(shape=(44100, 1))
