@@ -273,7 +273,7 @@ for i in range(len(validation_wav)):
     #gunshot_2d_spectrogram_model
     x_1 = x
     print("input shape",x_1.shape)
-    print("model input shape",gunshot_2d_spectrogram_model.layers[0].input_shape[0])
+    print("model input shape",gunshot_2d_spectrogram_model.layers[0].input_shape)
     output = gunshot_2d_spectrogram_model.predict(x_1)[0][1]
     print("gunshot_2d_spectrogram_model",y,output)
 
