@@ -264,7 +264,7 @@ for i in range(len(validation_wav)):
     print("CNN_2D_Model_keras",y,output)
 
     #CNN_1D_Model_keras
-    x_1 = x
+    x_1 = x.reshape((-1, 44100, 1))
     print("input shape",x_1.shape)
     print("model input shape",CNN_1D_Model_keras.layers[0].input_shape[0])
     output = CNN_1D_Model_keras.predict(x_1)[0][1]
