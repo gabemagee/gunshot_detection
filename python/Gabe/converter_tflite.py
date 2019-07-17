@@ -10,7 +10,7 @@ def auc(y_true, y_pred):
 
 saved_model_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/models/"
 model = saved_model_dir+"spectrogram_gunshot_model_1.h5"
-converter = tf.lite.TFLiteConverter.from_keras_model_file(model,custom_objects{"auc":auc})
+converter = tf.lite.TFLiteConverter.from_keras_model_file(model,custom_objects={"auc":auc})
 #converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_dir)
 tflite_model = converter.convert()
 open(saved_model_dir+"spectrogram_gunshot_model_1.tflite", "wb").write(tflite_model)
