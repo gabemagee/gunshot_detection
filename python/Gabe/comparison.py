@@ -172,6 +172,13 @@ name_dict[CNN_1D_Model_keras] = "CNN_1D_Model_keras"
 model_list.append(CNN_1D_Model_keras)
 
 
+
+
+gunshot_2d_spectrogram_model = load_model(models_dir+"RYAN_LATEST_gunshot_2d_spectrogram_model.h5",custom_objects={"auc":auc})
+name_dict[gunshot_2d_spectrogram_model] = "gunshot_2d_spectrogram_model"
+mode_list.append(gunshot_2d_spectrogram_model)
+
+
 model_name = "SAME_INDEX_gunshot_2d_spectrogram_model.tflite"
 gunshot_2d_spectrogram_model_tflite = tf.lite.Interpreter(models_dir+model_name)
 gunshot_2d_spectrogram_model_tflite.allocate_tensors()
@@ -203,8 +210,6 @@ def tflite_predict(interpreter,input_data):
 
 def make_spectrogram(y):
     y = np.array(y)
-    print(type(y))
-    print(y.dtype)
     return np.array(librosa.feature.melspectrogram(y=y, sr=22050))
 
 
@@ -249,15 +254,23 @@ for i in range(len(validation_wav)):
     print(x.shape)
     y = validation_label[i][0]
     d = {}
-    for model in model_list:
-        nm = name_dict[model]
-        #x = audio_to_melspectrogram(x)
-        x = make_spectrogram(x).reshape((-1, 128, 87, 1))
-        print(x.shape)
-        print(model.layers[0].input_shape[0])
-        output = model.predict(x)[0][1]
-        print(nm,y,output)
-    #predictions.append(d)
+
+    #CNN_2D_Model_keras
+    x_1 = make_spectrogram(x).reshape((-1, 128, 87, 1))
+    output = model.predict(x_1)[0][1]
+    print(nm,y,output)
+
+    #CNN_1D_Model_keras
+    x_1 = x
+    print(x_1.shape)
+    output = model.predict(x_1)[0][1]
+    print(nm,y,output)
+
+    #gunshot_2d_spectrogram_model
+    x_1 = x
+    print(x_1.shape)
+    output = model.predict(x_1)[0][1]
+    print(nm,y,output)
 
 exit()
 
