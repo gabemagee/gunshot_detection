@@ -53,9 +53,9 @@ sample_dir = base_dir+"REU_Data/spectrogram_training/samples_and_labels/"
 
 label_path = sample_dir+"gunshot_augmented_sound_labels.npy"
 
-#sample_path = sample_dir+"gunshot_augmented_sound_samples.npy"
+sample_path = sample_dir+"gunshot_augmented_sound_samples.npy"
 
-sample_path = sample_dir+"gunshot_augmented_sound_samples_spectro.npy"
+#sample_path = sample_dir+"gunshot_augmented_sound_samples_spectro.npy"
 
 spectrograph_samples_2_fn = sample_dir+"spectrogram_samples_power_to_db.npy"
 
@@ -74,6 +74,19 @@ sr = 22050
 input_shape = (128, 87, 1)
 
 print(labels.shape)
+
+def audio_to_melspectrogram(audio):
+    audio = np.array(audio)
+    spectrogram = librosa.feature.melspectrogram(audio,
+                                                 sr=sampling_rate,
+                                                 n_mels=n_mels,
+                                                 hop_length=hop_length,
+                                                 n_fft=n_fft,
+                                                 fmin=fmin,
+                                                 fmax=fmax)
+    spectrogram = librosa.power_to_db(spectrogram)
+    spectrogram = spectrogram.astype(np.float32)
+    return spectrogram
 
 
 testing_indexes_path = base_dir+"raspberry_pi/indexes/testing_set_indexes.npy"
@@ -231,7 +244,7 @@ for i in range(len(validation_wav)):
         else:
             print(model.layers[0].input_shape[0])
             x = x.reshape((-1, 128, 87, 1))
-            output = model.predict(x)[0]
+            output = model.predict(x)[0][1]
         print(nm,y,output)
     #predictions.append(d)
 
