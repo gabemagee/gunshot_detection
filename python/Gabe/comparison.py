@@ -167,7 +167,7 @@ CNN_2D_128x128_keras = load_model(models_dir+"128_128_gunshot_2d_spectrogram_mod
 name_dict[CNN_2D_128x128_keras] = "CNN_2D_128x128_keras"
 model_list.append(CNN_2D_128x128_keras)
 
-model_name = "SAME_INDEX_gunshot_2d_spectrogram_model.tflite"
+model_name = "RYAN_LATEST_gunshot_2d_spectrogram_model.tflite"
 gunshot_2d_spectrogram_model_tflite = tf.lite.Interpreter(models_dir+model_name)
 gunshot_2d_spectrogram_model_tflite.allocate_tensors()
 name_dict[gunshot_2d_spectrogram_model_tflite] = "gunshot_2d_spectrogram_model_tflite"
