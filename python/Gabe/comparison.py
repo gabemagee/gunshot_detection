@@ -135,13 +135,46 @@ name_dict = {}
 
 models_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/models/"
 
-CNN_2D_Model = load_model(models_dir+"spectrogram_gunshot_model_1.h5")
-name_dict[CNN_2D_Model] = "CNN_2D_Model"
-model_list.append(CNN_2D_Model)
+model_filenames = os.listdir(models_dir)
 
-CNN_1D_Model = load_model(models_dir+"gunshot_sound_model_1d.h5")
-CNN_1D_Model.name = "CNN_1D_Model"
-model_list.append(CNN_2D_Model)
+CNN_2D_Model_keras = load_model(models_dir+"spectrogram_gunshot_model_1.h5")
+name_dict[CNN_2D_Model_keras] = "CNN_2D_Model_keras"
+model_list.append(CNN_2D_Model_keras)
+
+CNN_1D_Model_keras = load_model(models_dir+"gunshot_sound_model_1d.h5")
+name_dict[CNN_1D_Model_keras] = "CNN_1D_Model_keras"
+model_list.append(CNN_1D_Model_keras)
+
+
+model_name = "SAME_INDEX_gunshot_2d_spectrogram_model.tflite"
+gunshot_2d_spectrogram_model_tflite = tf.lite.Interpreter(models_dir+model_name)
+gunshot_2d_spectrogram_model_tflite.allocate_tensors()
+name_dict[gunshot_2d_spectrogram_model_tflite] = "gunshot_2d_spectrogram_model_tflite"
+model_list.append(gunshot_2d_spectrogram_model_tflite)
+
+model_name = "spectrogram_gunshot_model_1.tflite"
+CNN_2D_Model_tflite = tf.lite.Interpreter(models_dir+model_name)
+CNN_2D_Model_tflite.allocate_tensors()
+name_dict[CNN_2D_Model_tflite] = "CNN_2D_Model_tflite"
+model_list.append(CNN_2D_Model_tflite)
+
+
+model_name = "gunshot_sound_model_1d.tflite"
+CNN_1D_Model_tflite = tf.lite.Interpreter(models_dir+model_name)
+CNN_1D_Model_tflite.allocate_tensors()
+name_dict[CNN_1D_Model_tflite] = "CNN_1D_Model_tflite"
+model_list.append(CNN_1D_Model_tflite)
+
+
+
+def tflite_predict(interpreter,input_data):
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    interpreter.set_tensor(input_details[0]['index'], input_data)
+    interpreter.invoke()
+    output_data = interpreter.get_tensor(output_details[0]['index'])
+    return output_data
+
 
 print("loaded models")
 
@@ -184,9 +217,12 @@ for i in range(len(validation_wav)):
     y = validation_label[i][0]
     d = {}
     for model in model_list:
-        y_i = model.predict(x)
-        print(name_dict[model],y,y_i)
-        #d[name_dict[model]] = y_i
+        nm = name_dict[model]
+        if nm.split("_")[-1]=="tflite":
+            output = tflite_predict(model,x)
+        else:
+            output = model.predict(x)
+        print(nm,y,output)
     #predictions.append(d)
 
 exit()
