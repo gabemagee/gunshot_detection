@@ -264,7 +264,6 @@ for i in range(len(validation_wav)):
     x = validation_wav[i]
     #print(x.shape)
     y = label_binarizer.inverse_transform(validation_label[:,0][i])
-    d = {}
 
     #CNN_2D_Model_keras
     x_1 = make_spectrogram(x).reshape((-1, 128, 87, 1))
@@ -272,7 +271,15 @@ for i in range(len(validation_wav)):
     #print("model input shape",CNN_2D_Model_keras.layers[0].input_shape[0])
     output = CNN_2D_Model_keras.predict(x_1)[:,0][0]
     output = label_binarizer.inverse_transform(output)
-    print("CNN_2D_Model_keras",y,output)
+    if y[0]=="gun_shot" and output[0]=="gun_shot":
+        model_scores[CNN_2D_Model_keras]["true_pos"] = model_scores[CNN_2D_Model_keras]["true_pos"]+1
+    elif y[0]=="gun_shot" and output[0]!="gun_shot":
+        model_scores[CNN_2D_Model_keras]["false_neg"] = model_scores[CNN_2D_Model_keras]["false_neg"]+1
+    elif y[0]!="gun_shot" and output[0]=="gun_shot":
+        model_scores[CNN_2D_Model_keras]["false_pos"] = model_scores[CNN_2D_Model_keras]["false_pos"]+1
+    elif y[0]!="gun_shot" and output[0]!="gun_shot":
+        model_scores[CNN_2D_Model_keras]["true_neg"] = model_scores[CNN_2D_Model_keras]["true_neg"]+1
+
 
     #CNN_1D_Model_keras
     x_1 = x.reshape((-1, 44100, 1))
@@ -280,7 +287,14 @@ for i in range(len(validation_wav)):
     #print("model input shape",CNN_1D_Model_keras.layers[0].input_shape[0])
     output = CNN_1D_Model_keras.predict(x_1)[:,0][0]
     output = label_binarizer.inverse_transform(output)
-    print("CNN_1D_Model_keras",y,output)
+    if y[0]=="gun_shot" and output[0]=="gun_shot":
+        model_scores[CNN_1D_Model_keras]["true_pos"] = model_scores[CNN_1D_Model_keras]["true_pos"]+1
+    elif y[0]=="gun_shot" and output[0]!="gun_shot":
+        model_scores[CNN_1D_Model_keras]["false_neg"] = model_scores[CNN_1D_Model_keras]["false_neg"]+1
+    elif y[0]!="gun_shot" and output[0]=="gun_shot":
+        model_scores[CNN_1D_Model_keras]["false_pos"] = model_scores[CNN_1D_Model_keras]["false_pos"]+1
+    elif y[0]!="gun_shot" and output[0]!="gun_shot":
+        model_scores[CNN_1D_Model_keras]["true_neg"] = model_scores[CNN_1D_Model_keras]["true_neg"]+1
 
     #gunshot_2d_spectrogram_model
     x_1 = audio_to_melspectrogram(x).reshape((-1,128,64,1))
@@ -288,7 +302,19 @@ for i in range(len(validation_wav)):
     #print("model input shape",gunshot_2d_spectrogram_model.layers[0].input_shape)
     output = gunshot_2d_spectrogram_model.predict(x_1)[:,0][0]
     output = label_binarizer.inverse_transform(output)
-    print("gunshot_2d_spectrogram_model",y,output)
+    if y[0]=="gun_shot" and output[0]=="gun_shot":
+        model_scores[gunshot_2d_spectrogram_model]["true_pos"] = model_scores[gunshot_2d_spectrogram_model]["true_pos"]+1
+    elif y[0]=="gun_shot" and output[0]!="gun_shot":
+        model_scores[gunshot_2d_spectrogram_model]["false_neg"] = model_scores[gunshot_2d_spectrogram_model]["false_neg"]+1
+    elif y[0]!="gun_shot" and output[0]=="gun_shot":
+        model_scores[gunshot_2d_spectrogram_model]["false_pos"] = model_scores[gunshot_2d_spectrogram_model]["false_pos"]+1
+    elif y[0]!="gun_shot" and output[0]!="gun_shot":
+        model_scores[gunshot_2d_spectrogram_model]["true_neg"] = model_scores[gunshot_2d_spectrogram_model]["true_neg"]+1
+
+    for model in model_list:
+        print(name_dict[model])
+        for fig in ["true_pos","true_neg","false_pos","false_neg"]:
+            print(fig,model_scores[model][fig])
 
 exit()
 
