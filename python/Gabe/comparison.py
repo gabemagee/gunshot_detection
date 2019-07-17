@@ -169,20 +169,20 @@ model_name = "SAME_INDEX_gunshot_2d_spectrogram_model.tflite"
 gunshot_2d_spectrogram_model_tflite = tf.lite.Interpreter(models_dir+model_name)
 gunshot_2d_spectrogram_model_tflite.allocate_tensors()
 name_dict[gunshot_2d_spectrogram_model_tflite] = "gunshot_2d_spectrogram_model_tflite"
-model_list.append(gunshot_2d_spectrogram_model_tflite)
+#model_list.append(gunshot_2d_spectrogram_model_tflite)
 
 model_name = "spectrogram_gunshot_model_1.tflite"
 CNN_2D_Model_tflite = tf.lite.Interpreter(models_dir+model_name)
 CNN_2D_Model_tflite.allocate_tensors()
 name_dict[CNN_2D_Model_tflite] = "CNN_2D_Model_tflite"
-model_list.append(CNN_2D_Model_tflite)
+#model_list.append(CNN_2D_Model_tflite)
 
 
 model_name = "gunshot_sound_model_1d.tflite"
 CNN_1D_Model_tflite = tf.lite.Interpreter(models_dir+model_name)
 CNN_1D_Model_tflite.allocate_tensors()
 name_dict[CNN_1D_Model_tflite] = "CNN_1D_Model_tflite"
-model_list.append(CNN_1D_Model_tflite)
+#model_list.append(CNN_1D_Model_tflite)
 
 
 
@@ -238,13 +238,9 @@ for i in range(len(validation_wav)):
     d = {}
     for model in model_list:
         nm = name_dict[model]
-        print(nm)
-        if nm.split("_")[-1]=="tflite":
-            output = tflite_predict(model,x)
-        else:
-            print(model.layers[0].input_shape[0])
-            x = x.reshape((-1, 128, 87, 1))
-            output = model.predict(x)[0][1]
+        x = audio_to_melspectrogram(x)
+        print(x.shape)
+        output = model.predict(x)[0][1]
         print(nm,y,output)
     #predictions.append(d)
 
