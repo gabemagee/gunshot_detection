@@ -9,14 +9,14 @@ def auc(y_true, y_pred):
 
 
 saved_model_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/models/"
-model = "spectrogram_gunshot_model_1.h5"
+model = saved_model_dir+"spectrogram_gunshot_model_1.h5"
 converter = tf.lite.TFLiteConverter.from_keras_model_file(model)
 #converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_dir)
 tflite_model = converter.convert()
 open(saved_model_dir+"spectrogram_gunshot_model_1.tflite", "wb").write(tflite_model)
 print("done 1")
 
-model = "gunshot_sound_model_1d.h5"
+model = saved_model_dir+"gunshot_sound_model_1d.h5"
 converter = tf.lite.TFLiteConverter.from_keras_model_file(model)
 #converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_dir)
 tflite_model = converter.convert()
