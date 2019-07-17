@@ -54,9 +54,9 @@ def audio_to_melspectrogram(audio,hop_length=345*2):
                                                  sr=44100,
                                                  n_mels=128,
                                                  hop_length=hop_length,
-                                                 n_fft=n_mels * 20,
+                                                 n_fft=128 * 20,
                                                  fmin=20,
-                                                 fmax=sampling_rate // 2)
+                                                 fmax= 44100 // 2)
     spectrogram = librosa.power_to_db(spectrogram)
     spectrogram = spectrogram.astype(np.float32)
     return spectrogram
@@ -173,14 +173,14 @@ gunshot_2d_spectrogram_model_tflite.allocate_tensors()
 name_dict[gunshot_2d_spectrogram_model_tflite] = "gunshot_2d_spectrogram_model_tflite"
 #model_list.append(gunshot_2d_spectrogram_model_tflite)
 
-model_name = "spectrogram_gunshot_model_1.tflite"
+model_name = "CNN_2D.tflite"
 CNN_2D_Model_tflite = tf.lite.Interpreter(models_dir+model_name)
 CNN_2D_Model_tflite.allocate_tensors()
 name_dict[CNN_2D_Model_tflite] = "CNN_2D_Model_tflite"
 #model_list.append(CNN_2D_Model_tflite)
 
 
-model_name = "gunshot_sound_model_1d.tflite"
+model_name = "1D_CNN.tflite"
 CNN_1D_Model_tflite = tf.lite.Interpreter(models_dir+model_name)
 CNN_1D_Model_tflite.allocate_tensors()
 name_dict[CNN_1D_Model_tflite] = "CNN_1D_Model_tflite"
