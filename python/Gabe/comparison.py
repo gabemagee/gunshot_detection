@@ -257,6 +257,8 @@ for i in range(len(validation_wav)):
 
     #CNN_2D_Model_keras
     x_1 = make_spectrogram(x).reshape((-1, 128, 87, 1))
+    x_1 = audio_to_melspectrogram(x)
+    print(x_1.shape)
     output = model.predict(x_1)[0][1]
     print(nm,y,output)
 
