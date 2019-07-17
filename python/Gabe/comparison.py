@@ -82,6 +82,8 @@ labels = label_binarizer.fit_transform(labels)
 labels = np.hstack((labels,1-labels))
 print(labels)
 
+print(label_binarizer.inverse_transform(labels[:,0]))
+
 sampling_rate = 44100
 hop_length = 345 * 2
 fmin = 20
