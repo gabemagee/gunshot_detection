@@ -318,7 +318,7 @@ for model in model_list:
 
 t = Texttable()
 table = []
-table.append(["metric"]+model_list)
+table.append(["metric"]+[name_dict[model] for model in model_list])
 for metric in metrics:
     l = []
     #metric name
@@ -326,5 +326,6 @@ for metric in metrics:
     for model in model_list:
         [model_scores[model]["true_pos"],]
         l.append(metric(model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"]))
+    table.append(l)
 t.add_rows(table)
 print(t.draw())
