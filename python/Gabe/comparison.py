@@ -260,7 +260,7 @@ for model in model_list:
 
 predictions = []
 for i in range(len(validation_wav)):
-    #print(i)
+    print(i*100/len(validation_wav))
     x = validation_wav[i]
     #print(x.shape)
     y = label_binarizer.inverse_transform(validation_label[:,0][i])
@@ -316,8 +316,6 @@ for model in model_list:
     for fig in ["true_pos","true_neg","false_pos","false_neg"]:
         print(fig,model_scores[model][fig])
 
-exit()
-
 t = Texttable()
 table = []
 table.append(["metric"]+model_list)
@@ -326,7 +324,7 @@ for metric in metrics:
     #metric name
     l.append(name_dict[metric])
     for model in model_list:
-
-        l.append(metric(model))
+        [model_scores[model]["true_pos"],]
+        l.append(metric(model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"]))
 t.add_rows(table)
 print(t.draw())
