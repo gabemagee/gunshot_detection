@@ -220,6 +220,7 @@ predictions = []
 for i in range(len(validation_wav)):
     print(i)
     x = validation_wav[i]
+    print(x.shape)
     y = validation_label[i][0]
     d = {}
     for model in model_list:
@@ -227,6 +228,7 @@ for i in range(len(validation_wav)):
         if nm.split("_")[-1]=="tflite":
             output = tflite_predict(model,x)
         else:
+            print(model.layers[0].input_shape)
             output = model.predict(x)
         print(nm,y,output)
     #predictions.append(d)
