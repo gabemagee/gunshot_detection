@@ -75,6 +75,13 @@ input_shape = (128, 87, 1)
 
 print(labels.shape)
 
+sampling_rate = 44100
+hop_length = 345 * 2
+fmin = 20
+fmax = sampling_rate // 2
+n_mels = 128
+n_fft = n_mels * 20
+min_seconds = 0.5
 def audio_to_melspectrogram(audio):
     audio = np.array(audio)
     spectrogram = librosa.feature.melspectrogram(audio,
