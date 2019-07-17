@@ -311,10 +311,10 @@ for i in range(len(validation_wav)):
     elif y[0]!="gun_shot" and output[0]!="gun_shot":
         model_scores[gunshot_2d_spectrogram_model]["true_neg"] = model_scores[gunshot_2d_spectrogram_model]["true_neg"]+1
 
-    for model in model_list:
-        print(name_dict[model])
-        for fig in ["true_pos","true_neg","false_pos","false_neg"]:
-            print(fig,model_scores[model][fig])
+for model in model_list:
+    print(name_dict[model])
+    for fig in ["true_pos","true_neg","false_pos","false_neg"]:
+        print(fig,model_scores[model][fig])
 
 exit()
 
