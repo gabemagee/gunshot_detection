@@ -263,7 +263,7 @@ for i in range(len(validation_wav)):
     #print(i)
     x = validation_wav[i]
     #print(x.shape)
-    y = label_binarizer.inverse_transform(validation_label[i,0])
+    y = label_binarizer.inverse_transform(validation_label[i,0][0])
     d = {}
 
     #CNN_2D_Model_keras
