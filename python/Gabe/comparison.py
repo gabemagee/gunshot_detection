@@ -56,7 +56,7 @@ def audio_to_melspectrogram(audio,hop_length=345*2):
                                                  hop_length=hop_length,
                                                  n_fft=128 * 20,
                                                  fmin=20,
-                                                 fmax=sampling_rate // 2)
+                                                 fmax= 44100 // 2)
     spectrogram = librosa.power_to_db(spectrogram)
     spectrogram = spectrogram.astype(np.float32)
     return spectrogram
