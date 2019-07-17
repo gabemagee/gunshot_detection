@@ -247,6 +247,7 @@ for i in range(len(validation_wav)):
         nm = name_dict[model]
         x = audio_to_melspectrogram(x)
         print(x.shape)
+        print(model.layers[0].input_shape[0])
         output = model.predict(x)[0][1]
         print(nm,y,output)
     #predictions.append(d)
