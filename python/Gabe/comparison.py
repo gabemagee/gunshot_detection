@@ -176,7 +176,7 @@ model_list.append(CNN_1D_Model_keras)
 
 gunshot_2d_spectrogram_model = load_model(models_dir+"RYAN_LATEST_gunshot_2d_spectrogram_model.h5",custom_objects={"auc":auc})
 name_dict[gunshot_2d_spectrogram_model] = "gunshot_2d_spectrogram_model"
-mode_list.append(gunshot_2d_spectrogram_model)
+model_list.append(gunshot_2d_spectrogram_model)
 
 
 model_name = "SAME_INDEX_gunshot_2d_spectrogram_model.tflite"
