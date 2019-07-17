@@ -129,6 +129,12 @@ validation_weights = np.array(validation_weights)
 
 print("finished split")
 
+
+def auc(y_true, y_pred):
+    auc = tf.metrics.auc(y_true, y_pred)[1]
+    K.get_session().run(tf.local_variables_initializer())
+    return auc
+
 model_list = []
 
 name_dict = {}
@@ -141,7 +147,7 @@ CNN_2D_Model_keras = load_model(models_dir+"spectrogram_gunshot_model_1.h5")
 name_dict[CNN_2D_Model_keras] = "CNN_2D_Model_keras"
 model_list.append(CNN_2D_Model_keras)
 
-CNN_1D_Model_keras = load_model(models_dir+"gunshot_sound_model_1d.h5")
+CNN_1D_Model_keras = load_model(models_dir+"gunshot_sound_model_1d.h5",custom_objects={"auc":auc})
 name_dict[CNN_1D_Model_keras] = "CNN_1D_Model_keras"
 model_list.append(CNN_1D_Model_keras)
 
