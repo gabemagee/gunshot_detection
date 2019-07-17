@@ -220,7 +220,7 @@ x = layers.Dense(1028, activation="relu")(x)
 output_tensor = layers.Dense(2, activation="softmax")(x)
 
 model = tf.keras.Model(input_tensor, output_tensor)
-model.compile(optimizer=optimizer, loss="binary_crossentropy", metrics=[auc, "accuracy"])
+model.compile(optimizer=optimizer, loss="binary_crossentropy", metrics=["accuracy"])
 
 # ## Configuring model properties
 
