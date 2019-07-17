@@ -174,7 +174,7 @@ def auc(y_true, y_pred):
 # In[ ]:
 
 
-number_of_epochs = 100
+number_of_epochs = 77
 batch_size = 32
 optimizer = optimizers.Adam(lr=0.001, decay=0.001 / 100)
 input_tensor = Input(shape=(44100, 1))
@@ -252,6 +252,7 @@ print(model.summary())
 
 # In[ ]:
 
+model.load_weights(model_filename)
 
 History = model.fit(train_wav, train_label,
                     validation_data=[test_wav, test_label],

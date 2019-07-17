@@ -131,20 +131,30 @@ print("finished split")
 
 model_list = []
 
-print("loaded models")
+
 
 models_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/models/"
 
 CNN_2D_Model = load_model(models_dir+"spectrogram_gunshot_model_1.h5")
+CNN_2D_Model.name = "CNN_2D_Model"
+model_list.append(CNN_2D_Model)
 
+CNN_2D_Model = load_model(models_dir+"spectrogram_gunshot_model_1.h5")
+CNN_2D_Model.name = "CNN_2D_Model"
+model_list.append(CNN_2D_Model)
 
+print("loaded models")
 
+predictions = []
 for i in range(len(validation_wav)):
     print(i)
     x = validation_wav[i]
     y = validation_label[i]
+    d = {}
     for model in model_list:
-        model.predict(x)
+        y = model.predict(x)
+        d[model.name] = y
+    predictions.append(d)
 
 
 t = Texttable()
