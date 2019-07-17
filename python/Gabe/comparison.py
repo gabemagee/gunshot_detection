@@ -201,6 +201,12 @@ def tflite_predict(interpreter,input_data):
     output_data = interpreter.get_tensor(output_details[0]['index'])
     return output_data
 
+def make_spectrogram(y):
+    y = np.array(y)
+    print(type(y))
+    print(y.dtype)
+    return np.array(librosa.feature.melspectrogram(y=y, sr=22050))
+
 
 print("loaded models")
 
@@ -245,7 +251,8 @@ for i in range(len(validation_wav)):
     d = {}
     for model in model_list:
         nm = name_dict[model]
-        x = audio_to_melspectrogram(x)
+        #x = audio_to_melspectrogram(x)
+        x = make_spectrogram(x)
         print(x.shape)
         print(model.layers[0].input_shape[0])
         output = model.predict(x)[0][1]
