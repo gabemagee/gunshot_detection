@@ -36,7 +36,7 @@ from sklearn.model_selection import KFold
 
 from texttable import Texttable
 
-
+SELF_RECORDING_WEIGHT = 50
 
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
@@ -139,9 +139,9 @@ CNN_2D_Model = load_model(models_dir+"spectrogram_gunshot_model_1.h5")
 CNN_2D_Model.name = "CNN_2D_Model"
 model_list.append(CNN_2D_Model)
 
-CNN_2D_Model = load_model(models_dir+"spectrogram_gunshot_model_1.h5")
-CNN_2D_Model.name = "CNN_2D_Model"
-model_list.append(CNN_2D_Model)
+#CNN_1D_Model = load_model(models_dir+"spectrogram_gunshot_model_1.h5")
+#CNN_1D_Model.name = "CNN_1D_Model"
+#model_list.append(CNN_2D_Model)
 
 print("loaded models")
 
@@ -152,8 +152,9 @@ for i in range(len(validation_wav)):
     y = validation_label[i]
     d = {}
     for model in model_list:
-        y = model.predict(x)
-        d[model.name] = y
+        y_i = model.predict(x)
+        print(model.name,y_i)
+        d[model.name] = y_i
     predictions.append(d)
 
 
