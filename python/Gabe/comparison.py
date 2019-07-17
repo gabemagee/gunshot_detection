@@ -75,6 +75,13 @@ input_shape = (128, 87, 1)
 
 print(labels.shape)
 
+print(labels)
+labels = np.array([("gun_shot" if label ==1.0 else "other") for label in labels])
+label_binarizer = LabelBinarizer()
+labels = label_binarizer.fit_transform(labels)
+labels = np.hstack((labels,1-labels))
+print(labels)
+
 sampling_rate = 44100
 hop_length = 345 * 2
 fmin = 20
