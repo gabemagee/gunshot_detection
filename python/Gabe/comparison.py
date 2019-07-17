@@ -228,7 +228,7 @@ for i in range(len(validation_wav)):
         if nm.split("_")[-1]=="tflite":
             output = tflite_predict(model,x)
         else:
-            print(model.layers[0].input_shape)
+            x = x.reshape(model.layers[0].input_shape[0])
             output = model.predict(x)
         print(nm,y,output)
     #predictions.append(d)
