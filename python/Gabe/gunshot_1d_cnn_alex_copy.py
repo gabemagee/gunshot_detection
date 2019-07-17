@@ -264,7 +264,7 @@ History = model.fit(train_wav, train_label,
 
 
 
-model.save(BASE_DIRECTORY + "gunshot_sound_model.h5")
+model.save(BASE_DIRECTORY + "gunshot_sound_model_1d.h5")
 
 print("saved at: ",BASE_DIRECTORY + "gunshot_sound_model.h5")
 
