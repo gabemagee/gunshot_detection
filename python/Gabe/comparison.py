@@ -173,14 +173,14 @@ gunshot_2d_spectrogram_model_tflite.allocate_tensors()
 name_dict[gunshot_2d_spectrogram_model_tflite] = "gunshot_2d_spectrogram_model_tflite"
 #model_list.append(gunshot_2d_spectrogram_model_tflite)
 
-model_name = "spectrogram_gunshot_model_1.tflite"
+model_name = "CNN_2D.tflite"
 CNN_2D_Model_tflite = tf.lite.Interpreter(models_dir+model_name)
 CNN_2D_Model_tflite.allocate_tensors()
 name_dict[CNN_2D_Model_tflite] = "CNN_2D_Model_tflite"
 #model_list.append(CNN_2D_Model_tflite)
 
 
-model_name = "gunshot_sound_model_1d.tflite"
+model_name = "1D_CNN.tflite"
 CNN_1D_Model_tflite = tf.lite.Interpreter(models_dir+model_name)
 CNN_1D_Model_tflite.allocate_tensors()
 name_dict[CNN_1D_Model_tflite] = "CNN_1D_Model_tflite"
