@@ -229,7 +229,7 @@ for i in range(len(validation_wav)):
             output = tflite_predict(model,x)
         else:
             print(model.layers[0].input_shape[0])
-            x = x.reshape(model.layers[0].input_shape[0])
+            x = x.reshape((-1, 128, 87, 1))
             output = model.predict(x)
         print(nm,y,output)
     #predictions.append(d)
