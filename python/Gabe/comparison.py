@@ -75,7 +75,7 @@ input_shape = (128, 87, 1)
 
 print(labels.shape)
 
-print(labels)
+print(list(labels))
 labels = np.array([("gun_shot" if label ==1.0 else "other") for label in labels])
 label_binarizer = LabelBinarizer()
 labels = label_binarizer.fit_transform(labels)
