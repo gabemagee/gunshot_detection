@@ -259,19 +259,22 @@ for i in range(len(validation_wav)):
     #x_1 = make_spectrogram(x).reshape((-1, 128, 87, 1))
     x_1 = audio_to_melspectrogram(x).reshape((-1,128,64,1))
     print(x_1.shape)
-    output = model.predict(x_1)[0][1]
+    print(CNN_2D_Model_keras.layers[0].input_shape[0])
+    output = CNN_2D_Model_keras.predict(x_1)[0][1]
     print("CNN_2D_Model_keras",y,output)
 
     #CNN_1D_Model_keras
     x_1 = x
     print(x_1.shape)
-    output = model.predict(x_1)[0][1]
+    print(CNN_1D_Model_keras.layers[0].input_shape[0])
+    output = CNN_1D_Model_keras.predict(x_1)[0][1]
     print("CNN_1D_Model_keras",y,output)
 
     #gunshot_2d_spectrogram_model
     x_1 = x
     print(x_1.shape)
-    output = model.predict(x_1)[0][1]
+    print(gunshot_2d_spectrogram_model.layers[0].input_shape[0])
+    output = gunshot_2d_spectrogram_model.predict(x_1)[0][1]
     print("gunshot_2d_spectrogram_model",y,output)
 
 exit()
