@@ -131,32 +131,65 @@ print("finished split")
 
 model_list = []
 
-
+name_dict = {}
 
 models_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/models/"
 
 CNN_2D_Model = load_model(models_dir+"spectrogram_gunshot_model_1.h5")
-CNN_2D_Model.name = "CNN_2D_Model"
+name_dict[CNN_2D_Model] = "CNN_2D_Model"
 model_list.append(CNN_2D_Model)
 
-#CNN_1D_Model = load_model(models_dir+"spectrogram_gunshot_model_1.h5")
-#CNN_1D_Model.name = "CNN_1D_Model"
-#model_list.append(CNN_2D_Model)
+CNN_1D_Model = load_model(models_dir+"gunshot_sound_model_1d.h5")
+CNN_1D_Model.name = "CNN_1D_Model"
+model_list.append(CNN_2D_Model)
 
 print("loaded models")
+
+
+
+def accuracy(true_pos,true_neg,false_pos,false_neg):
+    return (true_pos+true_neg)/(true_pos+true_neg+false_pos+false_neg)
+
+def precision(true_pos,true_neg,false_pos,false_neg):
+    #TP/TP+FP
+    return true_pos/(true_pos+false_pos)
+
+def recall(true_pos,true_neg,false_pos,false_neg):
+    #TP/TP+FN
+    return true_pos/(true_pos+false_neg)
+
+def f1_score(true_pos,true_neg,false_pos,false_neg):
+    rc = recall(true_pos,true_neg,false_pos,false_neg)
+    pr = precision(true_pos,true_neg,false_pos,false_neg)
+    return 2*(rc * pr) / (rc + pr)
+
+metrics = [accuracy,precision,recall,f1_score]
+
+name_dict[accuracy] = "accuracy"
+name_dict[precision] = "precision"
+name_dict[recall] = "recall"
+name_dict[f1_score] = "f1_score"
+
+model_scores = {}
+for model in model_list:
+    model_scores[model] = {}
+    for fig in ["true_pos","true_neg","false_pos","false_neg"]:
+        model_scores[model][fig] = 0
+
 
 predictions = []
 for i in range(len(validation_wav)):
     print(i)
     x = validation_wav[i]
-    y = validation_label[i]
+    y = validation_label[i][0]
     d = {}
     for model in model_list:
         y_i = model.predict(x)
-        print(model.name,y_i)
-        d[model.name] = y_i
-    predictions.append(d)
+        print(name_dict[model],y,y_i)
+        #d[name_dict[model]] = y_i
+    #predictions.append(d)
 
+exit()
 
 t = Texttable()
 table = []
@@ -164,9 +197,9 @@ table.append(["metric"]+model_list)
 for metric in metrics:
     l = []
     #metric name
-    l.append(metric.name)
+    l.append(name_dict[metric])
     for model in model_list:
-        #score for that metric for that model
+
         l.append(metric(model))
 t.add_rows(table)
 print(t.draw())
