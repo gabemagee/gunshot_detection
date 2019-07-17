@@ -75,6 +75,8 @@ input_shape = (128, 87, 1)
 
 print(labels.shape)
 
+
+
 print(list(labels))
 labels = np.array([("gun_shot" if label ==1.0 else "other") for label in labels])
 label_binarizer = LabelBinarizer()
@@ -262,13 +264,15 @@ for i in range(len(validation_wav)):
     x = validation_wav[i]
     #print(x.shape)
     y = validation_label[i][0]
+    y = label_binarizer.inverse_transform(validation_label[i])
     d = {}
 
     #CNN_2D_Model_keras
     x_1 = make_spectrogram(x).reshape((-1, 128, 87, 1))
     #print("input shape",x_1.shape)
     #print("model input shape",CNN_2D_Model_keras.layers[0].input_shape[0])
-    output = CNN_2D_Model_keras.predict(x_1)[0]
+    output = CNN_2D_Model_keras.predict(x_1)[:,0][0]
+    output = label_binarizer.inverse_transform(output)
     print("CNN_2D_Model_keras",y,output)
 
     #CNN_1D_Model_keras
