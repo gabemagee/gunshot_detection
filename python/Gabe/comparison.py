@@ -94,6 +94,8 @@ def update_counts(y,output,model,model_scores):
 def tflite_predict(interpreter,input_data):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
+    print(input_data.shape)
+    print(input_data.dtype)
     interpreter.set_tensor(input_details[0]['index'], input_data)
     interpreter.invoke()
     output_data = interpreter.get_tensor(output_details[0]['index'])
@@ -338,6 +340,7 @@ for i in range(len(validation_wav)):
     shape = interpreter.get_input_details()[0]['shape']
     print(shape)
     x_1 = x.reshape((-1, 44100, 1))
+    print(x_1.shape)
     output = tflite_predict(interpreter,x_1)
     print(output)
 
