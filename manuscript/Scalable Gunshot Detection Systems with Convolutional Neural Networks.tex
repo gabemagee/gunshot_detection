@@ -7,7 +7,7 @@
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
-\usepackage{multirow}
+\usepackage{booktabs}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
@@ -69,34 +69,25 @@ We obtained our data from two places: free internet  databases such as Freesound
 Further, we decidedly divided our data into three sets: training data, testing data, and validation data. This was to prevent our models from overfitting to our given dataset which had been occurring previously. Detailed below is a list of the augmentations we applied to each of our sound samples.
 
 \begin{table}[htbp]
+\centering
 \caption{Data Augmentations}
-\begin{center}
-\begin{tabular}{|c|c|c|}
-\hline
-\textbf{Time Shift} & \textbf{Pitch Change} & \textbf{Speed Change} \\
-\hline
-\multirow{5}{*}{\parbox{2.5cm}{Shifts a sound sample to the left or right by a randomly chosen amount less than 50\% of the length, and then fills in silence as needed.}} &
-\multirow{5}{*}{\parbox{2cm}{Changes the pitch of a sample by a randomly-chosen factor between 70\% and 130\%.}} & 
-\multirow{5}{*}{\parbox{2.5cm}{Alters the playback speed of a sample by a randomly-chosen amount between 70\% and 130\%.}} \\ \\ \\ \\ \\ \\ \\
-\hline
+\small
+\begin{tabular}{*{3}{p{.285\linewidth}}}
+\toprule
+\textbf{Time Shift} & \textbf{Pitch Change} & \textbf{Speed Change} \\\midrule
+Shifts a sound sample to the left or right by a randomly chosen amount less than 50\% of the length, and then fills in silence as needed. & Changes the pitch of a sample by a randomly-chosen factor between 70\% and 130\%. & Alters the playback speed of a sample by a randomly-chosen amount between 70\% and 130\%. \\\midrule
 \end{tabular}
 \label{tab1}
-\end{center}
 \end{table}
 
 \begin{table}[htbp]
-\begin{center}
-\begin{tabular}{|c|c|}
-\hline
-\textbf{Volume Change} & \textbf{Background Noise Addition} \\
-\hline
-\multirow{5}{*}{\parbox{2.5cm}{Increases the amplitude of a sample​ with a uniformly-random variable$^{\mathrm{a}}$.}} &
-\multirow{5}{*}{\parbox{2.5cm}{Introduces random​ background noise into a sample while making sure that no gunshots are added into a sample that does not originally contain a gunshot.}} \\ \\ \\ \\ \\ \\ \\ \\
-\hline
-\multicolumn{2}{l}{$^{\mathrm{a}}$Sample of a Table footnote.}
+\centering
+\small
+\begin{tabular}{*{2}{p{.45\linewidth}}}
+\toprule
+\textbf{Volume Change} & \textbf{Background Noise Addition} \\\midrule
+Increases the amplitude of a sample with a uniformly-random variable. & Introduces random background noise into a sample while making sure that no gunshots are added into a sample that does not originally contain a gunshot. \\\midrule
 \end{tabular}
-\label{tab2}
-\end{center}
 \end{table}
 
 \begin{figure}[htbp]
@@ -105,18 +96,16 @@ Further, we decidedly divided our data into three sets: training data, testing d
 \label{fig1}
 \end{figure}
 
-Figure Labels: Use 8 point Times New Roman for Figure labels. Use words 
-rather than symbols or abbreviations when writing Figure axis labels to 
-avoid confusing the reader. As an example, write the quantity 
-``Magnetization'', or ``Magnetization, M'', not just ``M''. If including 
-units in the label, present them within parentheses. Do not label axes only 
-with units. In the example, write ``Magnetization (A/m)'' or ``Magnetization 
-\{A[m(1)]\}'', not just ``A/m''. Do not label axes with a ratio of 
-quantities and units. For example, write ``Temperature (K)'', not 
-``Temperature/K''.
-
 \section{CNNs}
 Convolutional Neural Networks (CNNs) are neural networks designed to locate, model, and accurately predict patterns present in input data such as a colored image. They do so by iteratively sliding over small regions of data and translating any inherent properties in a region over to a proceeding network layer. This process is repeated up until the output layer which generates a prediction.
+
+\begin{figure}[h!]
+    \begin{flushleft}
+        \includegraphics[width=\linewidth]{{"2D CNN Architecture"}.png}
+        \caption{An illustration of our 2D CNN's architecture.}
+        \label{fig:illustration1}
+    \end{flushleft}
+\end{figure}
 
 \section{Spectrograms}
 Spectrograms are visual representations of the frequency and amplitude of sound over a specified span of time. For our project, we created two models, a 1D architecture that looks at sound represented as an array of frequency values and a 2D architecture that instead analyzes sound represented as spectrograms. For the time-series model each entry simply corresponds to a frequency measurement in a time-series, whereas for the spectrogram model the entry for each specific frequency-time cartesian coordinate is an amplitude value.
@@ -129,42 +118,36 @@ A convolutional neural network (CNN) was trained on a variety of sound data to r
 \subsection{Deployment}
 Each model was then deployed to a Raspberry Pi Model 3 B+ with an SMS modem attached. In order to conserve space, we decided to convert them to TensorFlow Lite (TFLite) models, with a tradeoff for performance time. Our program has three processes – one to put audio from a stream onto a queue, one to analyze sound data pulled from the queue, and one to send an SMS alert message to a predetermined list of phone numbers.
 
-\section{Gunshot Detection Results}
+\section{Results}
 
 Using a validation data set, we found that our Keras models performed reasonably well with predictions. Regarding the performance of our models when stored in TFLite format, the results below describe expected levels of effectiveness.
 
 \begin{table}[htbp]
-\caption{Table Type Styles}
+\caption{Gunshot Detection Results}
 \begin{center}
-\begin{tabular}{|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|c|}
 \hline
-\textbf{Table}&\multicolumn{3}{|c|}{\textbf{Table Column Head}} \\
-\cline{2-4} 
-\textbf{Head} & \textbf{\textit{Table column subhead}}& \textbf{\textit{Subhead}}& \textbf{\textit{Subhead}} \\
+& \multicolumn{2}{|c|}{\textbf{2D CNN (128 x 64)}} & \multicolumn{2}{|c|}{\textbf{2D CNN (128 x 128)}} & \multicolumn{2}{|c|}{\textbf{CNN Ensemble}} \\
+\cline{2-7}
+& \textit{Keras} & \textit{TFLite} & \textit{Keras} & \textit{TFLite} & \textit{Keras} & \textit{TFLite} \\
 \hline
-copy& More table copy$^{\mathrm{a}}$& &  \\
+Accuracy & 98.8\% & N/A & 98.8\% & N/A & 98.8\% & N/A  \\
 \hline
-\multicolumn{4}{l}{$^{\mathrm{a}}$Sample of a Table footnote.}
+Precision & 96.5\% & N/A & 94.3\% & N/A & 97.1\% & N/A \\
+\hline
+Recall & 93.8\% & N/A & 96.2\% & N/A & 92.9\% & N/A \\
+\hline
+F1 Score & 95.1\% & N/A & 95.2\% & N/A & 95.0\% & N/A \\
+\hline
 \end{tabular}
-\label{tab3}
+\label{tab2}
 \end{center}
 \end{table}
 
 \begin{figure}[htbp]
-% \centerline{\includegraphics{fig1.png}}
-\caption{Example of a figure caption.}
+\caption{The findings of a cross-evaluation technique applied to our models.}
 \label{fig2}
 \end{figure}
-
-Figure Labels: Use 8 point Times New Roman for Figure labels. Use words 
-rather than symbols or abbreviations when writing Figure axis labels to 
-avoid confusing the reader. As an example, write the quantity 
-``Magnetization'', or ``Magnetization, M'', not just ``M''. If including 
-units in the label, present them within parentheses. Do not label axes only 
-with units. In the example, write ``Magnetization (A/m)'' or ``Magnetization 
-\{A[m(1)]\}'', not just ``A/m''. Do not label axes with a ratio of 
-quantities and units. For example, write ``Temperature (K)'', not 
-``Temperature/K''.
 
 \section{Significance \& Future Work}
 
