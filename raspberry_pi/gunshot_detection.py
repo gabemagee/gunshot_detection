@@ -389,7 +389,6 @@ while True:
 
         # Post-processes the microphone data
         modified_microphone_data = librosa.resample(y=microphone_data, orig_sr=AUDIO_RATE, target_sr=22050)
-        modified_microphone_data = normalize(modified_microphone_data)
         if NOISE_REDUCTION_ENABLED and noise_sample_captured:
             # Acts as a substitute for normalization
             modified_microphone_data = remove_noise(audio_clip=modified_microphone_data, noise_clip=noise_sample)
