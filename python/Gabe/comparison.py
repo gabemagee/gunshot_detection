@@ -145,6 +145,8 @@ print("Finished loading data. Loading Models.")
 
 model_list = []
 
+tflite_model_list = []
+
 models_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/models/"
 models_dir = base_dir+"raspberry_pi/models/"
 
@@ -171,20 +173,26 @@ model_name = "RYAN_LATEST_gunshot_2d_spectrogram_model.tflite"
 gunshot_2d_spectrogram_model_tflite = tf.lite.Interpreter(models_dir+model_name)
 gunshot_2d_spectrogram_model_tflite.allocate_tensors()
 name_dict[gunshot_2d_spectrogram_model_tflite] = "gunshot_2d_spectrogram_model_tflite"
-#model_list.append(gunshot_2d_spectrogram_model_tflite)
+tflite_model_list.append(gunshot_2d_spectrogram_model_tflite)
 
 model_name = "CNN_2D.tflite"
 CNN_2D_Model_tflite = tf.lite.Interpreter(models_dir+model_name)
 CNN_2D_Model_tflite.allocate_tensors()
 name_dict[CNN_2D_Model_tflite] = "CNN_2D_Model_tflite"
-#model_list.append(CNN_2D_Model_tflite)
+tflite_model_list.append(CNN_2D_Model_tflite)
 
 
 model_name = "1D_CNN.tflite"
 CNN_1D_Model_tflite = tf.lite.Interpreter(models_dir+model_name)
 CNN_1D_Model_tflite.allocate_tensors()
 name_dict[CNN_1D_Model_tflite] = "CNN_1D_Model_tflite"
-#model_list.append(CNN_1D_Model_tflite)
+tflite_model_list.append(CNN_1D_Model_tflite)
+
+model_name = "128_128_gunshot_2d_spectrogram_model.tflite"
+CNN_2D_128x128_tflite = tf.lite.Interpreter(models_dir+model_name)
+CNN_2D_128x128_tflite.allocate_tensors()
+name_dict[CNN_2D_128x128_tflite] = "CNN_2D_128x128_tflite"
+tflite_model_list.append(CNN_2D_128x128_tflite)
 
 
 one_and_two  = tf.keras.Model()
@@ -212,6 +220,11 @@ for model in model_list:
     for fig in ["true_pos","true_neg","false_pos","false_neg"]:
         model_scores[model][fig] = 0
 
+for model in tflite_model_list:
+    model_scores[model] = {}
+    for fig in ["true_pos","true_neg","false_pos","false_neg"]:
+        model_scores[model][fig] = 0
+
 print("loaded models")
 
 metrics = [accuracy,precision,recall,f1_score]
@@ -222,8 +235,6 @@ name_dict[recall] = "recall"
 name_dict[f1_score] = "f1_score"
 
 last = 0
-
-predictions = []
 for i in range(len(validation_wav)):
     temp = int(i*100/len(validation_wav))
     if temp> last:
@@ -309,6 +320,31 @@ for i in range(len(validation_wav)):
     else:
         output = ["other"]
     update_counts(y,output,three_and_four,model_scores)
+
+
+    ## TFLite
+    interpreter = gunshot_2d_spectrogram_model_tflite
+    x_1 = audio_to_melspectrogram(x).reshape((-1,128,64,1))
+    output = tflite_predict(interpreter,x_1)
+    print(output)
+
+    interpreter = CNN_2D_Model_tflite
+    x_1 = make_spectrogram(x).reshape((-1, 128, 87, 1))
+    output = tflite_predict(interpreter,x_1)
+    print(output)
+
+
+    interpreter = CNN_1D_Model_tflite
+    x_1 = x.reshape((-1, 44100, 1))
+    output = tflite_predict(interpreter,x_1)
+    print(output)
+
+    interpreter = CNN_2D_128x128_tflite
+    x_1 = audio_to_melspectrogram(x,hop_length=345).reshape((-1,128,128,1))
+    output = tflite_predict(interpreter,x_1)
+    print(output)
+
+
 
 t = Texttable()
 table = []
