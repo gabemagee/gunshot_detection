@@ -35,6 +35,8 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import KFold
 import librosa
 from texttable import Texttable
+import progressbar
+
 
 SELF_RECORDING_WEIGHT = 50
 name_dict = {}
@@ -237,11 +239,15 @@ name_dict[recall] = "recall"
 name_dict[f1_score] = "f1_score"
 
 last = 0
+bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+bar.start()
+bar.update(last)
+
 for i in range(len(validation_wav)):
     temp = int(i*100/len(validation_wav))
     if temp> last:
         last = temp
-        print(last)
+        bar.update(last)
     x = validation_wav[i]
     #print(x.shape)
     y = label_binarizer.inverse_transform(validation_label[:,0][i])
@@ -358,7 +364,7 @@ for i in range(len(validation_wav)):
         output = ["other"]
     update_counts(y,output,three_and_four,model_scores)
 
-
+bar.finish()
 
 t = Texttable()
 table = []
