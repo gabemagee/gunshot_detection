@@ -1,44 +1,29 @@
 import os
 import glob
+import csv
+import IPython
+import tensorflow as tf
+import tensorflow.keras as keras
+import IPython.display as ipd
 import numpy as np
 import sys
 import keras
+import librosa
+import progressbar
 from keras.models import Sequential
 from keras.layers import Conv1D, Conv2D, MaxPooling2D, GlobalAveragePooling1D, MaxPooling1D, Dense, Dropout, Activation, Flatten
 from keras import optimizers
 from keras.optimizers import Adam, SGD
-from keras.utils import np_utils
-from keras.layers.normalization import BatchNormalization
-from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
 from sklearn import metrics
-from matplotlib import pyplot
-from sklearn import preprocessing
 from sklearn.preprocessing import LabelBinarizer
-from scipy import signal
-from scipy.io import wavfile
-import csv
-import IPython.display as ipd
-from os import listdir
-from os.path import isfile, join
-from glob import glob
-import IPython
-import tensorflow as tf
-import tensorflow.keras as keras
 from tensorflow.python.client import device_lib
 from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from sklearn.model_selection import KFold
-import librosa
 from texttable import Texttable
-import progressbar
 
 
-SELF_RECORDING_WEIGHT = 50
+
 name_dict = {}
 
 def get_available_gpus():
@@ -84,6 +69,7 @@ def f1_score(true_pos,true_neg,false_pos,false_neg):
     return 2*(rc * pr) / (rc + pr)
 
 def update_counts(y,output,model,model_scores):
+    #print(name_dict[model],model_scores[model])
     if y[0]=="gun_shot" and output[0]=="gun_shot":
         model_scores[model]["true_pos"] = model_scores[model]["true_pos"]+1
     elif y[0]=="gun_shot" and output[0]!="gun_shot":
@@ -153,8 +139,6 @@ tflite_model_list = []
 
 models_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/models/"
 models_dir = base_dir+"raspberry_pi/models/"
-
-model_filenames = os.listdir(models_dir)
 
 CNN_2D_keras = load_model(models_dir+"CNN_2D.h5")
 name_dict[CNN_2D_keras] = "CNN_2D_keras"
@@ -240,14 +224,15 @@ name_dict[f1_score] = "f1_score"
 
 last = 0
 bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-bar.start()
-bar.update(last)
+#bar.start()
+#bar.update(last)
 
 for i in range(len(validation_wav)):
     temp = int(i*100/len(validation_wav))
     if temp> last:
         last = temp
-        bar.update(last)
+        print(last)
+        #bar.update(last)
     x = validation_wav[i]
     #print(x.shape)
     y = label_binarizer.inverse_transform(validation_label[:,0][i])
@@ -364,7 +349,7 @@ for i in range(len(validation_wav)):
         output = ["other"]
     update_counts(y,output,three_and_four,model_scores)
 
-bar.finish()
+#bar.finish()
 
 t = Texttable()
 table = []
@@ -374,7 +359,8 @@ for metric in metrics:
     #metric name
     l.append(name_dict[metric])
     for model in model_list:
-        l.append(metric(model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"]))
+        pass
+        #l.append(metric(model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"]))
     table.append(l)
 t.add_rows(table)
 print(t.draw())
