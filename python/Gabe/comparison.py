@@ -94,8 +94,8 @@ def update_counts(y,output,model,model_scores):
 def tflite_predict(interpreter,input_data):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
-    print(input_data.shape)
-    print(input_data.dtype)
+    #print(input_data.shape)
+    input_data = np.array(input_data,dtype=np.float32)
     interpreter.set_tensor(input_details[0]['index'], input_data)
     interpreter.invoke()
     output_data = interpreter.get_tensor(output_details[0]['index'])
