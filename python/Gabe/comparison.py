@@ -335,6 +335,8 @@ for i in range(len(validation_wav)):
 
 
     interpreter = CNN_1D_Model_tflite
+    shape = interpreter.get_input_details()[0]['shape']
+    print(shape)
     x_1 = x.reshape((-1, 44100, 1))
     output = tflite_predict(interpreter,x_1)
     print(output)
