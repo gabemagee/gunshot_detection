@@ -45,7 +45,7 @@ MINIMUM_FREQUENCY = 20
 MAXIMUM_FREQUENCY = AUDIO_RATE // 2
 NUMBER_OF_MELS = 128
 NUMBER_OF_FFTS = NUMBER_OF_MELS * 20
-SMS_ALERTS_ENABLED = False
+SMS_ALERTS_ENABLED = True
 DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
 sound_data = np.zeros(0, dtype = "float32")
 noise_sample_captured = False
@@ -224,18 +224,6 @@ def remove_noise(audio_clip,
 
 # Converting 1D Sound Arrays into Spectrograms #
 
-def convert_audio_to_spectrogram(data):
-    spectrogram = librosa.feature.melspectrogram(y=data, sr=AUDIO_RATE,
-                                                 hop_length=HOP_LENGTH,
-                                                 fmin=MINIMUM_FREQUENCY,
-                                                 fmax=MAXIMUM_FREQUENCY,
-                                                 n_mels=NUMBER_OF_MELS,
-                                                 n_fft=NUMBER_OF_FFTS)
-    spectrogram = power_to_db(spectrogram)
-    spectrogram = spectrogram.astype(np.float32)
-    return spectrogram
-
-
 def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
     S = np.asarray(S)
     if amin <= 0:
@@ -258,6 +246,19 @@ def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
         log_spec = np.maximum(log_spec, log_spec.max() - top_db)
     return log_spec
 
+
+def convert_audio_to_spectrogram(data):
+    spectrogram = librosa.feature.melspectrogram(y=data, sr=AUDIO_RATE,
+                                                 hop_length=HOP_LENGTH,
+                                                 fmin=MINIMUM_FREQUENCY,
+                                                 fmax=MAXIMUM_FREQUENCY,
+                                                 n_mels=NUMBER_OF_MELS,
+                                                 n_fft=NUMBER_OF_FFTS)
+    spectrogram = power_to_db(spectrogram)
+    spectrogram = spectrogram.astype(np.float32)
+    return spectrogram
+
+
 # WAV File Composition Function #
 
 # Saves a two-second gunshot sample as a WAV file
@@ -270,7 +271,7 @@ def create_gunshot_wav_file(microphone_data, index, timestamp):
 # Loading in the model #
 
 # Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="./models/spectro_no_variables.tflite")
+interpreter = tf.lite.Interpreter(model_path="./models/128_128_gunshot_2d_spectrogram_model.tflite")
 interpreter.allocate_tensors()
 
 # Gets input and output tensors as well as the input shape
