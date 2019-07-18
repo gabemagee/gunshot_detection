@@ -203,12 +203,12 @@ two_and_three = tf.keras.Model()
 one_and_four = tf.keras.Model()
 two_and_four = tf.keras.Model()
 three_and_four = tf.keras.Model()
-model_list.append(one_and_two)
-model_list.append(one_and_three)
-model_list.append(two_and_three)
-model_list.append(one_and_four)
-model_list.append(two_and_four)
-model_list.append(three_and_four)
+tflite_model_list.append(one_and_two)
+tflite_model_list.append(one_and_three)
+tflite_model_list.append(two_and_three)
+tflite_model_list.append(one_and_four)
+tflite_model_list.append(two_and_four)
+tflite_model_list.append(three_and_four)
 name_dict[one_and_two] = "1 and 2"
 name_dict[one_and_three] = "1 and 3"
 name_dict[two_and_three] = "2 and 3"
@@ -245,7 +245,7 @@ for i in range(len(validation_wav)):
     x = validation_wav[i]
     #print(x.shape)
     y = label_binarizer.inverse_transform(validation_label[:,0][i])
-
+    """
     #CNN_2D_keras
     x_1 = make_spectrogram(x).reshape((-1, 128, 87, 1))
     #print("input shape",x_1.shape)
@@ -280,6 +280,41 @@ for i in range(len(validation_wav)):
     output = label_binarizer.inverse_transform(output)
     update_counts(y,output,CNN_2D_128x128_keras,model_scores)
     output_4 = output
+
+    """
+
+
+    ## TFLite
+    interpreter = gunshot_2d_spectrogram_model_tflite
+    x_1 = audio_to_melspectrogram(x).reshape((-1,128,64,1))
+    output = tflite_predict(interpreter,x_1)
+    output = label_binarizer.inverse_transform(output)
+    output_1 = output
+    update_counts(y,output,interpreter,model_scores)
+
+    interpreter = CNN_2D_Model_tflite
+    x_1 = make_spectrogram(x).reshape((-1, 128, 87, 1))
+    output = tflite_predict(interpreter,x_1)
+    output = label_binarizer.inverse_transform(output)
+    output_2 = output
+    update_counts(y,output,interpreter,model_scores)
+
+
+    interpreter = CNN_1D_Model_tflite
+    shape = interpreter.get_input_details()[0]['shape']
+    x_1 = x.reshape((-1, 44100, 1))
+    output = tflite_predict(interpreter,x_1)
+    output = label_binarizer.inverse_transform(output)
+    output_3 = output
+    update_counts(y,output,interpreter,model_scores)
+
+    interpreter = CNN_2D_128x128_tflite
+    x_1 = audio_to_melspectrogram(x,hop_length=345).reshape((-1,128,128,1))
+    output = tflite_predict(interpreter,x_1)
+    output = label_binarizer.inverse_transform(output)
+    output_4 = output
+    update_counts(y,output,interpreter,model_scores)
+
 
     # one_and_two
     if output_1[0]=="gun_shot" and output_2[0]=="gun_shot":
@@ -322,34 +357,6 @@ for i in range(len(validation_wav)):
     else:
         output = ["other"]
     update_counts(y,output,three_and_four,model_scores)
-
-
-    ## TFLite
-    interpreter = gunshot_2d_spectrogram_model_tflite
-    x_1 = audio_to_melspectrogram(x).reshape((-1,128,64,1))
-    output = tflite_predict(interpreter,x_1)
-    output = label_binarizer.inverse_transform(output)
-    update_counts(y,output,interpreter,model_scores)
-
-    interpreter = CNN_2D_Model_tflite
-    x_1 = make_spectrogram(x).reshape((-1, 128, 87, 1))
-    output = tflite_predict(interpreter,x_1)
-    output = label_binarizer.inverse_transform(output)
-    update_counts(y,output,interpreter,model_scores)
-
-
-    interpreter = CNN_1D_Model_tflite
-    shape = interpreter.get_input_details()[0]['shape']
-    x_1 = x.reshape((-1, 44100, 1))
-    output = tflite_predict(interpreter,x_1)
-    output = label_binarizer.inverse_transform(output)
-    update_counts(y,output,interpreter,model_scores)
-
-    interpreter = CNN_2D_128x128_tflite
-    x_1 = audio_to_melspectrogram(x,hop_length=345).reshape((-1,128,128,1))
-    output = tflite_predict(interpreter,x_1)
-    output = label_binarizer.inverse_transform(output)
-    update_counts(y,output,interpreter,model_scores)
 
 
 
