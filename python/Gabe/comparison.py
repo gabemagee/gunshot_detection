@@ -328,26 +328,28 @@ for i in range(len(validation_wav)):
     interpreter = gunshot_2d_spectrogram_model_tflite
     x_1 = audio_to_melspectrogram(x).reshape((-1,128,64,1))
     output = tflite_predict(interpreter,x_1)
-    print(output)
+    output = label_binarizer.inverse_transform(output)
+    update_counts(y,output,interpreter,model_scores)
 
     interpreter = CNN_2D_Model_tflite
     x_1 = make_spectrogram(x).reshape((-1, 128, 87, 1))
     output = tflite_predict(interpreter,x_1)
-    print(output)
+    output = label_binarizer.inverse_transform(output)
+    update_counts(y,output,interpreter,model_scores)
 
 
     interpreter = CNN_1D_Model_tflite
     shape = interpreter.get_input_details()[0]['shape']
-    print(shape)
     x_1 = x.reshape((-1, 44100, 1))
-    print(x_1.shape)
     output = tflite_predict(interpreter,x_1)
-    print(output)
+    output = label_binarizer.inverse_transform(output)
+    update_counts(y,output,interpreter,model_scores)
 
     interpreter = CNN_2D_128x128_tflite
     x_1 = audio_to_melspectrogram(x,hop_length=345).reshape((-1,128,128,1))
     output = tflite_predict(interpreter,x_1)
-    print(output)
+    output = label_binarizer.inverse_transform(output)
+    update_counts(y,output,interpreter,model_scores)
 
 
 
@@ -359,8 +361,20 @@ for metric in metrics:
     #metric name
     l.append(name_dict[metric])
     for model in model_list:
-        [model_scores[model]["true_pos"],]
         l.append(metric(model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"]))
     table.append(l)
 t.add_rows(table)
+print(t.draw())
+
+tbl = Texttable()
+table = []
+table.append(["metric"]+[name_dict[model] for model in tflite_model_list])
+for metric in metrics:
+    l = []
+    #metric name
+    l.append(name_dict[metric])
+    for model in tflite_model_list:
+        l.append(metric(model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"]))
+    table.append(l)
+tbl.add_rows(table)
 print(t.draw())
