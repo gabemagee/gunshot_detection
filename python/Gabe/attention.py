@@ -180,7 +180,7 @@ training_indexes_path = base_dir+"raspberry_pi/indexes/training_set_indexes.npy"
 
 training_indexes = np.load(training_indexes_path)
 
-labels = keras.utils.to_categorical(labels, 2)
+labels = to_categorical(labels, 2)
 
 print(labels.shape)
 
