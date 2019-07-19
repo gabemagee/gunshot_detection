@@ -63,12 +63,12 @@ def minst_attention(inc_noise=False, attention=True):
     inputs = Input(shape=(1,image_size,image_size),name='input')
 
     conv_1a = Convolution2D(32, 3, 3,activation='relu',name='conv_1')
-    maxp_1a = MaxPooling2D((3, 3), strides=(2,2),name='convmax_1')
+    maxp_1a = MaxPooling2D((2, 2), strides=(2,2),name='convmax_1')
     norm_1a = crosschannelnormalization(name="convpool_1")
     zero_1a = ZeroPadding2D((2,2),name='convzero_1')
 
     conv_2a = Convolution2D(32,3,3,activation='relu',name='conv_2')
-    maxp_2a = MaxPooling2D((3, 3), strides=(2,2),name='convmax_2')
+    maxp_2a = MaxPooling2D((2, 2), strides=(2,2),name='convmax_2')
     norm_2a = crosschannelnormalization(name="convpool_2")
     zero_2a = ZeroPadding2D((2,2),name='convzero_2')
 
@@ -139,6 +139,8 @@ def audio_to_melspectrogram(audio,hop_length=345*2):
 #from tensorflow.keras.datasets import mnist
 
 #(X_train, y_train), (X_test, y_test) = mnist.load_data()
+
+"""
 
 base_dir = "/home/gamagee/workspace/gunshot_detection/"
 model_dir = base_dir+"raspberry_pi/models/"
@@ -217,12 +219,18 @@ test_wav = np.array(test_wav)
 test_label = np.array(test_label)
 #test_weights = np.array(test_weights)
 
-print("finished split")
+np.save("X_train.npy",train_wav)
+np.save("X_test.npy",test_wav)
+np.save("y_train.npy",train_label)
+np.save("y_test.npy",test_label)
 
-X_train = train_wav
-X_test = test_wav
-y_train = train_label
-y_test = test_label
+
+print("finished split")
+"""
+X_train = np.load("X_train.npy")
+X_test = np.load("X_test.npy")
+y_train = np.load("y_train.npy")
+y_test = np.load("y_test.npy")
 
 image_size = 128
 X_train.shape = (len(X_train),1,image_size,image_size)
