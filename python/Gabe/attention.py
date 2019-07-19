@@ -60,10 +60,10 @@ def att_shape2(input_shape):
 
 def minst_attention(inc_noise=False, attention=True):
     #make layers
-    inputs = Input(shape=(1,image_size,image_size),name='input')
+    inputs = Input(shape=(image_size,image_size,1),name='input')
 
     conv_1a = Convolution2D(32, 3, 3,activation='relu',name='conv_1')
-    maxp_1a = MaxPooling2D((3, 3), strides=(2,2),name='convmax_1',dim_ordering="tf")
+    maxp_1a = MaxPooling2D((2, 2), strides=(2,2),name='convmax_1',dim_ordering="tf")
     norm_1a = crosschannelnormalization(name="convpool_1")
     zero_1a = ZeroPadding2D((3,3),name='convzero_1')
 
@@ -233,8 +233,8 @@ y_train = np.load("y_train.npy")
 y_test = np.load("y_test.npy")
 
 image_size = 128
-X_train.shape = (len(X_train),1,image_size,image_size)
-X_test.shape = (len(X_test),1,image_size,image_size)
+X_train.shape = (len(X_train),image_size,image_size,1)
+X_test.shape = (len(X_test),image_size,image_size,1)
 
 
 y_trainCAT = to_categorical(y_train)
