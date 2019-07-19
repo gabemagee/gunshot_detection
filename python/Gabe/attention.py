@@ -48,7 +48,7 @@ def no_attention_control(args):
     return find_att
 
 def change_shape1(x):
-    x = K.reshape(K.transpose(x),(15*15,32))
+    x = K.reshape(K.transpose(x),(23*23,32))
     return x
 
 def att_shape(input_shape):
