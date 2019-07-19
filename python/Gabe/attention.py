@@ -2,7 +2,7 @@ from keras import backend as K
 from keras.layers import Input, Dense, merge, Flatten, Dropout, Lambda, normalization, Concatenate, Reshape, noise
 from keras.models import Model
 from keras.optimizers import SGD
-from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
+from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D
 
 #assert K.backend() == 'theano'
 #assert K.image_dim_ordering() == 'th'
@@ -58,16 +58,16 @@ def att_shape(input_shape):
 def att_shape2(input_shape):
     return input_shape[0][0:4]
 
-def minst_attention(inc_noise=False, attention=True):
+def minst_attention(attention=True):
     #make layers
     inputs = Input(shape=(image_size,image_size,1),name='input')
 
-    conv_1a = Convolution2D(32, 3, 3,activation='relu',name='conv_1')
+    conv_1a = Conv2D(32, 3, 3,activation='relu',name='conv_1')
     maxp_1a = MaxPooling2D((3, 3), strides=(2,2),name='convmax_1',dim_ordering="tf")
     norm_1a = crosschannelnormalization(name="convpool_1")
     zero_1a = ZeroPadding2D((2,2),name='convzero_1')
 
-    conv_2a = Convolution2D(32,3,3,activation='relu',name='conv_2')
+    conv_2a = Conv2D(32,3,3,activation='relu',name='conv_2')
     maxp_2a = MaxPooling2D((3, 3), strides=(2,2),name='convmax_2')
     norm_2a = crosschannelnormalization(name="convpool_2")
     zero_2a = ZeroPadding2D((2,2),name='convzero_2')
@@ -76,11 +76,7 @@ def minst_attention(inc_noise=False, attention=True):
     dense_2a = Dense(10, activation = 'softmax', init='uniform',name='dense_2')
 
     #make actual model
-    if inc_noise:
-        inputs_noise = noise.GaussianNoise(2.5)(inputs)
-        input_pad = ZeroPadding2D((1,1),input_shape=(1,image_size,image_size),name='input_pad')(inputs_noise)
-    else:
-        input_pad = ZeroPadding2D((1,1),input_shape=(1,image_size,image_size),name='input_pad')(inputs)
+    input_pad = ZeroPadding2D((1,1),input_shape=(1,image_size,image_size),name='input_pad')(inputs)
 
     conv_1 = conv_1a(input_pad)
     conv_1 = maxp_1a(conv_1)
@@ -240,7 +236,7 @@ X_test.shape = (len(X_test),image_size,image_size,1)
 y_trainCAT = to_categorical(y_train)
 y_testCAT = to_categorical(y_test)
 
-model = minst_attention(inc_noise=False)
+model = minst_attention()
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.5, nesterov=True)
 model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics=['accuracy'])
 print(X_train.shape,y_trainCAT.shape)
