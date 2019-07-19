@@ -63,7 +63,7 @@ def minst_attention(inc_noise=False, attention=True):
     inputs = Input(shape=(1,image_size,image_size),name='input')
 
     conv_1a = Convolution2D(32, 3, 3,activation='relu',name='conv_1')
-    maxp_1a = MaxPooling2D((3, 3), strides=(2,2),name='convmax_1')
+    maxp_1a = MaxPooling2D((3, 3), strides=(2,2),name='convmax_1',dim_ordering="tf")
     norm_1a = crosschannelnormalization(name="convpool_1")
     zero_1a = ZeroPadding2D((3,3),name='convzero_1')
 
