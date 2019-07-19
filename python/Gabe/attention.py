@@ -1,11 +1,11 @@
 from keras import backend as K
-from keras.layers import Input, Dense, merge, Flatten, Dropout, Lambda, normalization, Merge, Reshape, noise
+from keras.layers import Input, Dense, merge, Flatten, Dropout, Lambda, normalization, Concatenate, Reshape, noise
 from keras.models import Model
 from keras.optimizers import SGD
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 
-assert K.backend() == 'theano'
-assert K.image_dim_ordering() == 'th'
+#assert K.backend() == 'theano'
+#assert K.image_dim_ordering() == 'th'
 
 def crosschannelnormalization(alpha = 1e-4, k=2, beta=0.75, n=5,**kwargs):
     """
@@ -105,7 +105,7 @@ def minst_attention(inc_noise=False, attention=True):
         find_att = Lambda(no_attention_control,output_shape=att_shape,name='att_con')([find_att,dense_2])
 
     zero_3a = ZeroPadding2D((1,1),name='convzero_3')(find_att)
-    apply_attention  = Merge(mode='mul',name='attend')([zero_3a,conv_1])
+    apply_attention  = Concatenate(mode='mul',name='attend')([zero_3a,conv_1])
 
     conv_3 = conv_2a(apply_attention)
     conv_3 = maxp_2a(conv_3)
@@ -120,15 +120,115 @@ def minst_attention(inc_noise=False, attention=True):
     return model
 
 import numpy as np
-from keras.datasets import mnist
+from keras.utils.np_utils import to_categorical
+import librosa
 
-(X_train, y_train), (X_test, y_test) = mnist.load_data()
-image_size = np.shape(X_train[0])[1]
-print(image_size)
+def audio_to_melspectrogram(audio,hop_length=345*2):
+    audio = np.array(audio)
+    spectrogram = librosa.feature.melspectrogram(audio,
+                                                 sr=44100,
+                                                 n_mels=128,
+                                                 hop_length=hop_length,
+                                                 n_fft=128 * 20,
+                                                 fmin=20,
+                                                 fmax= 44100 // 2)
+    spectrogram = librosa.power_to_db(spectrogram)
+    spectrogram = spectrogram.astype(np.float32)
+    return spectrogram
+
+#from tensorflow.keras.datasets import mnist
+
+#(X_train, y_train), (X_test, y_test) = mnist.load_data()
+
+base_dir = "/home/gamagee/workspace/gunshot_detection/"
+model_dir = base_dir+"raspberry_pi/models/"
+
+sample_dir = base_dir+"REU_Data/spectrogram_training/samples_and_labels/"
+
+label_path = sample_dir+"gunshot_augmented_sound_labels.npy"
+
+sample_path = sample_dir+"gunshot_augmented_sound_samples.npy"
+
+#sample_path = sample_dir+"gunshot_augmented_sound_samples_spectro.npy"
+
+#spectrograph_samples_2_fn = sample_dir+"spectrogram_samples_power_to_db.npy"
+
+samples = np.load(sample_path)
+labels = np.load(label_path)
+
+#sample_weights = np.array([1 for normally_recorded_sample in range(len(samples) - 660)] + [SELF_RECORDING_WEIGHT for raspberry_pi_recorded_sample in range(660)])
+
+
+print(samples.shape)
+
+#samples.reshape(-1,128,87,1)
+
+
+sample_rate_per_two_seconds = 44100
+number_of_classes = 2
+sr = 22050
+input_shape = (128, 87, 1)
+
+print(labels.shape)
+
+
+testing_indexes_path = base_dir+"raspberry_pi/indexes/testing_set_indexes.npy"
+
+testing_indexes = np.load(testing_indexes_path)
+
+training_indexes_path = base_dir+"raspberry_pi/indexes/training_set_indexes.npy"
+
+training_indexes = np.load(training_indexes_path)
+
+labels = keras.utils.to_categorical(labels, 2)
+
+print(labels.shape)
+
+#sample_weights = np.array( [1 for normally_recorded_sample in range(len(samples) - 660)] + [50 for raspberry_pi_recorded_sample in range(660)])
+#print("Shape of samples weights before splitting:", sample_weights.shape)
+
+print("~~~~~~~~~~~~~~~~")
+
+train_wav = []
+train_label = []
+#train_weights = []
+test_wav = []
+test_label = []
+#test_weights = []
+
+for i in range(len(labels)):
+    if i in training_indexes:
+        x = samples[i]
+        x = audio_to_melspectrogram(x,hop_length=345).reshape((-1,128,128,1))
+        train_wav.append(x)
+        train_label.append(labels[i])
+        #train_weights.append(sample_weights[i])
+    elif i in testing_indexes:
+        x = samples[i]
+        x = audio_to_melspectrogram(x,hop_length=345).reshape((-1,128,128,1))
+        test_wav.append(x)
+        test_label.append(labels[i])
+        #test_weights.append(sample_weights[i])
+
+train_wav = np.array(train_wav)
+train_label = np.array(train_label)
+#train_weights = np.array(train_weights)
+test_wav = np.array(test_wav)
+test_label = np.array(test_label)
+#test_weights = np.array(test_weights)
+
+print("finished split")
+
+X_train = train_wav
+X_test = test_wav
+y_train = train_label
+y_test = test_label
+
+image_size = 128
 X_train.shape = (len(X_train),1,image_size,image_size)
 X_test.shape = (len(X_test),1,image_size,image_size)
 
-from keras.utils.np_utils import to_categorical
+
 y_trainCAT = to_categorical(y_train)
 y_testCAT = to_categorical(y_test)
 
