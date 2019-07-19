@@ -92,6 +92,7 @@ def minst_attention(attention=True):
     dense_2 = dense_2a(dense_1)
 
     conv_shape1 = Lambda(change_shape1,output_shape=(32,),name='chg_shape')(conv_2_x)
+
     find_att = dense_2a(conv_shape1)
 
     if attention:
@@ -234,6 +235,8 @@ X_test.shape = (len(X_test),image_size,image_size,1)
 
 y_trainCAT = to_categorical(y_train)
 y_testCAT = to_categorical(y_test)
+
+print(X_train.shape)
 
 model = minst_attention()
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.5, nesterov=True)
