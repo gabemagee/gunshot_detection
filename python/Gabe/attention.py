@@ -16,8 +16,7 @@ def crosschannelnormalization(alpha = 1e-4, k=2, beta=0.75, n=5,**kwargs):
         b, ch, r, c = X.shape
         half = n // 2
         square = K.square(X)
-        extra_channels = K.spatial_2d_padding(K.permute_dimensions(square, (0,2,3,1))
-                                              , (0,half))
+        extra_channels = K.spatial_2d_padding(K.permute_dimensions(square, (0,2,3,1)), (0,half))
         extra_channels = K.permute_dimensions(extra_channels, (0,3,1,2))
         scale = k
         for i in range(n):
@@ -62,14 +61,14 @@ def minst_attention(attention=True):
     #make layers
     inputs = Input(shape=(image_size,image_size,1),name='input')
 
-    conv_1a = Conv2D(32, 3, 3,activation='relu',name='conv_1')
+    conv_1a = Conv2D(32, 3, 3,activation='relu',padding="same",name='conv_1')
     maxp_1a = MaxPooling2D((3, 3), strides=(2,2),name='convmax_1',dim_ordering="tf")
-    norm_1a = crosschannelnormalization(name="convpool_1")
+    #norm_1a = crosschannelnormalization(name="convpool_1")
     zero_1a = ZeroPadding2D((2,2),name='convzero_1')
 
     conv_2a = Conv2D(32,3,3,activation='relu',name='conv_2')
     maxp_2a = MaxPooling2D((3, 3), strides=(2,2),name='convmax_2')
-    norm_2a = crosschannelnormalization(name="convpool_2")
+    #norm_2a = crosschannelnormalization(name="convpool_2")
     zero_2a = ZeroPadding2D((2,2),name='convzero_2')
 
     dense_1a = Lambda(global_average_pooling,output_shape=global_average_pooling_shape,name='dense_1')
@@ -80,12 +79,12 @@ def minst_attention(attention=True):
 
     conv_1 = conv_1a(input_pad)
     conv_1 = maxp_1a(conv_1)
-    conv_1 = norm_1a(conv_1)
+    #conv_1 = norm_1a(conv_1)
     conv_1 = zero_1a(conv_1)
 
     conv_2_x = conv_2a(conv_1)
     conv_2 = maxp_2a(conv_2_x)
-    conv_2 = norm_2a(conv_2)
+    #conv_2 = norm_2a(conv_2)
     conv_2 = zero_2a(conv_2)
     conv_2 = Dropout(0.5)(conv_2)
 
@@ -105,7 +104,7 @@ def minst_attention(attention=True):
 
     conv_3 = conv_2a(apply_attention)
     conv_3 = maxp_2a(conv_3)
-    conv_3 = norm_2a(conv_3)
+    #conv_3 = norm_2a(conv_3)
     conv_3 = zero_2a(conv_3)
 
     dense_3 = dense_1a(conv_3)
