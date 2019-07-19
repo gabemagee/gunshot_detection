@@ -140,6 +140,8 @@ def audio_to_melspectrogram(audio,hop_length=345*2):
 
 #(X_train, y_train), (X_test, y_test) = mnist.load_data()
 
+"""
+
 base_dir = "/home/gamagee/workspace/gunshot_detection/"
 model_dir = base_dir+"raspberry_pi/models/"
 
@@ -224,11 +226,11 @@ np.save("y_test.npy",test_label)
 
 
 print("finished split")
-
-X_train = train_wav
-X_test = test_wav
-y_train = train_label
-y_test = test_label
+"""
+X_train = np.load("X_train.npy")
+X_test = np.load("X_test.npy")
+y_train = np.load("y_train.npy")
+y_test = np.load("y_test.npy")
 
 image_size = 128
 X_train.shape = (len(X_train),1,image_size,image_size)
