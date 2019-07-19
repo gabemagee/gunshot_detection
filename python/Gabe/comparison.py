@@ -381,4 +381,4 @@ for metric in metrics:
         l.append(metric(model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"]))
     table.append(l)
 tbl.add_rows(table)
-print(t.draw())
+print(tbl.draw())
