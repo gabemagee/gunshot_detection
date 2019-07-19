@@ -54,6 +54,8 @@ MAXIMUM_FREQUENCY = AUDIO_RATE // 2
 NUMBER_OF_MELS = 128
 NUMBER_OF_FFTS = NUMBER_OF_MELS * 20
 SMS_ALERTS_ENABLED = False
+ALERT_MESSAGE = "ALERT: A Gunshot Was Detected on "
+NETWORK_COVERAGE_TIMEOUT = 60
 DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
 sound_data = np.zeros(0, dtype = "float32")
 noise_sample_captured = False
@@ -244,18 +246,6 @@ def remove_noise(audio_clip,
 # In[ ]:
 
 
-def convert_audio_to_spectrogram(data):
-    spectrogram = librosa.feature.melspectrogram(y=data, sr=AUDIO_RATE,
-                                                 hop_length=HOP_LENGTH,
-                                                 fmin=MINIMUM_FREQUENCY,
-                                                 fmax=MAXIMUM_FREQUENCY,
-                                                 n_mels=NUMBER_OF_MELS,
-                                                 n_fft=NUMBER_OF_FFTS)
-    spectrogram = power_to_db(spectrogram)
-    spectrogram = spectrogram.astype(np.float32)
-    return spectrogram
-
-
 def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
     S = np.asarray(S)
     if amin <= 0:
@@ -277,6 +267,18 @@ def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
             logger.debug("ParameterError: top_db must be non-negative")
         log_spec = np.maximum(log_spec, log_spec.max() - top_db)
     return log_spec
+
+
+def convert_audio_to_spectrogram(data):
+    spectrogram = librosa.feature.melspectrogram(y=data, sr=AUDIO_RATE,
+                                                 hop_length=HOP_LENGTH,
+                                                 fmin=MINIMUM_FREQUENCY,
+                                                 fmax=MAXIMUM_FREQUENCY,
+                                                 n_mels=NUMBER_OF_MELS,
+                                                 n_fft=NUMBER_OF_FFTS)
+    spectrogram = power_to_db(spectrogram)
+    spectrogram = spectrogram.astype(np.float32)
+    return spectrogram
 
 
 # ### WAV File Composition Function
@@ -340,13 +342,13 @@ def send_sms_alert():
         # Continuously dispatches SMS alerts to a list of designated recipients
         while True:
             sms_alert_status = sms_alert_queue.get()
+            sms_alert_timestamp = sms_alert_queue.get()
             if sms_alert_status == "Gunshot Detected":
                 try:
                     # At this point in execution, an attempt to send an SMS alert to local authorities will be made
-                    modem.waitForNetworkCoverage(timeout = 86400)
-                    message = "--- ALERT: A Gunshot Has Been Detected ---"
+                    modem.waitForNetworkCoverage(timeout = NETWORK_COVERAGE_TIMEOUT)
                     for number in designated_alert_recipients:
-                        modem.sendSms(number, message)
+                        modem.sendSms(number, ALERT_MESSAGE + sms_alert_timestamp)
                     logger.debug(" *** Sent out an SMS alert to all designated recipients *** ")
                 except:
                     logger.debug("ERROR: Unable to successfully send an SMS alert to the designated recipients.")
@@ -357,8 +359,9 @@ def send_sms_alert():
     else:
         while True:
             sms_alert_status = sms_alert_queue.get()
+            sms_alert_timestamp = sms_alert_queue.get()
             if sms_alert_status == "Gunshot Detected":
-                logger.debug("--- ALERT: A Gunshot Has Been Detected ---")
+                logger.debug(ALERT_MESSAGE + sms_alert_timestamp)
 
 
 # Starts the SMS alert thread
@@ -449,6 +452,9 @@ while True:
         if probabilities[0][1] >= MODEL_CONFIDENCE_THRESHOLD:
             # Sends out an SMS alert
             sms_alert_queue.put("Gunshot Detected")
+            
+            # Sends out the time a given sample was heard
+            sms_alert_queue.put(time_of_sample_occurrence)
 
             # Makes a WAV file of the gunshot sample
             create_gunshot_wav_file(modified_microphone_data, gunshot_sound_counter, time_of_sample_occurrence)
