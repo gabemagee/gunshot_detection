@@ -10,6 +10,7 @@ import sys
 import keras
 import librosa
 import progressbar
+import pickle
 from keras.models import Sequential
 from keras.layers import Conv1D, Conv2D, MaxPooling2D, GlobalAveragePooling1D, MaxPooling1D, Dense, Dropout, Activation, Flatten
 from keras import optimizers
@@ -366,6 +367,16 @@ t.add_rows(table)
 print(t.draw())
 """
 
+
+
+with open('data.pickle', 'wb') as f:
+    # Pickle the 'data' dictionary using the highest protocol available.
+    pickle.dump(model_scores, f, pickle.HIGHEST_PROTOCOL)
+
+with open('data.pickle', 'rb') as f:
+    # The protocol version used is detected automatically, so we do not
+    # have to specify it.
+    model_scores = pickle.load(f)
 
 tbl = Texttable()
 table = []
