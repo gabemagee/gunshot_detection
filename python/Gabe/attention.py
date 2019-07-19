@@ -217,8 +217,8 @@ test_wav = np.array(test_wav)
 test_label = np.array(test_label)
 #test_weights = np.array(test_weights)
 
-np.save("train.npy",(train_wav,train_label))
-np.save("test.npy",(test_wav,test_label))
+np.save("train.npy",np.array([train_wav,train_label]))
+np.save("test.npy",np.array([test_wav,test_label]))
 
 
 print("finished split")
