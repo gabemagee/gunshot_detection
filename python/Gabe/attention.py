@@ -70,7 +70,7 @@ def minst_attention(attention=True):
     maxp_2a = MaxPooling2D((3, 3), strides=(2,2),name='convmax_2')
     #norm_2a = crosschannelnormalization(name="convpool_2")
     zero_2a = ZeroPadding2D((2,2),name='convzero_2')
-
+    print(dense_2a.input_shape)
     dense_1a = Lambda(global_average_pooling,output_shape=global_average_pooling_shape,name='dense_1')
     dense_2a = Dense(10, activation = 'softmax', init='uniform',name='dense_2')
 
