@@ -350,7 +350,7 @@ for i in range(len(validation_wav)):
     update_counts(y,output,three_and_four,model_scores)
 
 #bar.finish()
-
+"""
 t = Texttable()
 table = []
 table.append(["metric"]+[name_dict[model] for model in model_list])
@@ -364,6 +364,8 @@ for metric in metrics:
     table.append(l)
 t.add_rows(table)
 print(t.draw())
+"""
+
 
 tbl = Texttable()
 table = []
