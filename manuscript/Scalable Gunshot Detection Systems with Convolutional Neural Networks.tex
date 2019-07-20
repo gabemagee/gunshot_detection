@@ -120,23 +120,23 @@ Each model was then deployed to a Raspberry Pi Model 3 B+ with an SMS modem atta
 
 \section{Results}
 
-We found that all our Keras models performed well on a validation set. The best model, however, was found to be a combination of using our two primary models together by implementing a majority-rules algorithm which dispatches alerts if both models positively identified the sound of a gunshot.
+We found that all our Keras models performed well on a validation set. The best model, however, was found to be a combination of using our two 2D models together by implementing a majority-rules algorithm which dispatches alerts if both models positively identified the sound of a gunshot.
 
 \begin{table}[htbp]
 \caption{Gunshot Detection Results}
 \begin{center}
-\begin{tabular}{|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|}
 \hline
-& \multicolumn{1}{|c|}{\textbf{2D CNN (128 x 64)}} & \multicolumn{1}{|c|}{\textbf{2D CNN (128 x 128)}} & \multicolumn{1}{|c|}{\textbf{CNN Ensemble}} \\
+& \textbf{1D CNN} & \textbf{2D CNN (64)} & \textbf{2D CNN (128)} & \textbf{CNN Ensemble} \\
 \cline{2-4}
 \hline
-Accuracy & 98.8\% & 98.8\% & 98.8\%  \\
+Accuracy & 97.4\%    & 98.8\% & 98.8\% & 98.8\%  \\
 \hline
-Precision & 96.5\% & 94.3\% & 97.1\% \\
+Precision & 94.2\% & 96.5\% & 94.3\% & 97.1\% \\
 \hline
-Recall & 93.8\% & 96.2\% & 92.9\% \\
+Recall & 84.3\% & 93.8\% & 96.2\% & 92.9\% \\
 \hline
-F1 Score & 95.1\% & 95.2\% & 95.0\% \\
+F1 Score & 89.0\% & 95.1\% & 95.2\% & 95.0\% \\
 \hline
 \end{tabular}
 \label{tab2}
