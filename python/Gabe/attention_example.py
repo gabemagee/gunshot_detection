@@ -60,7 +60,6 @@ def BuildRCNN(nbChannels, shape1, shape2, nbClasses, nbRCL, nbFilters, filtersiz
     input_img = Input(shape=(nbChannels, shape1, shape2))
 
 	input_shape = (nbChannels, shape1, shape2)
-
 	attention_probs = Dense(input_shape, activation='softmax', name='attention_probs')(input_img)
 	attention_mul = multiply([input_img, attention_probs], output_shape=32, name='attention_mul')
 
