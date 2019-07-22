@@ -83,15 +83,13 @@ labels = []
 sound_file_names = []
 
 
-# ## Loading augmented NumPy files as NumPy arrays
+# ## Loading a NumPy file as spectrograms
 
 # In[ ]:
 
 
-samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_samples.npy")
-labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
-sound_file_names = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_file_names.npy")
-
+samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sample_spectrograms.npy")
+print("Successfully loaded all spectrograms as a NumPy array...")
 
 # ## Instantiating a sample weights NumPy array
 
@@ -100,102 +98,6 @@ sound_file_names = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_file_names.
 
 sample_weights = np.array([1 for normally_recorded_sample in range(len(samples) - 660)] + [20 for raspberry_pi_recorded_sample in range(660)])
 print("Shape of samples weights before splitting:", sample_weights.shape)
-
-
-# ### Debugging after augmenting the data (optional)
-
-# In[ ]:
-
-
-i = 0  # You can change the value of 'i' to adjust which sample is being inspected.
-sample = samples[i]
-print("The number of samples available to the model for training is " + str(len(samples)) + '.')
-print("The maximum frequency value in sample slice #" + str(i) + " is " + str(np.max(abs(sample))) + '.')
-print("The label associated with sample slice #" + str(i) + " is " + str(labels[i]) + '.')
-ipd.Audio(sample, rate = SAMPLE_RATE_PER_SECOND)
-
-
-# ## Converting augmented samples to spectrograms
-
-# ### Defining spectrogram conversion functions
-
-# In[ ]:
-
-
-def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
-    S = np.asarray(S)
-    if amin <= 0:
-        logger.debug("ParameterError: amin must be strictly positive")
-    if np.issubdtype(S.dtype, np.complexfloating):
-        logger.debug("Warning: power_to_db was called on complex input so phase information will be discarded.")
-        magnitude = np.abs(S)
-    else:
-        magnitude = S
-    if six.callable(ref):
-        # User supplied a function to calculate reference power
-        ref_value = ref(magnitude)
-    else:
-        ref_value = np.abs(ref)
-    log_spec = 10.0 * np.log10(np.maximum(amin, magnitude))
-    log_spec -= 10.0 * np.log10(np.maximum(amin, ref_value))
-    if top_db is not None:
-        if top_db < 0:
-            logger.debug("ParameterError: top_db must be non-negative")
-        log_spec = np.maximum(log_spec, log_spec.max() - top_db)
-    return log_spec
-
-
-def convert_audio_to_spectrogram(data):
-    spectrogram = librosa.feature.melspectrogram(y=data, sr=SAMPLE_RATE_PER_TWO_SECONDS,
-                                                 hop_length=HOP_LENGTH,
-                                                 fmin=MINIMUM_FREQUENCY,
-                                                 fmax=MAXIMUM_FREQUENCY,
-                                                 n_mels=NUMBER_OF_MELS,
-                                                 n_fft=NUMBER_OF_FFTS)
-    spectrogram = power_to_db(spectrogram)
-    spectrogram = spectrogram.astype(np.float32)
-    return spectrogram
-
-
-# ### Iteratively converting all augmented samples into spectrograms
-
-# In[ ]:
-
-
-spectrograms = []
-
-for sample in samples:
-    spectrogram = convert_audio_to_spectrogram(sample)
-    spectrograms.append(spectrogram)
-    print("Converted a sample into a spectrogram...")
-
-
-# ## Restructuring spectrograms
-
-# In[ ]:
-
-
-samples = np.array(spectrograms).reshape(-1, 192, 192, 3)
-samples = samples.astype("float32")
-samples /= 255
-
-
-# ## Saving spectrograms as a NumPy array
-
-# In[ ]:
-
-
-np.save(BASE_DIRECTORY + "gunshot_augmented_sample_spectrograms.npy", samples)
-print("Successfully saved all spectrograms as a NumPy array...")
-
-
-# ## Loading a NumPy file as spectrograms
-
-# In[ ]:
-
-
-samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sample_spectrograms.npy")
-print("Successfully loaded all spectrograms as a NumPy array...")
 
 
 # ## Establishing index values for the data
