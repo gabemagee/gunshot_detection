@@ -253,12 +253,12 @@ def attention_cnn(attention = True):
     # Make layers
     inputs = Input(shape = (1, 128, 64), name='input')
 
-    conv_1a = Convolution2D(32, 3, 3, activation='relu', name='conv_1')
+    conv_1a = Conv2D(32, 3, 3, activation='relu', name='conv_1')
     maxp_1a = MaxPooling2D((3, 3), strides = (2,2), name = 'convmax_1')
     norm_1a = crosschannelnormalization(name = "convpool_1")
     zero_1a = ZeroPadding2D((2,2), name = 'convzero_1')
 
-    conv_2a = Convolution2D(32, 3, 3, activation = 'relu', name = 'conv_2')
+    conv_2a = Conv2D(32, 3, 3, activation = 'relu', name = 'conv_2')
     maxp_2a = MaxPooling2D((3, 3), strides = (2,2), name = 'convmax_2')
     norm_2a = crosschannelnormalization(name = "convpool_2")
     zero_2a = ZeroPadding2D((2,2), name = 'convzero_2')
