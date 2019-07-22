@@ -35,7 +35,6 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 # In[ ]:
 
-
 import tensorflow as tf
 from tensorflow.keras import Input, layers, backend as K
 from tensorflow.keras.models import load_model, Sequential
