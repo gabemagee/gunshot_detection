@@ -311,7 +311,7 @@ def auc(y_true, y_pred):
 
 
 # Loads Keras model from H5 file
-model = keras.models.load_model("../models/RYAN_spectrogram_model.h5", custom_objects = {"auc" : auc})
+model = keras.models.load_model("/home/alexm/Datasets/RYAN_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
 # Gets the input shape of the Keras model
 input_shape = model.inputs[0].get_shape().as_list()
