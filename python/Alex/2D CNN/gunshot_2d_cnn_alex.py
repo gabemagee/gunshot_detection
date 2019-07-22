@@ -36,7 +36,6 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 
 import tensorflow as tf
-import kutilities.layers as kutil_layers
 from tensorflow.keras import Input, layers, backend as K
 from tensorflow.keras.models import load_model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Dropout, Activation, BatchNormalization, Flatten
@@ -78,8 +77,8 @@ print("Shape of samples weights before splitting:", sample_weights.shape)
 
 
 all_index = np.arange(len(samples))
-train_index = np.load("../../raspberry_pi/indexes/training_set_indexes.npy")
-test_index = np.load("../../raspberry_pi/indexes/testing_set_indexes.npy")
+train_index = np.load("../../../raspberry_pi/indexes/training_set_indexes.npy")
+test_index = np.load("../../../raspberry_pi/indexes/testing_set_indexes.npy")
 valid_index = np.delete(all_index, list(train_index) + list(test_index))
 
 # ## Restructuring the label data
@@ -182,9 +181,6 @@ model.add(Activation("relu"))
 model.add(BatchNormalization(axis = -1))
 model.add(MaxPooling2D(pool_size = (2, 2)))
 model.add(Dropout(0.25))
-
-# Attention Layer: Context-Included
-x = kutil_layers.AttentionWithContext()(x)
 
 
 """ Step 3: Flatten the layers """
