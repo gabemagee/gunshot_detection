@@ -4,7 +4,7 @@ build RCNN networks in keras
 '''
 from keras.models import Model
 from keras.layers import Input, Dense, Dropout, Flatten
-from keras.layers import add, Convolution2D, MaxPooling2D, Input
+from keras.layers import add,multiply, Convolution2D, MaxPooling2D, Input
 from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import PReLU
 from keras.optimizers import SGD
@@ -58,6 +58,12 @@ def BuildRCNN(nbChannels, shape1, shape2, nbClasses, nbRCL, nbFilters, filtersiz
 
     #Build Network
     input_img = Input(shape=(nbChannels, shape1, shape2))
+
+	input_shape = (nbChannels, shape1, shape2)
+
+	attention_probs = Dense(input_shape, activation='softmax', name='attention_probs')(input_img)
+	attention_mul = multiply([input_img, attention_probs], output_shape=32, name='attention_mul')
+
     conv_l = Convolution2D(nbFilters, filtersize, filtersize, border_mode='same', activation='relu')
     l = conv_l(input_img)
 
