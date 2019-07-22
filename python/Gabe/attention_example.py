@@ -56,7 +56,7 @@ def BuildRCNN(nbChannels, shape1, shape2, nbClasses, nbRCL, nbFilters, filtersiz
         return stack17
 
     #Build Network
-    input_img = Input(shape=(nbChannels, shape1, shape2))
+    input_img = Input(shape=( shape1, shape2,nbChannels))
     conv_l = Convolution2D(nbFilters, filtersize, filtersize, border_mode='same', activation='relu')
     l = conv_l(input_img)
 
