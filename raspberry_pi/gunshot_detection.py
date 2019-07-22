@@ -11,10 +11,12 @@ import scipy.signal
 import numpy as np
 import tensorflow as tf
 import six
+import tensorflow.keras as keras
 from threading import Thread
 from datetime import timedelta as td
 from queue import Queue
 from sklearn.preprocessing import LabelBinarizer
+from tensorflow.keras import backend as K
 from gsmmodem.modem import GsmModem
 
 
@@ -37,7 +39,7 @@ NUMBER_OF_AUDIO_CHANNELS = 1
 AUDIO_DEVICE_INDEX = 1
 NUMBER_OF_FRAMES_PER_BUFFER = 4410
 SAMPLE_DURATION = 2
-AUDIO_VOLUME_THRESHOLD = 0.5
+AUDIO_VOLUME_THRESHOLD = 0.25
 NOISE_REDUCTION_ENABLED = False
 MODEL_CONFIDENCE_THRESHOLD = 0.9
 HOP_LENGTH = 345
@@ -270,16 +272,28 @@ def create_gunshot_wav_file(microphone_data, index, timestamp):
                              + str(timestamp) + ").wav", microphone_data, 22050)
 
 
-# Loading in the model #
+# ### ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
 
-# Loads TFLite model and allocate tensors
-interpreter = tf.lite.Interpreter(model_path="./models/128_128_gunshot_2d_spectrogram_model.tflite")
-interpreter.allocate_tensors()
+# In[ ]:
 
-# Gets input and output tensors as well as the input shape
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
-input_shape = input_details[0]['shape']
+
+def auc(y_true, y_pred):
+    auc = tf.metrics.auc(y_true, y_pred)[1]
+    K.get_session().run(tf.local_variables_initializer())
+    return auc
+
+
+# ## Loading the Model
+
+# In[ ]:
+
+
+# Loads Keras model from H5 file
+model = keras.models.load_model("../models/RYAN_spectrogram_model.h5", custom_objects = {"auc" : auc})
+
+# Gets the input shape of the Keras model
+input_shape = model.inputs[0].get_shape().as_list()
+input_shape[0] = 1 if input_shape[0] == None else input_shape[0]
 
 
 ### --- ###
@@ -409,9 +423,8 @@ while True:
         # Reshapes the modified microphone data accordingly
         processed_data = processed_data.reshape(input_shape)
         
-        interpreter.set_tensor(input_details[0]["index"], processed_data)
-        interpreter.invoke()
-        probabilities = interpreter.get_tensor(output_details[0]["index"])
+        # Performs inference with a given Keras model
+        probabilities = model.predict(processed_data)
         logger.debug("The model-predicted probability values: " + str(probabilities[0]))
         logger.debug("Model-predicted sample class: " + label_binarizer.inverse_transform(probabilities[:, 0])[0])
 
