@@ -89,8 +89,10 @@ def minst_attention(attention=True):
     conv_2 = Dropout(0.5)(conv_2)
 
     dense_1 = dense_1a(conv_2)
+    print(dense_1a.input_shape)
+    pritn(dense_1a.output_shape)
     dense_2 = dense_2a(dense_1)
-    print(dense_2a.input_shape)
+
 
     conv_shape1 = Lambda(change_shape1,output_shape=(32,),name='chg_shape')(conv_2_x)
 
