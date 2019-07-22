@@ -60,7 +60,8 @@ sms_alert_queue = Queue()
 
 # Only one of these state variables may be set to true at a given point in time
 USING_1D_TIME_SERIES_MODEL = False
-USING_2D_SPECTROGRAM_MODEL = True
+USING_2D_64_SPECTROGRAM_MODEL = True
+USING_2D_128_SPECTROGRAM_MODEL = False
 
 
 # Loading in Augmented Labels #
@@ -417,7 +418,13 @@ while True:
         # Passes an audio sample of an appropriate format into the model for inference
         if USING_1D_TIME_SERIES_MODEL:
             processed_data = modified_microphone_data
-        elif USING_2D_SPECTROGRAM_MODEL:
+
+        elif USING_2D_64_SPECTROGRAM_MODEL:
+            HOP_LENGTH = 345 * 2
+            processed_data = convert_audio_to_spectrogram(data = modified_microphone_data)
+
+        elif USING_2D_128_SPECTROGRAM_MODEL:
+            HOP_LENGTH = 345
             processed_data = convert_audio_to_spectrogram(data = modified_microphone_data)
             
         # Reshapes the modified microphone data accordingly
