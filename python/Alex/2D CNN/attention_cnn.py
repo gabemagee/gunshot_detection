@@ -55,7 +55,7 @@ import tensorflow as tf
 import kutilities.layers as kutil_layers
 from tensorflow.keras import Input, layers, backend as K
 from tensorflow.keras.models import load_model, Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, ZeroPadding2D, Dense, Dropout, Activation, BatchNormalization, Flatten, Lambda, Merge, Model, noise
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, ZeroPadding2D, Dense, Dropout, Activation, BatchNormalization, Flatten, Lambda, Concatenate, Model, noise
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
@@ -400,7 +400,7 @@ def attention_cnn(inc_noise = False, attention = True):
         find_att = Lambda(no_attention_control, output_shape = att_shape, name = 'att_con')([find_att,dense_2])
 
     zero_3a = ZeroPadding2D((1,1), name = 'convzero_3')(find_att)
-    apply_attention = Merge(mode = 'mul', name = 'attend')([zero_3a,conv_1])
+    apply_attention = Concatenate(mode = 'mul', name = 'attend')([zero_3a,conv_1])
 
     conv_3 = conv_2a(apply_attention)
     conv_3 = maxp_2a(conv_3)
