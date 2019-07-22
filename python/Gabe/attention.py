@@ -90,7 +90,7 @@ def minst_attention(attention=True):
 
     dense_1 = dense_1a(conv_2)
     print(dense_1a.input_shape)
-    pritn(dense_1a.output_shape)
+    print(dense_1a.output_shape)
     dense_2 = dense_2a(dense_1)
 
 
