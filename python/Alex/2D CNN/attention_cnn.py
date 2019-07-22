@@ -249,7 +249,7 @@ K.set_session(session)
 # In[ ]:
 
 
-def attention_cnn(attention = True):
+def attention_cnn(attention = True, image_size = (128, 64, 1)):
     # Make layers
     inputs = Input(shape = (1, image_size, image_size), name='input')
 
