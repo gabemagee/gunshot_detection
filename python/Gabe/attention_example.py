@@ -88,7 +88,7 @@ X_test.shape = (len(X_test),image_size,image_size,1)
 
 y_trainCAT = to_categorical(y_train)
 y_testCAT = to_categorical(y_test)
-print(X_train.shape)
+print("SHAPE:",X_train.shape)
 model = makeModel(1,128,128,2)
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.5, nesterov=True)
 model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics=['accuracy'])
