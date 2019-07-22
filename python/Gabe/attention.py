@@ -241,6 +241,9 @@ y_testCAT = to_categorical(y_test)
 
 print(X_train.shape)
 
+input_shape = (image_size,image_size,1)
+random_input = np.array(np.random.random_sample(input_shape), dtype=np.float32)
+
 model = minst_attention()
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.5, nesterov=True)
 model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics=['accuracy'])
