@@ -264,10 +264,10 @@ def attention_cnn():
     zero_2a = ZeroPadding2D((2,2), name = 'convzero_2')
 
     dense_1a = Lambda(global_average_pooling, output_shape = global_average_pooling_shape, name='dense_1')
-    dense_2a = Dense(10, activation = 'softmax', init = 'uniform', name = 'dense_2')
+    dense_2a = Dense(2, activation = 'softmax', init = 'uniform', name = 'dense_2')
 
     # Make actual model
-    input_pad = ZeroPadding2D((1,1), input_shape = (1, image_size, image_size), name = 'input_pad')(inputs)
+    input_pad = ZeroPadding2D((1,1), input_shape = (1, 128, 64), name = 'input_pad')(inputs)
 
     conv_1 = conv_1a(input_pad)
     conv_1 = maxp_1a(conv_1)
