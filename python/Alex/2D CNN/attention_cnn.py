@@ -55,7 +55,8 @@ import tensorflow as tf
 import kutilities.layers as kutil_layers
 from tensorflow.keras import Input, layers, backend as K
 from tensorflow.keras.models import load_model, Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, ZeroPadding2D, Dense, Dropout, Activation, BatchNormalization, Flatten, Lambda, Concatenate, Model, noise
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, ZeroPadding2D, Dense, Dropout, Activation, BatchNormalization, Flatten, Lambda, Concatenate, noise
+from keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
