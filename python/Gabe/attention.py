@@ -73,7 +73,7 @@ def minst_attention(attention=True):
 
     dense_1a = Lambda(global_average_pooling,output_shape=global_average_pooling_shape,name='dense_1')
     dense_2a = Dense(10, activation = 'softmax', init='uniform',name='dense_2')
-    print(dense_2a.input_shape)
+
     #make actual model
     input_pad = ZeroPadding2D((1,1),input_shape=(1,image_size,image_size),name='input_pad')(inputs)
 
@@ -90,6 +90,7 @@ def minst_attention(attention=True):
 
     dense_1 = dense_1a(conv_2)
     dense_2 = dense_2a(dense_1)
+    print(dense_2a.input_shape)
 
     conv_shape1 = Lambda(change_shape1,output_shape=(32,),name='chg_shape')(conv_2_x)
 
