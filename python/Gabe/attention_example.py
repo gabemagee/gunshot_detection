@@ -96,4 +96,4 @@ model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics=['accu
 
 print(model.summary())
 
-model_history = model.fit(X_train, y_trainCAT,batch_size=1,validation_data=(X_test,y_testCAT),nb_epoch=1)
+model_history = model.fit(X_train, y_train,batch_size=1,validation_data=(X_test,y_test),nb_epoch=1)
