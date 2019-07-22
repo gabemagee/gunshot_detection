@@ -72,7 +72,7 @@ def BuildRCNN(nbChannels, shape1, shape2, nbClasses, nbRCL, nbFilters, filtersiz
     model = Model(input = input_img, output = l_out)
 
     return model
-    
+
 import numpy as np
 from keras.utils.np_utils import to_categorical
 import librosa
@@ -90,3 +90,9 @@ y_trainCAT = to_categorical(y_train)
 y_testCAT = to_categorical(y_test)
 
 model = makeModel(1,128,128,2)
+
+model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics=['accuracy'])
+
+print(model.summary)
+
+model_history = model.fit(X_train, y_trainCAT,batch_size=1,validation_data=(X_test,y_testCAT),nb_epoch=1)
