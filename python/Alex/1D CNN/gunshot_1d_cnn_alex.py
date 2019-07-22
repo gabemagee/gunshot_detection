@@ -31,7 +31,6 @@ from sklearn.preprocessing import LabelBinarizer
 
 
 import tensorflow as tf
-import kutilities.layers as kutil_layers
 from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
@@ -171,9 +170,6 @@ x = layers.Conv1D(256, 3, activation = "relu", padding = "same")(x)
 x = layers.Conv1D(256, 3, activation = "relu", padding = "same")(x)
 x = layers.GlobalMaxPool1D()(x)
 x = layers.Dropout(rate = (0.5))(x) # Increasing drop-out rate here to prevent overfitting
-
-# Attention Layer: Context-Included
-x = kutil_layers.AttentionWithContext()(x)
 
 x = layers.Dense(64, activation="relu")(x)
 x = layers.Dense(1028, activation="relu")(x)
