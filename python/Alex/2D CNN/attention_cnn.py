@@ -122,18 +122,6 @@ ipd.Audio(sample, rate = SAMPLE_RATE_PER_SECOND)
 # In[ ]:
 
 
-def convert_audio_to_spectrogram(data):
-    spectrogram = librosa.feature.melspectrogram(y=data, sr=SAMPLE_RATE_PER_TWO_SECONDS,
-                                                 hop_length=HOP_LENGTH,
-                                                 fmin=MINIMUM_FREQUENCY,
-                                                 fmax=MAXIMUM_FREQUENCY,
-                                                 n_mels=NUMBER_OF_MELS,
-                                                 n_fft=NUMBER_OF_FFTS)
-    spectrogram = librosa.power_to_db(spectrogram)
-    spectrogram = spectrogram.astype(np.float32)
-    return spectrogram
-
-
 def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
     S = np.asarray(S)
     if amin <= 0:
@@ -155,6 +143,18 @@ def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
             logger.debug("ParameterError: top_db must be non-negative")
         log_spec = np.maximum(log_spec, log_spec.max() - top_db)
     return log_spec
+
+
+def convert_audio_to_spectrogram(data):
+    spectrogram = librosa.feature.melspectrogram(y=data, sr=SAMPLE_RATE_PER_TWO_SECONDS,
+                                                 hop_length=HOP_LENGTH,
+                                                 fmin=MINIMUM_FREQUENCY,
+                                                 fmax=MAXIMUM_FREQUENCY,
+                                                 n_mels=NUMBER_OF_MELS,
+                                                 n_fft=NUMBER_OF_FFTS)
+    spectrogram = power_to_db(spectrogram)
+    spectrogram = spectrogram.astype(np.float32)
+    return spectrogram
 
 
 # ### Iteratively converting all augmented samples into spectrograms
