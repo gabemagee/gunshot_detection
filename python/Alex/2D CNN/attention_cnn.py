@@ -249,9 +249,9 @@ K.set_session(session)
 # In[ ]:
 
 
-def attention_cnn(attention = True, image_size = "128, 64, 1"):
+def attention_cnn(attention = True):
     # Make layers
-    inputs = Input(shape = (1, image_size, image_size), name='input')
+    inputs = Input(shape = (1, 128, 64), name='input')
 
     conv_1a = Convolution2D(32, 3, 3, activation='relu', name='conv_1')
     maxp_1a = MaxPooling2D((3, 3), strides = (2,2), name = 'convmax_1')
