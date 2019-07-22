@@ -93,6 +93,6 @@ model = makeModel(1,128,128,2)
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.5, nesterov=True)
 model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics=['accuracy'])
 
-print(model.summary)
+print(model.summary())
 
 model_history = model.fit(X_train, y_trainCAT,batch_size=1,validation_data=(X_test,y_testCAT),nb_epoch=1)
