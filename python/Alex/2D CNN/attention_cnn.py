@@ -55,7 +55,7 @@ import tensorflow as tf
 import kutilities.layers as kutil_layers
 from tensorflow.keras import Input, layers, backend as K
 from tensorflow.keras.models import load_model, Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, ZeroPadding2D, Dense, Dropout, Activation, BatchNormalization, Flatten, Lambda, Concatenate, noise
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, ZeroPadding2D, Dense, Dropout, Activation, BatchNormalization, Flatten, Lambda, Concatenate
 from keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
@@ -354,7 +354,7 @@ K.set_session(session)
 # In[ ]:
 
 
-def attention_cnn(inc_noise = False, attention = True):
+def attention_cnn(attention = True):
     # Make layers
     inputs = Input(shape = (1, image_size, image_size), name='input')
 
@@ -372,11 +372,7 @@ def attention_cnn(inc_noise = False, attention = True):
     dense_2a = Dense(10, activation = 'softmax', init = 'uniform', name = 'dense_2')
 
     # Make actual model
-    if inc_noise:
-        inputs_noise = noise.GaussianNoise(2.5)(inputs)
-        input_pad = ZeroPadding2D((1,1), input_shape = (1, image_size, image_size), name = 'input_pad')(inputs_noise)
-    else:
-        input_pad = ZeroPadding2D((1,1), input_shape = (1, image_size, image_size), name = 'input_pad')(inputs)
+    input_pad = ZeroPadding2D((1,1), input_shape = (1, image_size, image_size), name = 'input_pad')(inputs)
 
     conv_1 = conv_1a(input_pad)
     conv_1 = maxp_1a(conv_1)
@@ -415,7 +411,7 @@ def attention_cnn(inc_noise = False, attention = True):
 
     return model
 
-model = attention_cnn(inc_noise = False)
+model = attention_cnn()
 model.compile(optimizer = optimizer, loss = "binary_crossentropy", metrics = [auc, "accuracy"])
 
 
