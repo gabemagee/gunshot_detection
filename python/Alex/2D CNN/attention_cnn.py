@@ -89,6 +89,7 @@ sound_file_names = []
 
 
 samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sample_spectrograms.npy")
+labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
 print("Successfully loaded all spectrograms as a NumPy array...")
 
 # ## Instantiating a sample weights NumPy array
