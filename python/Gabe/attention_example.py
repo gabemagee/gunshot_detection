@@ -66,7 +66,7 @@ def BuildRCNN(nbChannels, shape1, shape2, nbClasses, nbRCL, nbFilters, filtersiz
         return stack17
 
     # Build Network
-        input_shape = (nbChannels, shape1, shape2)
+    input_shape = (nbChannels, shape1, shape2)
     input_img = Input(shape=input_shape)
 
     attention_probs = Dense(input_shape, activation='softmax',
