@@ -27,7 +27,6 @@ import librosa
 import librosa.display
 import cv2
 import six
-from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelBinarizer
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
@@ -37,6 +36,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 
 import tensorflow as tf
+import kutilities.layers as kutil_layers
 from tensorflow.keras import Input, layers, backend as K
 from tensorflow.keras.models import load_model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Dropout, Activation, BatchNormalization, Flatten
@@ -72,6 +72,16 @@ sample_weights = np.array(
     [1 for normally_recorded_sample in range(len(samples) - 660)] + [20 for raspberry_pi_recorded_sample in range(660)])
 print("Shape of samples weights before splitting:", sample_weights.shape)
 
+# ## Establishing index values for the data
+
+# In[ ]:
+
+
+all_index = np.arange(len(samples))
+train_index = np.load("../../raspberry_pi/indexes/training_set_indexes.npy")
+test_index = np.load("../../raspberry_pi/indexes/testing_set_indexes.npy")
+valid_index = np.delete(all_index, list(train_index) + list(test_index))
+
 # ## Restructuring the label data
 
 # In[ ]:
@@ -95,11 +105,9 @@ print("Shape of labels array:", labels.shape)
 # In[ ]:
 
 
-kf = KFold(n_splits=3, shuffle=True)
-for train_index, test_index in kf.split(samples):
-    train_wav, test_wav = samples[train_index], samples[test_index]
-    train_label, test_label = labels[train_index], labels[test_index]
-    train_weights, test_weights = sample_weights[train_index], sample_weights[test_index]
+train_wav, test_wav, valid_wav = samples[train_index], samples[test_index], samples[valid_index]
+train_label, test_label, valid_label = labels[train_index], labels[test_index], labels[valid_index]
+train_weights, test_weights, valid_weights = sample_weights[train_index], sample_weights[test_index], sample_weights[valid_index]
 
 
 # # Model
@@ -175,6 +183,9 @@ model.add(BatchNormalization(axis = -1))
 model.add(MaxPooling2D(pool_size = (2, 2)))
 model.add(Dropout(0.25))
 
+# Attention Layer: Context-Included
+x = kutil_layers.AttentionWithContext()(x)
+
 
 """ Step 3: Flatten the layers """
 
@@ -243,11 +254,12 @@ model.save(BASE_DIRECTORY + "gunshot_2d_spectrogram_model.h5")
 # In[ ]:
 
 
-y_test_pred = model.predict(test_wav)
-y_predicted_classes_test = y_test_pred.argmax(axis=-1)
-y_actual_classes_test = test_label.argmax(axis=-1)
-wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
-print(wrong_examples)
+y_val_pred = model.predict(valid_wav)
+y_predicted_classes_val = y_val_pred.argmax(axis=-1)
+y_actual_classes_val = valid_label.argmax(axis=-1)
+wrong_examples = np.nonzero(y_predicted_classes_val != y_actual_classes_val)
+print("Validation samples labeled incorrectly:", wrong_examples)
+print("Validation accuracy of the current model:", 100 - (len(wrong_examples[0]) / len(valid_wav)) * 100)
 
 # ## Converting model to TensorFlow Lite format
 
@@ -256,6 +268,5 @@ print(wrong_examples)
 
 model_name = BASE_DIRECTORY + "gunshot_2d_spectrogram_model"
 converter = tf.lite.TFLiteConverter.from_keras_model_file(model_name + ".h5", custom_objects={"auc": auc})
-converter.post_training_quantize = True
 tflite_model = converter.convert()
 open(model_name + ".tflite", "wb").write(tflite_model)

@@ -23,7 +23,6 @@ import numpy as np
 
 
 from array import array
-from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelBinarizer
 
 # ### Deep Learning Libraries
@@ -32,6 +31,7 @@ from sklearn.preprocessing import LabelBinarizer
 
 
 import tensorflow as tf
+import kutilities.layers as kutil_layers
 from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
@@ -62,6 +62,16 @@ sample_weights = np.array(
     [1 for normally_recorded_sample in range(len(samples) - 660)] + [20 for raspberry_pi_recorded_sample in range(660)])
 print("Shape of samples weights before splitting:", sample_weights.shape)
 
+# ## Establishing index values for the data
+
+# In[ ]:
+
+
+all_index = np.arange(len(samples))
+train_index = np.load("../../raspberry_pi/indexes/training_set_indexes.npy")
+test_index = np.load("../../raspberry_pi/indexes/testing_set_indexes.npy")
+valid_index = np.delete(all_index, list(train_index) + list(test_index))
+
 # ## Restructuring the label data
 
 # In[ ]:
@@ -85,11 +95,9 @@ print("Shape of labels array:", labels.shape)
 # In[ ]:
 
 
-kf = KFold(n_splits=3, shuffle=True)
-for train_index, test_index in kf.split(samples):
-    train_wav, test_wav = samples[train_index], samples[test_index]
-    train_label, test_label = labels[train_index], labels[test_index]
-    train_weights, test_weights = sample_weights[train_index], sample_weights[test_index]
+train_wav, test_wav, valid_wav = samples[train_index], samples[test_index], samples[valid_index]
+train_label, test_label, valid_label = labels[train_index], labels[test_index], labels[valid_index]
+train_weights, test_weights, valid_weights = sample_weights[train_index], sample_weights[test_index], sample_weights[valid_index]
 
 # ## Reshaping the sound data
 
@@ -140,25 +148,32 @@ input_tensor = Input(shape=(44100, 1))
 # In[ ]:
 
 
-x = layers.Conv1D(16, 9, activation="relu", padding="same")(input_tensor)
-x = layers.Conv1D(16, 9, activation="relu", padding="same")(x)
+# First Layer
+x = layers.Conv1D(16, 9, activation = "relu", padding = "same")(input_tensor)
+x = layers.Conv1D(16, 9, activation = "relu", padding = "same")(x)
 x = layers.MaxPool1D(16)(x)
-x = layers.Dropout(rate=0.25)(x)
+x = layers.Dropout(rate = 0.25)(x)
 
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+# Second Layer
+x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
+x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
 x = layers.MaxPool1D(4)(x)
-x = layers.Dropout(rate=0.25)(x)
+x = layers.Dropout(rate = 0.25)(x)
 
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
-x = layers.Conv1D(32, 3, activation="relu", padding="same")(x)
+# Third Layer
+x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
+x = layers.Conv1D(32, 3, activation = "relu", padding = "same")(x)
 x = layers.MaxPool1D(4)(x)
-x = layers.Dropout(rate=0.25)(x)
+x = layers.Dropout(rate = 0.25)(x)
 
-x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
-x = layers.Conv1D(256, 3, activation="relu", padding="same")(x)
+# Fourth Layer
+x = layers.Conv1D(256, 3, activation = "relu", padding = "same")(x)
+x = layers.Conv1D(256, 3, activation = "relu", padding = "same")(x)
 x = layers.GlobalMaxPool1D()(x)
-x = layers.Dropout(rate=(0.5))(x)  # Increasing drop-out rate here to prevent overfitting
+x = layers.Dropout(rate = (0.5))(x) # Increasing drop-out rate here to prevent overfitting
+
+# Attention Layer: Context-Included
+x = kutil_layers.AttentionWithContext()(x)
 
 x = layers.Dense(64, activation="relu")(x)
 x = layers.Dense(1028, activation="relu")(x)
@@ -214,11 +229,12 @@ model.save(BASE_DIRECTORY + "gunshot_sound_model.h5")
 # In[ ]:
 
 
-y_test_pred = model.predict(test_wav)
-y_predicted_classes_test = y_test_pred.argmax(axis=-1)
-y_actual_classes_test = test_label.argmax(axis=-1)
-wrong_examples = np.nonzero(y_predicted_classes_test != y_actual_classes_test)
-print(wrong_examples)
+y_val_pred = model.predict(valid_wav)
+y_predicted_classes_val = y_val_pred.argmax(axis=-1)
+y_actual_classes_val = valid_label.argmax(axis=-1)
+wrong_examples = np.nonzero(y_predicted_classes_val != y_actual_classes_val)
+print("Validation samples labeled incorrectly:", wrong_examples)
+print("Validation accuracy of the current model:", 100 - (len(wrong_examples[0]) / len(valid_wav)) * 100)
 
 # ## Converting model to TensorFlow Lite format
 
@@ -227,6 +243,5 @@ print(wrong_examples)
 
 model_name = BASE_DIRECTORY + "gunshot_sound_model"
 converter = tf.lite.TFLiteConverter.from_keras_model_file(model_name + ".h5", custom_objects={"auc": auc})
-converter.post_training_quantize = True
 tflite_model = converter.convert()
 open(model_name + ".tflite", "wb").write(tflite_model)
