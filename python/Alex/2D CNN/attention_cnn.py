@@ -61,14 +61,6 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
-# ### Configuration of Imported Libraries
-
-# In[ ]:
-
-
-get_ipython().run_line_magic('matplotlib', 'inline')
-
-
 # # Initialization of Variables
 
 # In[ ]:
