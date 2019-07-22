@@ -71,7 +71,6 @@ Further, we decidedly divided our data into three sets: training data, testing d
 \begin{table}[htbp]
 \centering
 \caption{Data Augmentations}
-\small
 \begin{tabular}{*{3}{p{.285\linewidth}}}
 \toprule
 \textbf{Time Shift} & \textbf{Pitch Change} & \textbf{Speed Change} \\\midrule
@@ -82,7 +81,6 @@ Shifts a sound sample to the left or right by a randomly chosen amount less than
 
 \begin{table}[htbp]
 \centering
-\small
 \begin{tabular}{*{2}{p{.45\linewidth}}}
 \toprule
 \textbf{Volume Change} & \textbf{Background Noise Addition} \\\midrule
@@ -124,23 +122,15 @@ We found that all our Keras models performed well on a validation set. The best 
 
 \begin{table}[htbp]
 \caption{Gunshot Detection Results}
-\begin{center}
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-& \textbf{1D CNN} & \textbf{2D CNN (64)} & \textbf{2D CNN (128)} & \textbf{CNN Ensemble} \\
-\cline{2-4}
-\hline
-Accuracy & 97.4\%    & 98.8\% & 98.8\% & 98.8\%  \\
-\hline
-Precision & 94.2\% & 96.5\% & 94.3\% & 97.1\% \\
-\hline
-Recall & 84.3\% & 93.8\% & 96.2\% & 92.9\% \\
-\hline
-F1 Score & 89.0\% & 95.1\% & 95.2\% & 95.0\% \\
-\hline
+\begin{tabular}{@{}lllll@{}}
+\toprule
+          & \textbf{1D CNN} & \textbf{2D CNN (64)} & \textbf{2D CNN (128)} & \textbf{CNN Ensemble} \\ \midrule
+Accuracy  & 97.4\% & 98.8\%      & 98.8\%       & 98.8\%       \\
+Precision & 94.2\% & 96.5\%      & 94.3\%       & 97.1\%       \\
+Recall    & 84.3\% & 93.8\%      & 96.2\%       & 92.9\%       \\
+F1 Score  & 89.0\% & 95.1\%      & 95.2\%       & 95.0\%       \\ \bottomrule
 \end{tabular}
 \label{tab2}
-\end{center}
 \end{table}
 
 \begin{figure}[htbp]
