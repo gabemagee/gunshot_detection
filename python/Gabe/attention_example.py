@@ -72,7 +72,10 @@ def BuildRCNN(nbChannels, shape1, shape2, nbClasses, nbRCL, nbFilters, filtersiz
     model = Model(input = input_img, output = l_out)
 
     return model
-
+    
+import numpy as np
+from keras.utils.np_utils import to_categorical
+import librosa
 X_train = np.load("X_train.npy")
 X_test = np.load("X_test.npy")
 y_train = np.load("y_train.npy")
