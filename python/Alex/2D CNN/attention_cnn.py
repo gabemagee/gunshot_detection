@@ -106,8 +106,8 @@ print("Shape of samples weights before splitting:", sample_weights.shape)
 
 
 all_index = np.arange(len(samples))
-train_index = np.load("../../raspberry_pi/indexes/training_set_indexes.npy")
-test_index = np.load("../../raspberry_pi/indexes/testing_set_indexes.npy")
+train_index = np.load("../../../raspberry_pi/indexes/training_set_indexes.npy")
+test_index = np.load("../../../raspberry_pi/indexes/testing_set_indexes.npy")
 valid_index = np.delete(all_index, list(train_index) + list(test_index))
 
 
