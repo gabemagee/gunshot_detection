@@ -49,6 +49,7 @@ def BuildRCNN(nbChannels, shape1, shape2, nbClasses, nbRCL, nbFilters, filtersiz
 
         if pool:
             stack16 = MaxPooling2D((2, 2), border_mode='same')(stack15)
+            stack16 = LSTM(200, return_sequences=False, activation='softmax')(stack16)
             stack17 = Dropout(0.1)(stack16)
         else:
             stack17 = Dropout(0.1)(stack15)
@@ -86,14 +87,13 @@ X_train.shape = (len(X_train),1,image_size,image_size)
 X_test.shape = (len(X_test),1,image_size,image_size)
 
 
-y_trainCAT = to_categorical(y_train)
-y_testCAT = to_categorical(y_test)
-print("SHAPE",X_train.shape)
-print("SHAPE_y",y_trainCAT.shape)
+#y_trainCAT = to_categorical(y_train)
+#y_testCAT = to_categorical(y_test)
+
 model = makeModel(1,128,128,2)
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.5, nesterov=True)
 model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics=['accuracy'])
 
 print(model.summary())
 
-model_history = model.fit(X_train, y_train,batch_size=1,validation_data=(X_test,y_test),nb_epoch=1)
+model_history = model.fit(X_train, y_train,batch_size=1,validation_data=(X_test,y_test),nb_epoch=20)
