@@ -7,7 +7,7 @@ from keras.layers import Input, Dense, Dropout, Flatten
 from keras.layers import add, Convolution2D, MaxPooling2D, Input
 from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import PReLU
-
+from keras.optimizers import SGD
 
 
 def makeModel(nbChannels, shape1, shape2, nbClasses, nbRCL=5,nbFilters=128, filtersize = 3):
@@ -90,7 +90,7 @@ y_trainCAT = to_categorical(y_train)
 y_testCAT = to_categorical(y_test)
 
 model = makeModel(1,128,128,2)
-
+sgd = SGD(lr=0.01, decay=1e-6, momentum=0.5, nesterov=True)
 model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics=['accuracy'])
 
 print(model.summary)
