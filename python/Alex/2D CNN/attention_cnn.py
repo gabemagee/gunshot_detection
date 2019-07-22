@@ -249,7 +249,7 @@ K.set_session(session)
 # In[ ]:
 
 
-def attention_cnn(attention = True):
+def attention_cnn():
     # Make layers
     inputs = Input(shape = (1, 128, 64), name='input')
 
@@ -285,11 +285,7 @@ def attention_cnn(attention = True):
 
     conv_shape1 = Lambda(change_shape1,output_shape = (32,), name = 'chg_shape')(conv_2_x)
     find_att = dense_2a(conv_shape1)
-
-    if attention:
-        find_att = Lambda(attention_control, output_shape = att_shape,name = 'att_con')([find_att,dense_2])
-    else:
-        find_att = Lambda(no_attention_control, output_shape = att_shape, name = 'att_con')([find_att,dense_2])
+    find_att = Lambda(attention_control, output_shape = att_shape,name = 'att_con')([find_att,dense_2])
 
     zero_3a = ZeroPadding2D((1,1), name = 'convzero_3')(find_att)
     apply_attention = Concatenate(mode = 'mul', name = 'attend')([zero_3a,conv_1])
