@@ -61,6 +61,8 @@ def build_1D_cnn():
 
     model = Model(input=input,output=output_tensor, name= "1D")
 
+    return model
+
 
 def build_2D_cnn():
     image_size = 128
