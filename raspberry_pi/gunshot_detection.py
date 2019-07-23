@@ -471,11 +471,11 @@ while True:
         elif USING_2D_64_SPECTROGRAM_MODEL and USING_2D_128_SPECTROGRAM_MODEL:
             HOP_LENGTH = 345 * 2
             processed_data_1 = convert_audio_to_spectrogram(data = modified_microphone_data)
-            processed_data_1 = processed_data.reshape(input_shape_1)
+            processed_data_1 = processed_data_1.reshape(input_shape_1)
             
             HOP_LENGTH = 345
             processed_data_2 = convert_audio_to_spectrogram(data = modified_microphone_data)
-            processed_data_2 = processed_data.reshape(input_shape_2)
+            processed_data_2 = processed_data_2.reshape(input_shape_2)
 
             # Performs inference with a given Keras model
             probabilities_1 = model_1.predict(processed_data_1)
