@@ -110,7 +110,7 @@ def build_2D_cnn():
 model = build_2D_cnn()
 #model = build_1D_cnn()
 
-model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr=0.001, decay=0.001 / 100), metrics=['accuracy'])
+model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr=0.0001, decay=0.001 / 100), metrics=['accuracy'])
 model.summary()
 
 model_filename = base_directory + "attention_model_gabe.pkl"
