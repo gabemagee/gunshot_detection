@@ -34,7 +34,7 @@ def build_1D_cnn():
     attention_dense = Dense(44100, activation='softmax', name='attention_dense')
     attention_probs = attention_dense(input)
     attention_mul = multiply([input, attention_probs], name='attention_mul')
-    attention_mul = Reshape(target_shape = (1,44100,1))(attention_mul)
+    print(attention_mul.shape)
     x = Conv1D(16, 3, activation="relu", padding="same")(attention_mul)
     #x = BatchNormalization()(x)
     x = MaxPool1D(3)(x)
