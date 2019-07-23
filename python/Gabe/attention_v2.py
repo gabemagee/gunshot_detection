@@ -37,7 +37,7 @@ def build_1D_cnn():
     attention_mul = multiply([input, attention_probs], name='attention_mul')
     x = Conv1D(16, 3, activation="relu", padding="same")(attention_mul)
     x = BatchNormalization()(x)
-    x = MaxPool2D(3)(x)
+    x = MaxPool1D(3)(x)
     x = Dropout(rate=drop_out_rate)(x)
 
     x = Conv1D(32, 3, activation="relu", padding="same")(x)
