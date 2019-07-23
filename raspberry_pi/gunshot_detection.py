@@ -315,7 +315,7 @@ elif USING_2D_64_SPECTROGRAM_MODEL and not USING_2D_128_SPECTROGRAM_MODEL:
 
 elif USING_2D_128_SPECTROGRAM_MODEL and not USING_2D_64_SPECTROGRAM_MODEL:
     # Loads 128 x 128 Keras model from H5 file
-    model = keras.models.load_model("/home/pi/Datasets/128_128_gunshot_2d_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    model = keras.models.load_model("/home/pi/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
     
     # Sets the input shape for the model
     input_shape = (1, 128, 128, 1)
