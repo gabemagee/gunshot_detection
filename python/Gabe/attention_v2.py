@@ -80,7 +80,7 @@ def build_1D_cnn():
 
     x = Dense(64, activation="relu")(x)
     x = Dense(1028, activation="relu")(x)
-    output_tensor = = Dense(2, activation="softmax")(x)
+    output_tensor = Dense(2, activation="softmax")(x)
 
     model = Model(input=input,output=output_tensor, name= "1D")
 
