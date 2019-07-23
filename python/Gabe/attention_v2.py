@@ -133,6 +133,8 @@ data_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_train
 X_train, X_test = np.load(data_dir+"X_train.npy").reshape(16294,44100,1),np.load(data_dir+"X_test.npy").reshape(16294,44100,1)
 Y_train, Y_test = np.load(data_dir+"Y_train.npy"),np.load(data_dir+"Y_test.npy")
 
+Y_train = to_categorical(Y_train, 2)
+Y_test = to_categorical(Y_test, 2)
 
 model_history = model.fit(X_train, Y_train,batch_size=64,validation_data=(X_test,Y_test),callbacks=model_callbacks,nb_epoch=50)
 
