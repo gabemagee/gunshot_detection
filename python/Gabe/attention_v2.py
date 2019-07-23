@@ -63,6 +63,4 @@ model.summary()
 base_directory = "/home/gamagee/workspace/gunshot_detection/test_train/"
 X_train, X_test = np.load(base_directory+"X_train.npy"),np.load(base_directory+"X_test.npy")
 Y_train, Y_test = np.load(base_directory+"y_train.npy"),np.load(base_directory+"y_test.npy")
-print(X_train.shape)
-print(X_train.shape,y_trainCAT.shape)
 model_history = model.fit(X_train, Y_train,batch_size=20,validation_data=(X_test,Y_test),nb_epoch=50)
