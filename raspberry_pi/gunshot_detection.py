@@ -376,7 +376,7 @@ def send_sms_alert():
                 try:
                     # At this point in execution, an attempt to send an SMS alert to local authorities will be made
                     modem.waitForNetworkCoverage(timeout = NETWORK_COVERAGE_TIMEOUT)
-                    for number in designated_alert_recipients:
+                    for number in DESIGNATED_ALERT_RECIPIENTS:
                         modem.sendSms(number, ALERT_MESSAGE + sms_alert_timestamp)
                     logger.debug(" *** Sent out an SMS alert to all designated recipients *** ")
                 except:

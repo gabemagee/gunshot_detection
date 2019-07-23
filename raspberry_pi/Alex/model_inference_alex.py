@@ -20,7 +20,7 @@ from datetime import timedelta as td
 from queue import Queue
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow.keras import backend as K
-# from gsmmodem.modem import GsmModem
+from gsmmodem.modem import GsmModem
 
 
 # ## Configuring the Logger
@@ -47,7 +47,7 @@ NUMBER_OF_AUDIO_CHANNELS = 1
 AUDIO_DEVICE_INDEX = 6
 NUMBER_OF_FRAMES_PER_BUFFER = 4410
 SAMPLE_DURATION = 2
-AUDIO_VOLUME_THRESHOLD = 0.5
+AUDIO_VOLUME_THRESHOLD = 0.3
 NOISE_REDUCTION_ENABLED = False
 MODEL_CONFIDENCE_THRESHOLD = 0.5
 HOP_LENGTH = 345 * 2
@@ -55,7 +55,7 @@ MINIMUM_FREQUENCY = 20
 MAXIMUM_FREQUENCY = AUDIO_RATE // 2
 NUMBER_OF_MELS = 128
 NUMBER_OF_FFTS = NUMBER_OF_MELS * 20
-SMS_ALERTS_ENABLED = False
+SMS_ALERTS_ENABLED = True
 ALERT_MESSAGE = "ALERT: A Gunshot Was Detected on "
 NETWORK_COVERAGE_TIMEOUT = 3600
 DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
@@ -391,7 +391,7 @@ def send_sms_alert():
         if modem_sim_pin:
             modem.connect(modem_sim_pin)
         else:
-            modem.connect()
+            modem.connect(None)
     
         # Continuously dispatches SMS alerts to a list of designated recipients
         while True:
@@ -401,7 +401,7 @@ def send_sms_alert():
                 try:
                     # At this point in execution, an attempt to send an SMS alert to local authorities will be made
                     modem.waitForNetworkCoverage(timeout = NETWORK_COVERAGE_TIMEOUT)
-                    for number in designated_alert_recipients:
+                    for number in DESIGNATED_ALERT_RECIPIENTS:
                         modem.sendSms(number, ALERT_MESSAGE + sms_alert_timestamp)
                     logger.debug(" *** Sent out an SMS alert to all designated recipients *** ")
                 except:
