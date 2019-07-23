@@ -23,33 +23,9 @@ def get_available_gpus():
 print("available gpus:",get_available_gpus())
 
 
-data_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/samples_and_labels/"
 
-X = np.load(data_dir+"gunshot_augmented_sound_samples.npy")
-Y = np.load(data_dir+"gunshot_augmented_sound_labels.npy")
-testing_indices = np.load(data_dir+"testing_set_indexes.npy")
-training_indices = np.load(data_dir+"training_set_indexes.npy")
-X_train = []
-X_test = []
-Y_train = []
-Y_test = []
-for i in range(X.shape[0]):
-    if i in training_indices:
-        X_train.append(X[i])
-        Y_train.append(Y[i])
-    elif i in testing_indices:
-        X_test.append(X[i])
-        Y_test.append(Y[i])
 
-X_train = np.array(X_train)
-X_test = np.array(X_test)
-Y_train = np.array(Y_train)
-Y_test = np.array(Y_test)
 
-np.save(data_dir+"attn/X_train.npy",X_train)
-np.save(data_dir+"attn/X_test.npy",X_test)
-np.save(data_dir+"attn/Y_train.npy",Y_train)
-np.save(data_dir+"attn/Y_test.npy",Y_test)
 
 
 
@@ -146,11 +122,13 @@ model_callbacks = [
                         save_best_only=True,
                         mode='max'),]
 
-
+data_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/samples_and_labels/attn/"
 
 #X_train, X_test = np.load(base_directory+"X_train.npy").reshape((16294, 128, 128, 1)),np.load(base_directory+"X_test.npy").reshape((16294, 128, 128, 1))
 #Y_train, Y_test = np.load(base_directory+"y_train.npy"),np.load(base_directory+"y_test.npy")
 
+X_train, X_test = np.load(data_dir+"X_train.npy"),np.load(data_dir+"X_test.npy")
+Y_train, Y_test = np.load(data_dir+"Y_train.npy"),np.load(data_dir+"Y_test.npy")
 
 
 model_history = model.fit(X_train, Y_train,batch_size=64,validation_data=(X_test,Y_test),callbacks=model_callbacks,nb_epoch=50)
