@@ -106,7 +106,7 @@ def build_2D_cnn():
 
     return model
 
-#model = build_2D_cnn()
+model = build_2D_cnn()
 model = build_1D_cnn()
 
 model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr=0.001, decay=0.001 / 100), metrics=['accuracy'])
@@ -127,10 +127,11 @@ model_callbacks = [
 
 data_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/samples_and_labels/attn/"
 
-#X_train, X_test = np.load(base_directory+"X_train.npy").reshape((16294, 128, 128, 1)),np.load(base_directory+"X_test.npy").reshape((16294, 128, 128, 1))
+X_train, X_test = np.load(base_directory+"X_train.npy").reshape((16294, 128, 128, 1)),np.load(base_directory+"X_test.npy").reshape((16294, 128, 128, 1))
+#X_train, X_test = np.load(data_dir+"X_train.npy").reshape(16294,44100,1),np.load(data_dir+"X_test.npy").reshape(16294,44100,1)
+
 Y_train, Y_test = np.load(base_directory+"y_train.npy"),np.load(base_directory+"y_test.npy")
 
-X_train, X_test = np.load(data_dir+"X_train.npy").reshape(16294,44100,1),np.load(data_dir+"X_test.npy").reshape(16294,44100,1)
 
 
 model_history = model.fit(X_train, Y_train,batch_size=64,validation_data=(X_test,Y_test),callbacks=model_callbacks,nb_epoch=50)
