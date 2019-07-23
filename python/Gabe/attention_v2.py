@@ -5,7 +5,7 @@ from keras.optimizers import Adam
 from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D
 from keras.layers import BatchNormalization, MaxPool2D, Dropout, GlobalMaxPool2D
 import numpy as np
-
+from tensorflow.python.client import device_lib
 
 
 
