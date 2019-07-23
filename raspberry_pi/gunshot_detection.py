@@ -362,7 +362,11 @@ def send_sms_alert():
         logger.debug("Initializing connection to modem...")
         modem = GsmModem(modem_port, modem_baudrate)
         modem.smsTextMode = False
-        modem.connect(modem_sim_pin)
+        
+        if modem_sim_pin:
+            modem.connect(modem_sim_pin)
+        else:
+            modem.connect()
     
         # Continuously dispatches SMS alerts to a list of designated recipients
         while True:
