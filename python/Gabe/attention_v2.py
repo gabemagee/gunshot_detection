@@ -107,7 +107,7 @@ def build_2D_cnn():
     return model
 
 model = build_2D_cnn()
-model = build_1D_cnn()
+#model = build_1D_cnn()
 
 model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr=0.001, decay=0.001 / 100), metrics=['accuracy'])
 model.summary()
