@@ -132,7 +132,7 @@ X_train, X_test = np.load(data_dir+"X_train.npy").reshape(16294,44100,1),np.load
 
 Y_train, Y_test = np.load(base_directory+"y_train.npy"),np.load(base_directory+"y_test.npy")
 
-print(Y_train.output_shape)
+print(Y_train.shape)
 
 model_history = model.fit(X_train, Y_train,batch_size=64,validation_data=(X_test,Y_test),callbacks=model_callbacks,nb_epoch=50)
 
