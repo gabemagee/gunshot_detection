@@ -16,7 +16,6 @@ drop_out_rate = 0.1
 base_directory = "/home/gamagee/workspace/gunshot_detection/test_train/"
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
-    print(local_device_protos)
     return [x.name for x in local_device_protos if x.device_type == 'GPU']
 # In[8]:
 
@@ -60,7 +59,7 @@ def build_1D_cnn():
     output_tensor = Dense(2, activation="softmax")
     output = output_tensor(x)
     print(output_tensor.output_shape)
-    model = Model(input=input,output=output_tensor, name= "1D")
+    model = Model(input=input,output=output, name= "1D")
 
     return model
 
