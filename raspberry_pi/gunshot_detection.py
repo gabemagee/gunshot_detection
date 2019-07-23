@@ -304,21 +304,21 @@ if USING_1D_TIME_SERIES_MODEL:
     model = keras.models.load_model("/home/pi/Datasets/RYAN_1D_model.h5", custom_objects = {"auc" : auc})
     
     # Sets the input shape for the model
-    input_shape = (44100, 1)
+    input_shape = (1, 44100, 1)
 
 elif USING_2D_64_SPECTROGRAM_MODEL and not USING_2D_128_SPECTROGRAM_MODEL:
     # Loads 128 x 64 Keras model from H5 file
     model = keras.models.load_model("/home/pi/Datasets/RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
     
     # Sets the input shape for the model
-    input_shape = (128, 64, 1)
+    input_shape = (1, 128, 64, 1)
 
 elif USING_2D_128_SPECTROGRAM_MODEL and not USING_2D_64_SPECTROGRAM_MODEL:
     # Loads 128 x 128 Keras model from H5 file
     model = keras.models.load_model("/home/pi/Datasets/128_128_gunshot_2d_spectrogram_model.h5", custom_objects = {"auc" : auc})
     
     # Sets the input shape for the model
-    input_shape = (128, 128, 1)
+    input_shape = (1, 128, 128, 1)
 
 elif USING_2D_64_SPECTROGRAM_MODEL and USING_2D_128_SPECTROGRAM_MODEL:
 
@@ -326,13 +326,13 @@ elif USING_2D_64_SPECTROGRAM_MODEL and USING_2D_128_SPECTROGRAM_MODEL:
     model_1 = keras.models.load_model("/home/pi/Datasets/RYAN_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
     # Gets the input shape from the 128 x 64 Keras model
-    input_shape_1 = (128, 64, 1)
+    input_shape_1 = (1, 128, 64, 1)
 
     # Loads 128 x 128 Keras model from H5 file
     model_2 = keras.models.load_model("/home/pi/Datasets/128_128_gunshot_2d_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
     # Gets the input shape from the 128 x 128 Keras model
-    input_shape_2 = (128, 128, 1)
+    input_shape_2 = (1, 128, 128, 1)
 
 
 ### --- ###
