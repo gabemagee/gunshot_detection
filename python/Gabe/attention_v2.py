@@ -7,6 +7,7 @@ from keras.layers import BatchNormalization, MaxPool2D, Dropout, GlobalMaxPool2D
 import numpy as np
 from tensorflow.python.client import device_lib
 import os
+from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 
 
 image_size = 128
