@@ -130,7 +130,7 @@ data_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_train
 #X_train, X_test = np.load(base_directory+"X_train.npy").reshape((16294, 128, 128, 1)),np.load(base_directory+"X_test.npy").reshape((16294, 128, 128, 1))
 #Y_train, Y_test = np.load(base_directory+"y_train.npy"),np.load(base_directory+"y_test.npy")
 
-X_train, X_test = np.load(data_dir+"X_train.npy"),np.load(data_dir+"X_test.npy")
+X_train, X_test = np.load(data_dir+"X_train.npy").reshape(16294,44100,1),np.load(data_dir+"X_test.npy").reshape(16294,44100,1)
 Y_train, Y_test = np.load(data_dir+"Y_train.npy"),np.load(data_dir+"Y_test.npy")
 
 
