@@ -346,13 +346,13 @@ elif USING_2D_128_SPECTROGRAM_MODEL and not USING_2D_64_SPECTROGRAM_MODEL:
 elif USING_2D_64_SPECTROGRAM_MODEL and USING_2D_128_SPECTROGRAM_MODEL:
 
     # Loads 128 x 64 Keras model from H5 file
-    model_1 = keras.models.load_model("/home/alexm/Datasets/RYAN_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    model = keras.models.load_model("/home/alexm/Datasets/RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
     # Gets the input shape from the 128 x 64 Keras model
     input_shape_1 = (1, 128, 64, 1)
 
     # Loads 128 x 128 Keras model from H5 file
-    model_2 = keras.models.load_model("/home/alexm/Datasets/128_128_gunshot_2d_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    model = keras.models.load_model("/home/alexm/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
     # Gets the input shape from the 128 x 128 Keras model
     input_shape_2 = (1, 128, 128, 1)
