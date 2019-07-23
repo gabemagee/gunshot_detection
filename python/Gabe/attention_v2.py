@@ -69,10 +69,24 @@ model = Model(input=input,output=output_tensor)
 model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr=0.001, decay=0.001 / 100), metrics=['accuracy'])
 model.summary()
 
+model_filename = base_directory + "attention_model_gabe.pkl"
+
+model_callbacks = [
+        EarlyStopping(monitor='val_acc',
+                      patience=15,
+                      verbose=1,
+                      mode='max'),
+
+        ModelCheckpoint(model_filename, monitor='val_acc',
+                        verbose=1,
+                        save_best_only=True,
+                        mode='max'),]
+
+
 base_directory = "/home/gamagee/workspace/gunshot_detection/test_train/"
 X_train, X_test = np.load(base_directory+"X_train.npy").reshape((16294, 128, 128, 1)),np.load(base_directory+"X_test.npy").reshape((16294, 128, 128, 1))
 Y_train, Y_test = np.load(base_directory+"y_train.npy"),np.load(base_directory+"y_test.npy")
-model_history = model.fit(X_train, Y_train,batch_size=200,validation_data=(X_test,Y_test),nb_epoch=50)
+model_history = model.fit(X_train, Y_train,batch_size=64,validation_data=(X_test,Y_test),callbacks=model_callbacks,nb_epoch=50)
 
 model_save_file = base_directory + "attention_model_gabe.h5"
 
