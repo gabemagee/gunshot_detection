@@ -62,14 +62,16 @@ DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
 sound_data = np.zeros(0, dtype = "float32")
 noise_sample_captured = False
 gunshot_sound_counter = 1
+gunshot_sound_counter_1 = 1
+gunshot_sound_counter_2 = 1
 noise_sample = []
 audio_analysis_queue = Queue()
 sms_alert_queue = Queue()
 
-# Only one of these state variables may be set to true at a given point in time
+# Only the two 2D model state variables may be set to true at the same time
 USING_1D_TIME_SERIES_MODEL = False
 USING_2D_64_SPECTROGRAM_MODEL = True
-USING_2D_128_SPECTROGRAM_MODEL = False
+USING_2D_128_SPECTROGRAM_MODEL = True
 
 # ## Loading in Augmented Labels
 
@@ -290,10 +292,19 @@ def convert_audio_to_spectrogram(data):
 
 
 # Saves a two-second gunshot sample as a WAV file
-def create_gunshot_wav_file(microphone_data, index, timestamp):
-    librosa.output.write_wav("/home/alexm/Gunshot Detection System Recordings/Gunshot Sound Sample #"
-                             + str(index) + " ("
-                             + str(timestamp) + ").wav", microphone_data, 22050)
+def create_gunshot_wav_file(microphone_data, index, timestamp, model_used = ""):
+    if model_used = "2D 64":
+        librosa.output.write_wav("/home/alexm/Gunshot Detection System Recordings/128 x 64 Gunshot Sound Sample #"
+                                 + str(index) + " ("
+                                 + str(timestamp) + ").wav", microphone_data, 22050)
+    elif model_used = "2D 128":
+        librosa.output.write_wav("/home/alexm/Gunshot Detection System Recordings/128 x 128 Gunshot Sound Sample #"
+                                 + str(index) + " ("
+                                 + str(timestamp) + ").wav", microphone_data, 22050)
+    else:
+        librosa.output.write_wav("/home/alexm/Gunshot Detection System Recordings/Gunshot Sound Sample #"
+                                 + str(index) + " ("
+                                 + str(timestamp) + ").wav", microphone_data, 22050)
 
 # ### ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
 
@@ -306,17 +317,45 @@ def auc(y_true, y_pred):
     return auc
 
 
-# ## Loading the Model
+# ## Loading the Models
 
 # In[ ]:
 
 
-# Loads Keras model from H5 file
-model = keras.models.load_model("/home/alexm/Datasets/RYAN_spectrogram_model.h5", custom_objects = {"auc" : auc})
+if USING_1D_TIME_SERIES_MODEL:
+    # Loads 44100 x 1 Keras model from H5 file
+    model = keras.models.load_model("/home/alexm/Datasets/RYAN_1D_model.h5", custom_objects = {"auc" : auc})
+    
+    # Sets the input shape for the model
+    input_shape = (44100, 1)
 
-# Gets the input shape of the Keras model
-input_shape = model.inputs[0].get_shape().as_list()
-input_shape[0] = 1 if input_shape[0] == None else input_shape[0]
+elif USING_2D_64_SPECTROGRAM_MODEL and not USING_2D_128_SPECTROGRAM_MODEL:
+    # Loads 128 x 64 Keras model from H5 file
+    model = keras.models.load_model("/home/alexm/Datasets/RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    
+    # Sets the input shape for the model
+    input_shape = (128, 64, 1)
+
+elif USING_2D_128_SPECTROGRAM_MODEL and not USING_2D_64_SPECTROGRAM_MODEL:
+    # Loads 128 x 128 Keras model from H5 file
+    model = keras.models.load_model("/home/alexm/Datasets/128_128_gunshot_2d_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    
+    # Sets the input shape for the model
+    input_shape = (128, 128, 1)
+
+elif USING_2D_64_SPECTROGRAM_MODEL and USING_2D_128_SPECTROGRAM_MODEL:
+
+    # Loads 128 x 64 Keras model from H5 file
+    model_1 = keras.models.load_model("/home/alexm/Datasets/RYAN_spectrogram_model.h5", custom_objects = {"auc" : auc})
+
+    # Gets the input shape from the 128 x 64 Keras model
+    input_shape_1 = (128, 64, 1)
+
+    # Loads 128 x 128 Keras model from H5 file
+    model_2 = keras.models.load_model("/home/alexm/Datasets/128_128_gunshot_2d_spectrogram_model.h5", custom_objects = {"auc" : auc})
+
+    # Gets the input shape from the 128 x 128 Keras model
+    input_shape_2 = (128, 128, 1)
 
 
 # ## ---
@@ -416,46 +455,117 @@ logger.debug("--- Listening to Audio Stream ---")
 
 ### Main (Audio Analysis) Thread
 
-# The main (audio analysis) thread will run indefinitely
+# This thread will run indefinitely
 while True:
     # Gets a sample and its timestamp from the audio analysis queue
-    microphone_data = np.array(audio_analysis_queue.get(), dtype="float32")
+    microphone_data = np.array(audio_analysis_queue.get(), dtype = "float32")
     time_of_sample_occurrence = audio_analysis_queue.get()
-
+    
     # Cleans up the global NumPy audio data source
-    sound_data = np.zeros(0, dtype="float32")
-
+    sound_data = np.zeros(0, dtype = "float32")
+        
     # Finds the current sample's maximum frequency value
     maximum_frequency_value = np.max(microphone_data)
-
+        
     # Determines whether a given sample potentially contains a gunshot
     if maximum_frequency_value >= AUDIO_VOLUME_THRESHOLD:
-
+        
         # Displays the current sample's maximum frequency value
         logger.debug("The maximum frequency value of a given sample before processing: " + str(maximum_frequency_value))
-
-        # Post-processes the microphone data
-        modified_microphone_data = librosa.resample(y=microphone_data, orig_sr=AUDIO_RATE, target_sr=22050)
-        if NOISE_REDUCTION_ENABLED and noise_sample_captured:
-            # Acts as a substitute for normalization
-            modified_microphone_data = remove_noise(audio_clip=modified_microphone_data, noise_clip=noise_sample)
-            number_of_missing_hertz = 44100 - len(modified_microphone_data)
-            modified_microphone_data = np.array(
-                modified_microphone_data.tolist() + [0 for i in range(number_of_missing_hertz)], dtype="float32")
-        modified_microphone_data = modified_microphone_data[:44100]
         
+        # Post-processes the microphone data
+        modified_microphone_data = librosa.resample(y = microphone_data, orig_sr = AUDIO_RATE, target_sr = 22050)
+        if NOISE_REDUCTION_ENABLED and noise_sample_captured:
+                # Acts as a substitute for normalization
+                modified_microphone_data = remove_noise(audio_clip = modified_microphone_data, noise_clip = noise_sample)
+                number_of_missing_hertz = 44100 - len(modified_microphone_data)
+                modified_microphone_data = np.array(modified_microphone_data.tolist() + [0 for i in range(number_of_missing_hertz)], dtype = "float32")
+        modified_microphone_data = modified_microphone_data[:44100]
+
         # Passes an audio sample of an appropriate format into the model for inference
         if USING_1D_TIME_SERIES_MODEL:
             processed_data = modified_microphone_data
 
-        elif USING_2D_64_SPECTROGRAM_MODEL:
+        elif USING_2D_64_SPECTROGRAM_MODEL and not USING_2D_128_SPECTROGRAM_MODEL:
             HOP_LENGTH = 345 * 2
             processed_data = convert_audio_to_spectrogram(data = modified_microphone_data)
 
-        elif USING_2D_128_SPECTROGRAM_MODEL:
+        elif USING_2D_128_SPECTROGRAM_MODEL and not USING_2D_64_SPECTROGRAM_MODEL:
             HOP_LENGTH = 345
             processed_data = convert_audio_to_spectrogram(data = modified_microphone_data)
+
+        elif USING_2D_64_SPECTROGRAM_MODEL and USING_2D_128_SPECTROGRAM_MODEL:
+            HOP_LENGTH = 345 * 2
+            processed_data_1 = convert_audio_to_spectrogram(data = modified_microphone_data)
+            processed_data_1 = processed_data.reshape(input_shape_1)
             
+            HOP_LENGTH = 345
+            processed_data_2 = convert_audio_to_spectrogram(data = modified_microphone_data)
+            processed_data_2 = processed_data.reshape(input_shape_2)
+
+            # Performs inference with a given Keras model
+            probabilities_1 = model_1.predict(processed_data_1)
+            logger.debug("The model-predicted probability values: " + str(probabilities_1[0]))
+            logger.debug("Model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_1[:, 0])[0])
+            
+            # Performs inference with a given Keras model
+            probabilities_2 = model_2.predict(processed_data_2)
+            logger.debug("The model-predicted probability values: " + str(probabilities_2[0]))
+            logger.debug("Model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_2[:, 0])[0])
+
+            # Determines if a gunshot sound was detected by the 128 x 64 model
+            if probabilities_1[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_2[0][1] < MODEL_CONFIDENCE_THRESHOLD:
+                # Sends out an SMS alert
+                sms_alert_queue.put("Gunshot Detected")
+
+                # Sends out the time a given sample was heard
+                sms_alert_queue.put(time_of_sample_occurrence)
+
+                # Makes a WAV file of the gunshot sample
+                create_gunshot_wav_file(modified_microphone_data, gunshot_sound_counter_1,
+                                        time_of_sample_occurrence, model_used = "2D 64")
+
+                # Increments the counter for gunshot sound file names
+                gunshot_sound_counter_1 += 1
+                
+                # Jumps to the next iteration of the while-loop.
+                break
+                
+            # Determines if a gunshot sound was detected by the 128 x 128 model
+            elif probabilities_2[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_1[0][1] < MODEL_CONFIDENCE_THRESHOLD:
+                # Sends out an SMS alert
+                sms_alert_queue.put("Gunshot Detected")
+
+                # Sends out the time a given sample was heard
+                sms_alert_queue.put(time_of_sample_occurrence)
+
+                # Makes a WAV file of the gunshot sample
+                create_gunshot_wav_file(modified_microphone_data, gunshot_sound_counter_2,
+                                        time_of_sample_occurrence, model_used = "2D 128")
+
+                # Increments the counter for gunshot sound file names
+                gunshot_sound_counter_2 += 1
+                
+                # Jumps to the next iteration of the while-loop.
+                break
+                
+            # Determines if a gunshot sound was detected by both models
+            elif probabilities[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_2[0][1] >= MODEL_CONFIDENCE_THRESHOLD:
+                # Sends out an SMS alert
+                sms_alert_queue.put("Gunshot Detected")
+
+                # Sends out the time a given sample was heard
+                sms_alert_queue.put(time_of_sample_occurrence)
+
+                # Makes a WAV file of the gunshot sample
+                create_gunshot_wav_file(modified_microphone_data, gunshot_sound_counter, time_of_sample_occurrence)
+
+                # Increments the counter for gunshot sound file names
+                gunshot_sound_counter += 1
+                
+                # Jumps to the next iteration of the while-loop.
+                break
+
         # Reshapes the modified microphone data accordingly
         processed_data = processed_data.reshape(input_shape)
         
@@ -471,15 +581,15 @@ while True:
             
             # Sends out the time a given sample was heard
             sms_alert_queue.put(time_of_sample_occurrence)
-
+            
             # Makes a WAV file of the gunshot sample
             create_gunshot_wav_file(modified_microphone_data, gunshot_sound_counter, time_of_sample_occurrence)
 
             # Increments the counter for gunshot sound file names
             gunshot_sound_counter += 1
-
+    
     # Allows us to capture two seconds of background noise from the microphone for noise reduction
     elif NOISE_REDUCTION_ENABLED and not noise_sample_captured:
-        noise_sample = librosa.resample(y=microphone_data, orig_sr=AUDIO_RATE, target_sr=22050)
+        noise_sample = librosa.resample(y = microphone_data, orig_sr = AUDIO_RATE, target_sr = 22050)
         noise_sample = noise_sample[:44100]
         noise_sample_captured = True
