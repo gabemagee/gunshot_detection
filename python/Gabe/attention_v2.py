@@ -14,7 +14,15 @@ maxpool_size = (3,3)
 drop_out_rate = 0.1
 flattend_input_dims = image_size*image_size
 
+def get_available_gpus():
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos if x.device_type == 'GPU']
+# In[8]:
 
+print("available gpus:",get_available_gpus())
+
+
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 
 #get a 128,128 attention tensor
@@ -63,4 +71,4 @@ model.summary()
 base_directory = "/home/gamagee/workspace/gunshot_detection/test_train/"
 X_train, X_test = np.load(base_directory+"X_train.npy").reshape((16294, 128, 128, 1)),np.load(base_directory+"X_test.npy").reshape((16294, 128, 128, 1))
 Y_train, Y_test = np.load(base_directory+"y_train.npy"),np.load(base_directory+"y_test.npy")
-model_history = model.fit(X_train, Y_train,batch_size=150,validation_data=(X_test,Y_test),nb_epoch=50)
+model_history = model.fit(X_train, Y_train,batch_size=200,validation_data=(X_test,Y_test),nb_epoch=50)
