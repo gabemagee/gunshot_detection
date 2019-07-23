@@ -509,13 +509,13 @@ while True:
 
             # Performs inference with a given Keras model
             probabilities_1 = model_1.predict(processed_data_1)
-            logger.debug("The 128 x 64 model's predicted probability values: " + str(probabilities_1[0]))
-            logger.debug("The 128 x 64 model's predicted sample class: " + label_binarizer.inverse_transform(probabilities_1[:, 0])[0])
+            logger.debug("The 128 x 64 model-predicted probability values: " + str(probabilities_1[0]))
+            logger.debug("The 128 x 64 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_1[:, 0])[0])
             
             # Performs inference with a given Keras model
             probabilities_2 = model_2.predict(processed_data_2)
-            logger.debug("The 128 x 128 model's predicted probability values: " + str(probabilities_2[0]))
-            logger.debug("The 128 x 128 model's predicted sample class: " + label_binarizer.inverse_transform(probabilities_2[:, 0])[0])
+            logger.debug("The 128 x 128 model-predicted probability values: " + str(probabilities_2[0]))
+            logger.debug("The 128 x 128 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_2[:, 0])[0])
 
             # Determines if a gunshot sound was detected by the 128 x 64 model
             if probabilities_1[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_2[0][1] < MODEL_CONFIDENCE_THRESHOLD:
@@ -532,9 +532,6 @@ while True:
                 # Increments the counter for gunshot sound file names
                 gunshot_sound_counter_1 += 1
                 
-                # Jumps to the next iteration of the while-loop.
-                break
-                
             # Determines if a gunshot sound was detected by the 128 x 128 model
             elif probabilities_2[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_1[0][1] < MODEL_CONFIDENCE_THRESHOLD:
                 # Sends out an SMS alert
@@ -549,10 +546,7 @@ while True:
 
                 # Increments the counter for gunshot sound file names
                 gunshot_sound_counter_2 += 1
-                
-                # Jumps to the next iteration of the while-loop.
-                break
-                
+
             # Determines if a gunshot sound was detected by both models
             elif probabilities_1[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_2[0][1] >= MODEL_CONFIDENCE_THRESHOLD:
                 # Sends out an SMS alert
@@ -566,9 +560,9 @@ while True:
 
                 # Increments the counter for gunshot sound file names
                 gunshot_sound_counter += 1
-                
-                # Jumps to the next iteration of the while-loop.
-                break
+        
+            # Jumps to the next iteration of the while-loop.
+            continue
 
         # Reshapes the modified microphone data accordingly
         processed_data = processed_data.reshape(input_shape)
