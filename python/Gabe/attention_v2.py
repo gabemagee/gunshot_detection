@@ -2,7 +2,7 @@ from keras import backend as K
 from keras.layers import Input, Dense, multiply, Flatten, Dropout, Lambda, normalization, Concatenate, Reshape, noise
 from keras.models import Model
 from keras.optimizers import Adam
-from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D
+from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D, Conv1D, MaxPool1D
 from keras.layers import BatchNormalization, MaxPool2D, Dropout, GlobalMaxPool2D
 import numpy as np
 from tensorflow.python.client import device_lib
