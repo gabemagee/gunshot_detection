@@ -30,7 +30,7 @@ print("available gpus:",get_available_gpus())
 
 #get a 128,128 attention tensor
 def build_1D_cnn():
-    input = Input(shape=(1,44100,1),name='input')
+    input = Input(shape=(44100,1),name='input')
     attention_dense = Dense(44100, activation='softmax', name='attention_dense')
     attention_probs = attention_dense(input)
     attention_mul = multiply([input, attention_probs], name='attention_mul')
