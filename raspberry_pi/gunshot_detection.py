@@ -49,7 +49,7 @@ NUMBER_OF_MELS = 128
 NUMBER_OF_FFTS = NUMBER_OF_MELS * 20
 SMS_ALERTS_ENABLED = True
 ALERT_MESSAGE = "ALERT: A Gunshot Was Detected on "
-NETWORK_COVERAGE_TIMEOUT = 60
+NETWORK_COVERAGE_TIMEOUT = 3600
 DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
 sound_data = np.zeros(0, dtype = "float32")
 noise_sample_captured = False
@@ -426,7 +426,6 @@ stream = pa.open(format=AUDIO_FORMAT,
 stream.start_stream()
 logger.debug("--- Listening to Audio Stream ---")
 
-
 ### Main (Audio Analysis) Thread
 
 # This thread will run indefinitely
@@ -479,13 +478,13 @@ while True:
 
             # Performs inference with a given Keras model
             probabilities_1 = model_1.predict(processed_data_1)
-            logger.debug("The model-predicted probability values: " + str(probabilities_1[0]))
-            logger.debug("Model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_1[:, 0])[0])
+            logger.debug("The 128 x 64 model's predicted probability values: " + str(probabilities_1[0]))
+            logger.debug("The 128 x 64 model's predicted sample class: " + label_binarizer.inverse_transform(probabilities_1[:, 0])[0])
             
             # Performs inference with a given Keras model
             probabilities_2 = model_2.predict(processed_data_2)
-            logger.debug("The model-predicted probability values: " + str(probabilities_2[0]))
-            logger.debug("Model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_2[:, 0])[0])
+            logger.debug("The 128 x 128 model's predicted probability values: " + str(probabilities_2[0]))
+            logger.debug("The 128 x 128 model's predicted sample class: " + label_binarizer.inverse_transform(probabilities_2[:, 0])[0])
 
             # Determines if a gunshot sound was detected by the 128 x 64 model
             if probabilities_1[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_2[0][1] < MODEL_CONFIDENCE_THRESHOLD:
@@ -524,7 +523,7 @@ while True:
                 break
                 
             # Determines if a gunshot sound was detected by both models
-            elif probabilities[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_2[0][1] >= MODEL_CONFIDENCE_THRESHOLD:
+            elif probabilities_1[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_2[0][1] >= MODEL_CONFIDENCE_THRESHOLD:
                 # Sends out an SMS alert
                 sms_alert_queue.put("Gunshot Detected")
 
