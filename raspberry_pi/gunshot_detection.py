@@ -476,14 +476,12 @@ while True:
             processed_data_2 = convert_audio_to_spectrogram(data = modified_microphone_data)
             processed_data_2 = processed_data_2.reshape(input_shape_2)
 
-            # Performs inference with a given Keras model
+            # Performs inference with the given Keras models
             probabilities_1 = model_1.predict(processed_data_1)
-            logger.debug("The 128 x 64 model-predicted probability values: " + str(probabilities_1[0]))
-            logger.debug("The 128 x 64 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_1[:, 0])[0])
-            
-            # Performs inference with a given Keras model
             probabilities_2 = model_2.predict(processed_data_2)
+            logger.debug("The 128 x 64 model-predicted probability values: " + str(probabilities_1[0]))
             logger.debug("The 128 x 128 model-predicted probability values: " + str(probabilities_2[0]))
+            logger.debug("The 128 x 64 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_1[:, 0])[0])
             logger.debug("The 128 x 128 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_2[:, 0])[0])
 
             # Determines if a gunshot sound was detected by the 128 x 64 model
