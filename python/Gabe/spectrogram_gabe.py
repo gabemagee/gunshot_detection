@@ -30,7 +30,7 @@ import tensorflow.keras as keras
 from tensorflow.python.client import device_lib
 from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.models import load_model
-from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import KFold
 

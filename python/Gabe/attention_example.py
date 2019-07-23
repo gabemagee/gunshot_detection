@@ -68,11 +68,13 @@ def BuildRCNN(nbChannels, shape1, shape2, nbClasses, nbRCL, nbFilters, filtersiz
     # Build Network
     input_shape = (nbChannels, shape1, shape2)
     input_img = Input(shape=input_shape)
-
-    attention_probs = Dense(input_shape, activation='softmax',
-                            name='attention_probs')(input_img)
+	
+    attention_probs = Dense(input_shape[0]*input_shape[1]*input_shape[2],
+                            activation='softmax', name='attention_probs')(input_img)
+    print("attn probs", attention_probs.shape)
+    print("input", input_img.shape)
     attention_mul = multiply(
-        [input_img, attention_probs], output_shape=32, name='attention_mul')
+        [input_img, attention_probs], name='attention_mul')
 
     conv_l = Convolution2D(nbFilters, filtersize, filtersize,
                            border_mode='same', activation='relu')
@@ -92,6 +94,13 @@ def BuildRCNN(nbChannels, shape1, shape2, nbClasses, nbRCL, nbFilters, filtersiz
     return model
 
 
+model = makeModel(1, 128, 128, 2)
+sgd = SGD(lr=0.01, decay=1e-6, momentum=0.5, nesterov=True)
+model.compile(loss='categorical_crossentropy',
+              optimizer=sgd, metrics=['accuracy'])
+
+print(model.summary())
+
 X_train = np.load("X_train.npy")
 X_test = np.load("X_test.npy")
 y_train = np.load("y_train.npy")
@@ -105,12 +114,6 @@ X_test.shape = (len(X_test), 1, image_size, image_size)
 #y_trainCAT = to_categorical(y_train)
 #y_testCAT = to_categorical(y_test)
 
-model = makeModel(1, 128, 128, 2)
-sgd = SGD(lr=0.01, decay=1e-6, momentum=0.5, nesterov=True)
-model.compile(loss='categorical_crossentropy',
-              optimizer=sgd, metrics=['accuracy'])
-
-print(model.summary())
 
 model_history = model.fit(X_train, y_train, batch_size=1,
                           validation_data=(X_test, y_test), nb_epoch=20)

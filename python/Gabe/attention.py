@@ -246,7 +246,7 @@ random_input = np.array(np.random.random_sample(input_shape), dtype=np.float32)
 
 model = minst_attention()
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.5, nesterov=True)
-model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics=['accuracy'])
+model.compile(loss = 'categorical_crossentropy', optimizer = optimizers.Adam(lr=0.001, decay=0.001 / 100), metrics=['accuracy'])
 print(X_train.shape,y_trainCAT.shape)
 model_history = model.fit(X_train, y_trainCAT,batch_size=1,validation_data=(X_test,y_testCAT),nb_epoch=1)
 
