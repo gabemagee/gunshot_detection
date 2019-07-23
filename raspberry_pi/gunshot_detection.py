@@ -269,11 +269,11 @@ def convert_audio_to_spectrogram(data):
 
 # Saves a two-second gunshot sample as a WAV file
 def create_gunshot_wav_file(microphone_data, index, timestamp, model_used = ""):
-    if model_used = "2D 64":
+    if model_used == "2D 64":
         librosa.output.write_wav("/home/pi/Gunshot Detection System Recordings/128 x 64 Gunshot Sound Sample #"
                                  + str(index) + " ("
                                  + str(timestamp) + ").wav", microphone_data, 22050)
-    elif model_used = "2D 128":
+    elif model_used == "2D 128":
         librosa.output.write_wav("/home/pi/Gunshot Detection System Recordings/128 x 128 Gunshot Sound Sample #"
                                  + str(index) + " ("
                                  + str(timestamp) + ").wav", microphone_data, 22050)
