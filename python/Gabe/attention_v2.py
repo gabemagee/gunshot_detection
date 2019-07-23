@@ -10,10 +10,9 @@ import os
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 
 
-image_size = 128
 maxpool_size = (3,3)
 drop_out_rate = 0.1
-flattend_input_dims = image_size*image_size
+
 base_directory = "/home/gamagee/workspace/gunshot_detection/test_train/"
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
@@ -24,49 +23,113 @@ def get_available_gpus():
 print("available gpus:",get_available_gpus())
 
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+data_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/samples_and_labels/"
+
+X = np.load(data_dir+"gunshot_augmented_sound_samples.npy")
+Y = np.load(data_dir+"gunshot_augmented_sound_labels.npy")
+testing_indices = np.load(data_dir+"testing_set_indexes.npy")
+training_indices = np.load(data_dir+"training_set_indexes.npy")
+X_train = []
+X_test = []
+Y_train = []
+Y_test = []
+for i in range(X.shape[0]):
+    if i in training_indices:
+        X_train.append(X[i])
+        Y_train.append(Y[i])
+    elif i in testing_indices:
+        X_test.append(X[i])
+        Y_test.append(Y[i])
+
+X_train = np.array(X_train)
+X_test = np.array(X_test)
+Y_train = np.array(Y_train)
+Y_test = np.array(Y_test)
+
+np.save(data_dir+"attn/X_train.npy",X_train)
+np.save(data_dir+"attn/X_test.npy",X_test)
+np.save(data_dir+"attn/Y_train.npy",Y_train)
+np.save(data_dir+"attn/Y_test.npy",Y_test)
+
 
 
 #get a 128,128 attention tensor
+def build_1D_cnn():
+    input = Input(shape=(44100,1),name='input')
+    attention_dense = Dense(44100, activation='softmax', name='attention_probs')
+    attention_mul = multiply([input, attention_probs], name='attention_mul')
+    x = Conv1D(16, 3, activation="relu", padding="same")(attention_mul)
+    x = BatchNormalization()(x)
+    x = MaxPool2D(3)(x)
+    x = Dropout(rate=drop_out_rate)(x)
 
-flatten = Flatten()
-attention_dense = Dense(flattend_input_dims, activation='softmax', name='attention_probs')
-unflatten = Reshape(target_shape = (image_size,image_size,1))
+    x = Conv1D(32, 3, activation="relu", padding="same")(x)
+    x = BatchNormalization()(x)
+    x = MaxPool1D(3)(x)
+    x = Dropout(rate=drop_out_rate)(x)
 
-input = Input(shape=(image_size,image_size,1),name='input')
-flattened_input = flatten(input)
-attention_probs = attention_dense(flattened_input)
-attention_mul = multiply([flattened_input, attention_probs], name='attention_mul')
-input_tensor = unflatten(attention_mul)
+    x = Conv1D(64, 3, activation="relu", padding="same")(x)
+    x = BatchNormalization()(x)
+    x = MaxPool1D(3)(x)
+    x = Dropout(rate=drop_out_rate)(x)
 
-print(unflatten.output_shape)
+    x = Conv1D(256, 3, activation="relu", padding="same")(x)
+    x = BatchNormalization()(x)
+    x = GlobalMaxPool1D()(x)
+    x = Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
 
-x = Conv2D(16, (3,3), activation="relu", padding="same")(input_tensor)
-x = BatchNormalization()(x)
-x = MaxPool2D(maxpool_size)(x)
-x = Dropout(rate=drop_out_rate)(x)
+    x = Dense(64, activation="relu")(x)
+    x = Dense(1028, activation="relu")(x)
+    output_tensor = = Dense(2, activation="softmax")(x)
 
-x = Conv2D(32, (3,3), activation="relu", padding="same")(x)
-x = BatchNormalization()(x)
-x = MaxPool2D(maxpool_size)(x)
-x = Dropout(rate=drop_out_rate)(x)
-
-x = Conv2D(64, (3,3), activation="relu", padding="same")(x)
-x = BatchNormalization()(x)
-x = MaxPool2D(maxpool_size)(x)
-x = Dropout(rate=drop_out_rate)(x)
-
-x = Conv2D(256, (3,3), activation="relu", padding="same")(x)
-x = BatchNormalization()(x)
-x = GlobalMaxPool2D()(x)
-x = Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
-
-x = Dense(64, activation="relu")(x)
-x = Dense(1028, activation="relu")(x)
-output_tensor = Dense(2, activation="softmax")(x)
+    model = Model(input=input,output=output_tensor, name= "1D")
 
 
-model = Model(input=input,output=output_tensor)
+def build_2D_cnn():
+    image_size = 128
+    flattend_input_dims = image_size*image_size
+    flatten = Flatten()
+    attention_dense = Dense(flattend_input_dims, activation='softmax', name='attention_probs')
+    unflatten = Reshape(target_shape = (image_size,image_size,1))
+
+    input = Input(shape=(image_size,image_size,1),name='input')
+    flattened_input = flatten(input)
+    attention_probs = attention_dense(flattened_input)
+    attention_mul = multiply([flattened_input, attention_probs], name='attention_mul')
+    input_tensor = unflatten(attention_mul)
+
+    x = Conv2D(16, (3,3), activation="relu", padding="same")(input_tensor)
+    x = BatchNormalization()(x)
+    x = MaxPool2D(maxpool_size)(x)
+    x = Dropout(rate=drop_out_rate)(x)
+
+    x = Conv2D(32, (3,3), activation="relu", padding="same")(x)
+    x = BatchNormalization()(x)
+    x = MaxPool2D(maxpool_size)(x)
+    x = Dropout(rate=drop_out_rate)(x)
+
+    x = Conv2D(64, (3,3), activation="relu", padding="same")(x)
+    x = BatchNormalization()(x)
+    x = MaxPool2D(maxpool_size)(x)
+    x = Dropout(rate=drop_out_rate)(x)
+
+    x = Conv2D(256, (3,3), activation="relu", padding="same")(x)
+    x = BatchNormalization()(x)
+    x = GlobalMaxPool2D()(x)
+    x = Dropout(rate=(drop_out_rate * 2))(x) # Increasing drop-out rate here to prevent overfitting
+
+    x = Dense(64, activation="relu")(x)
+    x = Dense(1028, activation="relu")(x)
+    output_tensor = Dense(2, activation="softmax")(x)
+
+
+    model = Model(input=input,output=output_tensor, name= "2D")
+
+    return model
+
+#model = build_2D_cnn()
+model = build_1D_cnn()
+
 model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr=0.001, decay=0.001 / 100), metrics=['accuracy'])
 model.summary()
 
@@ -85,8 +148,11 @@ model_callbacks = [
 
 
 
-X_train, X_test = np.load(base_directory+"X_train.npy").reshape((16294, 128, 128, 1)),np.load(base_directory+"X_test.npy").reshape((16294, 128, 128, 1))
-Y_train, Y_test = np.load(base_directory+"y_train.npy"),np.load(base_directory+"y_test.npy")
+#X_train, X_test = np.load(base_directory+"X_train.npy").reshape((16294, 128, 128, 1)),np.load(base_directory+"X_test.npy").reshape((16294, 128, 128, 1))
+#Y_train, Y_test = np.load(base_directory+"y_train.npy"),np.load(base_directory+"y_test.npy")
+
+
+
 model_history = model.fit(X_train, Y_train,batch_size=64,validation_data=(X_test,Y_test),callbacks=model_callbacks,nb_epoch=50)
 
 model_save_file = base_directory + "attention_model_gabe.h5"
