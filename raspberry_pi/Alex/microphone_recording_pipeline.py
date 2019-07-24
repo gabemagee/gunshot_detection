@@ -49,8 +49,8 @@ audio_capture_queue = Queue()
 # In[ ]:
 
 
-# Saves a two-second gunshot sample as a WAV file
-def create_gunshot_wav_file(microphone_data, index, timestamp, model_used = ""):
+# Saves a two-second audio sample as a WAV file
+def create_wav_file(microphone_data, index, timestamp, model_used = ""):
     librosa.output.write_wav("/home/alexm/Audio Capture System Recordings/Audio Sample #"
                             + str(index) + " ("
                             + str(timestamp) + ").wav", microphone_data, 22050)
@@ -107,8 +107,8 @@ while True:
     modified_microphone_data = librosa.resample(y = microphone_data, orig_sr = AUDIO_RATE, target_sr = 22050)
     modified_microphone_data = modified_microphone_data[:44100]
             
-    # Makes a WAV file of the gunshot sample
-    create_gunshot_wav_file(modified_microphone_data, audio_sample_counter, time_of_sample_occurrence)
+    # Makes a WAV file of the audio sample
+    create_wav_file(modified_microphone_data, audio_sample_counter, time_of_sample_occurrence)
 
     # Increments the counter for audio sample file names
     audio_sample_counter += 1
