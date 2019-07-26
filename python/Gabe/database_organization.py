@@ -104,6 +104,6 @@ for i in range(4):
                 samples_processed.append(label)
 
     filename = base_dir+nombre[i]
-    numpy.save(filename+"_samples.npy",np.array(samples_processed))
-    numpy.save(filename+"_labels.npy",np.array(labels_processed))
+    np.save(filename+"_samples.npy",np.array(samples_processed))
+    np.save(filename+"_labels.npy",np.array(labels_processed))
     print("Finished parsing set of: ",nombre[i])
