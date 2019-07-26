@@ -3,7 +3,7 @@ from keras.layers import Input, Dense, multiply, Flatten, Dropout, Lambda, norma
 from keras.models import Model
 from keras.optimizers import Adam
 from keras.utils.np_utils import to_categorical
-from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D, Conv1D
+from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D, Conv1D,AveragePool1D
 import numpy as np
 from tensorflow.python.client import device_lib
 import os
@@ -22,7 +22,32 @@ def get_available_gpus():
 print("available gpus:",get_available_gpus())
 
 
+from keras import backend as K
+from keras.layers import Layer
 
+class SmoothingLayer(Layer):
+
+    def __init__(self, output_dim, **kwargs):
+        self.output_dim = output_dim
+        super(MyLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        # Create a trainable weight variable for this layer.
+        self.kernel = self.add_weight(name='kernel',
+                                      shape=(input_shape[1], self.output_dim),
+                                      initializer='uniform',
+                                      trainable=True)
+        super(MyLayer, self).build(input_shape)  # Be sure to call this at the end
+
+    def call(self, x):
+        x = AveragePool1D(9)(x)
+        a = []
+        for i in x:
+            b =
+        return x
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], self.output_dim)
 
 
 
@@ -32,8 +57,11 @@ print("available gpus:",get_available_gpus())
 def build_1D_cnn():
     input = Input(shape=(44100,1),name='input')
     flattened_input = Flatten()(input)
-    attention_dense = Dense(44100, activation='softmax', name='attention_dense')
+    attention_dense = Dense(4900, activation='softmax', name='attention_dense')
     attention_probs = attention_dense(flattened_input)
+
+    attention_probs =
+
     attention_mul = multiply([flattened_input, attention_probs], name='attention_mul')
     input_tensor = Reshape(target_shape=(44100,1))(attention_mul)
     x = Conv1D(16, 3, activation="relu", padding="same")(input_tensor)
