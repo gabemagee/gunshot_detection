@@ -98,8 +98,8 @@ for i in range(4):
             samples_processed.append(padded_sample)
             labels_processed.append(label)
         else:
-            for i in range(0, sample.size - sample_rate_per_two_seconds, sample_rate_per_two_seconds):
-                sample_slice = sample[i: i + sample_rate_per_two_seconds]
+            for n in range(0, sample.size - sample_rate_per_two_seconds, sample_rate_per_two_seconds):
+                sample_slice = sample[n: n + sample_rate_per_two_seconds]
                 samples_processed.append(sample_slice)
                 samples_processed.append(label)
 
