@@ -138,10 +138,9 @@ def add_background(sample, samples, labels, label_to_avoid):
 
 
 samples = np.array(samples)
-labels = np.array(labels)
 number_of_augmentations = 5
 augmented_samples = np.zeros((samples.shape[0] * (number_of_augmentations + 1), SAMPLE_RATE_PER_TWO_SECONDS))
-augmented_labels = np.zeros((labels.shape[0] * (number_of_augmentations + 1),))
+augmented_labels = []
 j = 0
 
 for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
@@ -156,12 +155,9 @@ for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
     else:
         augmented_samples[i + 5,:] = add_background(samples[j,:], samples, labels, "gun_shot")
     
-    augmented_labels[i] = labels[j]
-    augmented_labels[i + 1] = labels[j]
-    augmented_labels[i + 2] = labels[j]
-    augmented_labels[i + 3] = labels[j]
-    augmented_labels[i + 4] = labels[j]
-    augmented_labels[i + 5] = labels[j]
+    # Accounts for multiplicably increasing the number of samples through augmentations
+    for distinct_sample in range(number_of_augmentations + 1):
+        augmented_labels.append(labels[j])
     
     print("Finished augmenting sample #" + str(j + 1))
     j += 1
