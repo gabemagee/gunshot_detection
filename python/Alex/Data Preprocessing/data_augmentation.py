@@ -159,7 +159,7 @@ for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
     for sample_version in range(number_of_augmentations + 1):
         augmented_labels.append(labels[j])
     
-    print("Finished augmenting sample #" + str(j + 1))
+    print("Finished augmenting " + DATA_CATEGORY + " sample #" + str(j + 1))
     j += 1
 
 samples = augmented_samples
