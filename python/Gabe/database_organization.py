@@ -82,6 +82,8 @@ sets = [samples,testing_set,validation_set,training_set,samples]
 label_sets = [labels,testing_labels,validation_labels,training_labels,labels]
 nombre = ["all","testing","validation","training","all"]
 
+label_count = {}
+
 for i in range(1):
     print("Starting parsing set of:",nombre[i])
     set = sets[i]
@@ -98,11 +100,13 @@ for i in range(1):
             padded_sample = list(np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)]))
             samples_processed.append(padded_sample)
             labels_processed.append(label)
+            label_count[label] = label_count.get(label,0)+1
         else:
             for n in range(0, sample.size - sample_rate_per_two_seconds, sample_rate_per_two_seconds):
                 sample_slice = list(sample[n: n + sample_rate_per_two_seconds])
                 samples_processed.append(sample_slice)
                 labels_processed.append(label)
+                label_count[label] = label_count.get(label,0)+1
 
     filename = base_dir+nombre[i]
     samples_processed = np.array(samples_processed)
@@ -110,3 +114,8 @@ for i in range(1):
     np.save(filename+"_samples.npy",samples_processed)
     np.save(filename+"_labels.npy",np.array(labels_processed))
     print("Finished parsing set of: ",nombre[i])
+
+n = len(labels_processed)
+print(n)
+for label in label_count.keys():
+    print(label,label_count[label]/n)
