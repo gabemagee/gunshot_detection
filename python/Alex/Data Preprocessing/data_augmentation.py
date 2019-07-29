@@ -116,15 +116,12 @@ def change_volume(sample, magnitude):
     return sample_volume_change
     
 def add_background(sample, samples, labels, label_to_avoid):
-    print("Indexing for sample...")
-    sample_index = [np.array_equal(sample, array) for array in samples.tolist()].index(True)
+    sample_index = np.where(samples == sample)[0][0]
     chosen_bg_sample = samples[np.random.randint(len(samples))]
-    print("Indexing for background noise sample...")
-    chosen_bg_sample_index = [np.array_equal(chosen_bg_sample, array) for array in samples.tolist()].index(True)
+    chosen_bg_sample_index = np.where(samples == chosen_bg_sample)[0][0]
     while chosen_bg_sample_index == sample_index or labels[sample_index] == label_to_avoid:
         chosen_bg_sample = samples[np.random.randint(len(samples))]
-        print("Indexing for background noise sample...")
-        chosen_bg_sample_index = [np.array_equal(chosen_bg_sample, array) for array in samples.tolist()].index(True)
+        chosen_bg_sample_index = np.where(samples == chosen_bg_sample)[0][0]
     ceil = max((chosen_bg_sample.shape[0] - sample.shape[0]), 1)
     start_ = np.random.randint(ceil)
     bg_slice = chosen_bg_sample[start_ : start_ + sample.shape[0]]
