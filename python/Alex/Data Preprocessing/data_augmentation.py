@@ -116,11 +116,14 @@ def change_volume(sample, magnitude):
     return sample_volume_change
     
 def add_background(sample, samples, labels, label_to_avoid):
+    print("Indexing for sample...")
     sample_index = [np.array_equal(sample, array) for array in samples.tolist()].index(True)
     chosen_bg_sample = samples[np.random.randint(len(samples))]
+    print("Indexing for background noise sample...")
     chosen_bg_sample_index = [np.array_equal(chosen_bg_sample, array) for array in samples.tolist()].index(True)
     while chosen_bg_sample_index == sample_index or labels[sample_index] == label_to_avoid:
         chosen_bg_sample = samples[np.random.randint(len(samples))]
+        print("Indexing for background noise sample...")
         chosen_bg_sample_index = [np.array_equal(chosen_bg_sample, array) for array in samples.tolist()].index(True)
     ceil = max((chosen_bg_sample.shape[0] - sample.shape[0]), 1)
     start_ = np.random.randint(ceil)
@@ -156,7 +159,7 @@ for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
         augmented_samples[i + 5,:] = add_background(samples[j,:], samples, labels, "gun_shot")
     
     # Accounts for multiplicably increasing the number of samples through augmentations
-    for distinct_sample in range(number_of_augmentations + 1):
+    for sample_version in range(number_of_augmentations + 1):
         augmented_labels.append(labels[j])
     
     print("Finished augmenting sample #" + str(j + 1))
