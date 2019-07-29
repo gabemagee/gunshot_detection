@@ -145,16 +145,16 @@ augmented_labels = np.zeros((labels.shape[0] * (number_of_augmentations + 1),))
 j = 0
 
 for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
-    augmented_samples[i,:] = samples[j,:]
-    augmented_samples[i + 1,:] = time_shift(samples[j,:])
-    augmented_samples[i + 2,:] = change_pitch(samples[j,:], SAMPLE_RATE_PER_SECOND)
-    augmented_samples[i + 3,:] = speed_change(samples[j,:])
-    augmented_samples[i + 4,:] = change_volume(samples[j,:], np.random.uniform())
+    augmented_samples[i] = samples[j]
+    augmented_samples[i + 1] = time_shift(samples[j])
+    augmented_samples[i + 2] = change_pitch(samples[j], SAMPLE_RATE_PER_SECOND)
+    augmented_samples[i + 3] = speed_change(samples[j])
+    augmented_samples[i + 4] = change_volume(samples[j], np.random.uniform())
     
-    if labels[j] == 1:
-        augmented_samples[i + 5,:] = add_background(samples[j,:], samples, labels, "") 
+    if labels[j] == "gun_shot":
+        augmented_samples[i + 5] = add_background(samples[j], samples, labels, "") 
     else:
-        augmented_samples[i + 5,:] = add_background(samples[j,:], samples, labels, "gun_shot")
+        augmented_samples[i + 5] = add_background(samples[j], samples, labels, "gun_shot")
     
     augmented_labels[i] = labels[j]
     augmented_labels[i + 1] = labels[j]
