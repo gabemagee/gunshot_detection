@@ -76,12 +76,13 @@ for i in range(n_testing):
 
 print(len(testing_set),len(training_set),len(validation_set))
 
+samples = os.listdir(samples_dir)
 
-sets = [testing_set,validation_set,training_set,samples]
-label_sets = [testing_labels,validation_labels,training_labels,labels]
-nombre = ["testing","validation","training","all"]
+sets = [samples,testing_set,validation_set,training_set,samples]
+label_sets = [labels,testing_labels,validation_labels,training_labels,labels]
+nombre = ["all","testing","validation","training","all"]
 
-for i in range(4):
+for i in range(1):
     print("Starting parsing set of:",nombre[i])
     set = sets[i]
     label_set = label_sets[i]
