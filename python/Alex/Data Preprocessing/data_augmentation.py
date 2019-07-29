@@ -118,7 +118,7 @@ def change_volume(sample, magnitude):
 def add_background(sample, samples, labels, label_to_avoid):
     sample_index = [np.array_equal(sample, array) for array in samples.tolist()].index(True)
     chosen_bg_sample = samples[np.random.randint(len(samples))]
-    chosen_bg_sample_index, = [np.array_equal(chosen_bg_sample, array) for array in samples.tolist()].index(True)
+    chosen_bg_sample_index = [np.array_equal(chosen_bg_sample, array) for array in samples.tolist()].index(True)
     while chosen_bg_sample_index == sample_index or labels[sample_index] == label_to_avoid:
         chosen_bg_sample = samples[np.random.randint(len(samples))]
         chosen_bg_sample_index = [np.array_equal(chosen_bg_sample, array) for array in samples.tolist()].index(True)
