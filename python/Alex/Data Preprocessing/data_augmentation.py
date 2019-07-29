@@ -140,7 +140,7 @@ def add_background(sample, samples, labels, label_to_avoid):
 samples = np.array(samples)
 labels = np.array(labels)
 number_of_augmentations = 5
-augmented_samples = np.zeros((samples.shape[0] * (number_of_augmentations + 1), samples.shape[1]))
+augmented_samples = np.zeros((samples.shape[0] * (number_of_augmentations + 1), SAMPLE_RATE_PER_TWO_SECONDS))
 augmented_labels = np.zeros((labels.shape[0] * (number_of_augmentations + 1),))
 j = 0
 
