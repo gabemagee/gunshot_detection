@@ -151,7 +151,7 @@ for i in range (0, len(augmented_samples), (number_of_augmentations + 1)):
     augmented_samples[i + 3,:] = speed_change(samples[j,:])
     augmented_samples[i + 4,:] = change_volume(samples[j,:], np.random.uniform())
     
-    if labels[j] == 1:
+    if labels[j] == "gun_shot":
         augmented_samples[i + 5,:] = add_background(samples[j,:], samples, labels, "") 
     else:
         augmented_samples[i + 5,:] = add_background(samples[j,:], samples, labels, "gun_shot")
@@ -182,70 +182,6 @@ np.save(BASE_DIRECTORY + "augmented_" + DATA_CATEGORY + "_samples.npy", samples)
 np.save(BASE_DIRECTORY + "augmented_" + DATA_CATEGORY + "_labels.npy", labels)
 
 
-# ## Converting augmented samples to spectrograms
-
-# ### Defining spectrogram conversion functions
-
-# In[ ]:
-
-
-def convert_audio_to_spectrogram(data):
-    spectrogram = librosa.feature.melspectrogram(y=data, sr=SAMPLE_RATE_PER_TWO_SECONDS,
-                                                 hop_length=HOP_LENGTH,
-                                                 fmin=MINIMUM_FREQUENCY,
-                                                 fmax=MAXIMUM_FREQUENCY,
-                                                 n_mels=NUMBER_OF_MELS,
-                                                 n_fft=NUMBER_OF_FFTS)
-    spectrogram = librosa.power_to_db(spectrogram)
-    spectrogram = spectrogram.astype(np.float32)
-    return spectrogram
-
-
-def power_to_db(S, ref=1.0, amin=1e-10, top_db=80.0):
-    S = np.asarray(S)
-    if amin <= 0:
-        logger.debug("ParameterError: amin must be strictly positive")
-    if np.issubdtype(S.dtype, np.complexfloating):
-        logger.debug("Warning: power_to_db was called on complex input so phase information will be discarded.")
-        magnitude = np.abs(S)
-    else:
-        magnitude = S
-    if six.callable(ref):
-        # User supplied a function to calculate reference power
-        ref_value = ref(magnitude)
-    else:
-        ref_value = np.abs(ref)
-    log_spec = 10.0 * np.log10(np.maximum(amin, magnitude))
-    log_spec -= 10.0 * np.log10(np.maximum(amin, ref_value))
-    if top_db is not None:
-        if top_db < 0:
-            logger.debug("ParameterError: top_db must be non-negative")
-        log_spec = np.maximum(log_spec, log_spec.max() - top_db)
-    return log_spec
-
-
-# ### Iteratively converting all augmented samples into spectrograms
-
-# In[ ]:
-
-
-spectrograms = []
-
-for sample in samples:
-    spectrogram = convert_audio_to_spectrogram(sample)
-    spectrograms.append(spectrogram)
-    print("Converted a sample into a spectrogram...")
-
-
-# ## Saving spectrograms as a NumPy array
-
-# In[ ]:
-
-
-np.save(BASE_DIRECTORY + "augmented_" + DATA_CATEGORY + "_spectrograms.npy", samples)
-print("Successfully saved all spectrograms as a NumPy array...")
-
-
 # ### Debugging of the sample and label data's shape (optional)
 
 # In[ ]:
@@ -253,4 +189,3 @@ print("Successfully saved all spectrograms as a NumPy array...")
 
 print("Shape of samples array:", samples.shape)
 print("Shape of labels array:", labels.shape)
-
