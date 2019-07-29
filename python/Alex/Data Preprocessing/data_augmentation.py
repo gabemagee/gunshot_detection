@@ -74,7 +74,7 @@ DATA_CATEGORY = "testing"
 # In[ ]:
 
 
-samples = np.load(BASE_DIRECTORY + DATA_CATEGORY + "_samples.npy", allow_pickle = True)
+samples = np.load(BASE_DIRECTORY + DATA_CATEGORY + "_samples.npy")
 labels = np.load(BASE_DIRECTORY + DATA_CATEGORY +  "_labels.npy")
 
 
