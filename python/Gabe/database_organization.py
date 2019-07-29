@@ -94,16 +94,18 @@ for i in range(4):
 
         if len(sample) <= sample_rate_per_two_seconds:
             number_of_missing_hertz = sample_rate_per_two_seconds - len(sample)
-            padded_sample = np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)])
+            padded_sample = list(np.array(sample.tolist() + [0 for i in range(number_of_missing_hertz)]))
             samples_processed.append(padded_sample)
             labels_processed.append(label)
         else:
             for n in range(0, sample.size - sample_rate_per_two_seconds, sample_rate_per_two_seconds):
-                sample_slice = sample[n: n + sample_rate_per_two_seconds]
+                sample_slice = list(sample[n: n + sample_rate_per_two_seconds])
                 samples_processed.append(sample_slice)
-                samples_processed.append(label)
+                labels_processed.append(label)
 
     filename = base_dir+nombre[i]
-    np.save(filename+"_samples.npy",np.array(samples_processed))
+    samples_processed = np.array(samples_processed)
+    print(samples_processed.shape)
+    np.save(filename+"_samples.npy",samples_processed)
     np.save(filename+"_labels.npy",np.array(labels_processed))
     print("Finished parsing set of: ",nombre[i])
