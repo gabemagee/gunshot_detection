@@ -120,9 +120,7 @@ input_shape = (128, 87, 1)
 labels = np.array([("gun_shot" if label ==1.0 else "other") for label in labels])
 label_binarizer = LabelBinarizer()
 labels = label_binarizer.fit_transform(labels)
-labels = np.hstack((labels,1-labels))
-
-validation_label = np.array(labels)
+validation_label = np.hstack((labels,1-labels))
 
 print(validation_label.shape)
 print(validation_label)
@@ -186,7 +184,7 @@ bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'
 bar.start()
 bar.update(last)
 
-
+print(validation_label[:,0])
 
 for i in range(len(validation_wav)):
     temp = int(i*100/len(validation_wav))
