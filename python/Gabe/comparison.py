@@ -192,6 +192,7 @@ for i in range(len(validation_wav)):
         last = temp
         bar.update(last)
     x = validation_wav[i]
+    print(validation_label[:,0][i])
     y = label_binarizer.inverse_transform(validation_label[:,0][i])
 
 
