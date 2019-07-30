@@ -5,7 +5,7 @@ import numpy as np
 # libraries
 import matplotlib.pyplot as plt
 import numpy as np
-
+import csv
 
 
 
@@ -48,13 +48,53 @@ def audio_to_melspectrogram(audio):
     spectrogram = spectrogram.astype(np.float32)
     return spectrogram
 
-file = "../processing/Samples/120.wav"
-y,sr = librosa.load(file)
+csv_list = "../processing/labels.csv"
 
-spec_1 = make_spectrogram(y)
-spec_2 = audio_to_melspectrogram(y)
-plt.imshow(spec_2)
-plt.savefig("../spec_1.png")
-plt.close()
-plt.imshow(spec_1)
-plt.savefig("../spec_2.png")
+gun_shot_ids = []
+
+firework_ids = []
+
+other_ids = []
+
+jackhammer_ids = []
+
+with open(csv_list) as csvfile:
+    rows = csv.reader(csvfile)
+    for row in rows:
+        if row[0]=="ID":
+            pass
+        id = row[0]
+        label = row[1]
+        if label=="gun_shot":
+            gun_shot_ids.append(id)
+        if label=="jackhammer":
+            jackhammer_ids.append(id)
+        if label=="fireworks":
+            firework_ids.append(id)
+        else:
+            other_ids.append(id)
+
+def file_to_image(filename,class_name):
+    id = filename.split(".")[0]
+    y,sr = librosa.load(filename)
+    spec_1 = make_spectrogram(y)
+    spec_2 = audio_to_melspectrogram(y)
+
+    plt.imshow(spec_2)
+    plt.savefig("../processing/"+class_name+"_reg.png")
+    plt.close()
+
+    plt.imshow(spec_1)
+    plt.savefig("../processing/"+class_name+"_mel.png")
+    plt.close()
+
+
+nom = ["gunshot","fireworks","other","jackhammer"]
+lists = [gun_shot_ids, firework_ids,other_ids,jackhammer_ids]
+
+import random
+
+for i in range(4):
+    lst = lists[i]
+    file_path = "../processing/Samples/"+lst[random.randint(0,len(lst)-1)]+".wav"
+    file_to_image(file_path,nom[i])
