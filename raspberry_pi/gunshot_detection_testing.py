@@ -42,6 +42,7 @@ SAMPLE_DURATION = 2
 AUDIO_VOLUME_THRESHOLD = 0.01
 NOISE_REDUCTION_ENABLED = False
 MODEL_CONFIDENCE_THRESHOLD = 0.5
+HOP_LENGTH = 345
 MINIMUM_FREQUENCY = 20
 MAXIMUM_FREQUENCY = AUDIO_RATE // 2
 NUMBER_OF_MELS = 128
@@ -52,11 +53,17 @@ NETWORK_COVERAGE_TIMEOUT = 3600
 DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
 sound_data = np.zeros(0, dtype = "float32")
 noise_sample_captured = False
-noise_sample = []
 gunshot_sound_counter = 1
+gunshot_sound_counter_1 = 1
+gunshot_sound_counter_2 = 1
+noise_sample = []
 audio_analysis_queue = Queue()
 sms_alert_queue = Queue()
 
+# Only the two 2D model state variables may be set to true at the same time
+USING_1D_TIME_SERIES_MODEL = False
+USING_2D_64_SPECTROGRAM_MODEL = True
+USING_2D_128_SPECTROGRAM_MODEL = True
 
 # Loading in Augmented Labels #
 
@@ -262,9 +269,18 @@ def convert_audio_to_spectrogram(data):
 
 # Saves a two-second gunshot sample as a WAV file
 def create_gunshot_wav_file(microphone_data, index, timestamp, model_used = ""):
-    librosa.output.write_wav("/home/pi/Gunshot Detection System Recordings/Gunshot Sound Sample #"
-                            + str(index) + " ("
-                            + str(timestamp) + ").wav", microphone_data, 22050)
+    if model_used == "2D 64":
+        librosa.output.write_wav("/home/pi/Gunshot Detection System Recordings/128 x 64 Gunshot Sound Sample #"
+                                 + str(index) + " ("
+                                 + str(timestamp) + ").wav", microphone_data, 22050)
+    elif model_used == "2D 128":
+        librosa.output.write_wav("/home/pi/Gunshot Detection System Recordings/128 x 128 Gunshot Sound Sample #"
+                                 + str(index) + " ("
+                                 + str(timestamp) + ").wav", microphone_data, 22050)
+    else:
+        librosa.output.write_wav("/home/pi/Gunshot Detection System Recordings/Gunshot Sound Sample #"
+                                 + str(index) + " ("
+                                 + str(timestamp) + ").wav", microphone_data, 22050)
 
 
 # ### ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
@@ -282,18 +298,41 @@ def auc(y_true, y_pred):
 
 # In[ ]:
 
+
+if USING_1D_TIME_SERIES_MODEL:
+    # Loads 44100 x 1 Keras model from H5 file
+    model = keras.models.load_model("/home/pi/Datasets/RYAN_1D_model.h5", custom_objects = {"auc" : auc})
     
-# Loads 128 x 64 Keras model from H5 file
-model_1 = keras.models.load_model("/home/pi/Datasets/RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    # Sets the input shape for the model
+    input_shape = (1, 44100, 1)
 
-# Gets the input shape from the 128 x 64 Keras model
-input_shape_1 = (1, 128, 64, 1)
+elif USING_2D_64_SPECTROGRAM_MODEL and not USING_2D_128_SPECTROGRAM_MODEL:
+    # Loads 128 x 64 Keras model from H5 file
+    model = keras.models.load_model("/home/pi/Datasets/RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    
+    # Sets the input shape for the model
+    input_shape = (1, 128, 64, 1)
 
-# Loads 128 x 128 Keras model from H5 file
-model_2 = keras.models.load_model("/home/pi/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+elif USING_2D_128_SPECTROGRAM_MODEL and not USING_2D_64_SPECTROGRAM_MODEL:
+    # Loads 128 x 128 Keras model from H5 file
+    model = keras.models.load_model("/home/pi/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    
+    # Sets the input shape for the model
+    input_shape = (1, 128, 128, 1)
 
-# Gets the input shape from the 128 x 128 Keras model
-input_shape_2 = (1, 128, 128, 1)
+elif USING_2D_64_SPECTROGRAM_MODEL and USING_2D_128_SPECTROGRAM_MODEL:
+
+    # Loads 128 x 64 Keras model from H5 file
+    model_1 = keras.models.load_model("/home/pi/Datasets/RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+
+    # Gets the input shape from the 128 x 64 Keras model
+    input_shape_1 = (1, 128, 64, 1)
+
+    # Loads 128 x 128 Keras model from H5 file
+    model_2 = keras.models.load_model("/home/pi/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+
+    # Gets the input shape from the 128 x 128 Keras model
+    input_shape_2 = (1, 128, 128, 1)
 
 
 ### --- ###
@@ -417,30 +456,97 @@ while True:
         modified_microphone_data = modified_microphone_data[:44100]
 
         # Passes an audio sample of an appropriate format into the model for inference
-        HOP_LENGTH = 345 * 2
-        processed_data_1 = convert_audio_to_spectrogram(data = modified_microphone_data)
-        processed_data_1 = processed_data_1.reshape(input_shape_1)
+        if USING_1D_TIME_SERIES_MODEL:
+            processed_data = modified_microphone_data
+
+        elif USING_2D_64_SPECTROGRAM_MODEL and not USING_2D_128_SPECTROGRAM_MODEL:
+            HOP_LENGTH = 345 * 2
+            processed_data = convert_audio_to_spectrogram(data = modified_microphone_data)
+
+        elif USING_2D_128_SPECTROGRAM_MODEL and not USING_2D_64_SPECTROGRAM_MODEL:
+            HOP_LENGTH = 345
+            processed_data = convert_audio_to_spectrogram(data = modified_microphone_data)
+
+        elif USING_2D_64_SPECTROGRAM_MODEL and USING_2D_128_SPECTROGRAM_MODEL:
+            HOP_LENGTH = 345 * 2
+            processed_data_1 = convert_audio_to_spectrogram(data = modified_microphone_data)
+            processed_data_1 = processed_data_1.reshape(input_shape_1)
             
-        HOP_LENGTH = 345
-        processed_data_2 = convert_audio_to_spectrogram(data = modified_microphone_data)
-        processed_data_2 = processed_data_2.reshape(input_shape_2)
+            HOP_LENGTH = 345
+            processed_data_2 = convert_audio_to_spectrogram(data = modified_microphone_data)
+            processed_data_2 = processed_data_2.reshape(input_shape_2)
 
-        # Performs inference with the given Keras models
-        probabilities_1 = model_1.predict(processed_data_1)
-        probabilities_2 = model_2.predict(processed_data_2)
-        logger.debug("The 128 x 64 model-predicted probability values: " + str(probabilities_1[0]))
-        logger.debug("The 128 x 128 model-predicted probability values: " + str(probabilities_2[0]))
-        logger.debug("The 128 x 64 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_1[:, 0])[0])
-        logger.debug("The 128 x 128 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_2[:, 0])[0])
+            # Performs inference with the given Keras models
+            probabilities_1 = model_1.predict(processed_data_1)
+            probabilities_2 = model_2.predict(processed_data_2)
+            logger.debug("The 128 x 64 model-predicted probability values: " + str(probabilities_1[0]))
+            logger.debug("The 128 x 128 model-predicted probability values: " + str(probabilities_2[0]))
+            logger.debug("The 128 x 64 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_1[:, 0])[0])
+            logger.debug("The 128 x 128 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_2[:, 0])[0])
 
-        # Determines if a gunshot sound was detected by both models
-        if probabilities_1[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_2[0][1] >= MODEL_CONFIDENCE_THRESHOLD:
+            # Determines if a gunshot sound was detected by the 128 x 64 model
+            if probabilities_1[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_2[0][1] < MODEL_CONFIDENCE_THRESHOLD:
+                # Sends out an SMS alert
+                sms_alert_queue.put("Gunshot Detected")
+
+                # Sends out the time a given sample was heard
+                sms_alert_queue.put(time_of_sample_occurrence)
+
+                # Makes a WAV file of the gunshot sample
+                create_gunshot_wav_file(modified_microphone_data, gunshot_sound_counter_1,
+                                        time_of_sample_occurrence, model_used = "2D 64")
+
+                # Increments the counter for gunshot sound file names
+                gunshot_sound_counter_1 += 1
+                
+            # Determines if a gunshot sound was detected by the 128 x 128 model
+            elif probabilities_2[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_1[0][1] < MODEL_CONFIDENCE_THRESHOLD:
+                # Sends out an SMS alert
+                sms_alert_queue.put("Gunshot Detected")
+
+                # Sends out the time a given sample was heard
+                sms_alert_queue.put(time_of_sample_occurrence)
+
+                # Makes a WAV file of the gunshot sample
+                create_gunshot_wav_file(modified_microphone_data, gunshot_sound_counter_2,
+                                        time_of_sample_occurrence, model_used = "2D 128")
+
+                # Increments the counter for gunshot sound file names
+                gunshot_sound_counter_2 += 1
+
+            # Determines if a gunshot sound was detected by both models
+            elif probabilities_1[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_2[0][1] >= MODEL_CONFIDENCE_THRESHOLD:
+                # Sends out an SMS alert
+                sms_alert_queue.put("Gunshot Detected")
+
+                # Sends out the time a given sample was heard
+                sms_alert_queue.put(time_of_sample_occurrence)
+
+                # Makes a WAV file of the gunshot sample
+                create_gunshot_wav_file(modified_microphone_data, gunshot_sound_counter, time_of_sample_occurrence)
+
+                # Increments the counter for gunshot sound file names
+                gunshot_sound_counter += 1
+        
+            # Jumps to the next iteration of the while-loop.
+            continue
+
+        # Reshapes the modified microphone data accordingly
+        processed_data = processed_data.reshape(input_shape)
+        
+        # Performs inference with a given Keras model
+        probabilities = model.predict(processed_data)
+        logger.debug("The model-predicted probability values: " + str(probabilities[0]))
+        logger.debug("Model-predicted sample class: " + label_binarizer.inverse_transform(probabilities[:, 0])[0])
+
+        # Determines if a gunshot sound was detected by the model
+        if probabilities[0][1] >= MODEL_CONFIDENCE_THRESHOLD:
             # Sends out an SMS alert
             sms_alert_queue.put("Gunshot Detected")
-
+            
             # Sends out the time a given sample was heard
             sms_alert_queue.put(time_of_sample_occurrence)
-
+            
             # Makes a WAV file of the gunshot sample
             create_gunshot_wav_file(modified_microphone_data, gunshot_sound_counter, time_of_sample_occurrence)
 
