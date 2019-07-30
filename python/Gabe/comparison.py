@@ -27,6 +27,7 @@ from texttable import Texttable
 
 name_dict = {}
 model_list = []
+model_dict = {}
 
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
@@ -74,6 +75,7 @@ def prep_model(file_path):
     model = load_model(file_path,custom_objects={"auc":auc})
     name_dict[model] = file_path.split("/")[-1].split(".")[0]
     model_list.append(model)
+    model_dict[name_dict[model]] = model
 
 def IOU(true_pos,true_neg,false_pos,false_neg):
     denom = true_pos+false_pos+false_neg
@@ -133,7 +135,7 @@ for model_filename in os.listdir(models_dir):
 
 to_append = []
 for model_1 in model_list[:2]:
-    for model_2 in model_list[1:]:
+    for model_2 in model_list[2:]:
         model_1_name = name_dict[model_1]
         model_2_name = name_dict[model_2]
         and_model_name = model_1_name+"_and_"+model_2_name
@@ -144,18 +146,21 @@ for model_1 in model_list[:2]:
         to_append.append(or_model)
         name_dict[and_model] = and_model_name
         name_dict[or_model] = or_model_name
+        model_dict[and_model_name] = and_model
+        model_dict[or_model_name] = or_model
 
 model_list.extend(to_append)
 
 
 majority = tf.keras.Model()
 name_dict[majority] = "majority"
+model_dict["majority"] = majority
 model_list.append(majority)
 
 for mdl in model_list:
     print(name_dict[mdl])
 
-exit()
+
 
 model_scores = {}
 for model in model_list:
@@ -173,12 +178,12 @@ name_dict[recall] = "recall"
 name_dict[f1_score] = "f1_score"
 name[IOU] = "IOU"
 
-
-
 last = 0
 bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
 bar.start()
 bar.update(last)
+
+
 
 for i in range(len(validation_wav)):
     temp = int(i*100/len(validation_wav))
@@ -191,21 +196,21 @@ for i in range(len(validation_wav)):
 
     # 1D
     x_1 = x.reshape((-1, 44100, 1))
-    model = name_dict[""]
+    model = name_dict["1_dimensional"]
     output = model.predict(x_1)[:,0][0]
     output_1 = label_binarizer.inverse_transform(output)
     update_counts(y,output_1,model,model_scores)
 
     # 128x128
     x_1 = audio_to_melspectrogram(x,hop_length=345).reshape((-1,128,128,1))
-    model = ""
+    model = name_dict["128_x_128"]
     output = model.predict(x_1)[:,0][0]
     output_2 = label_binarizer.inverse_transform(output)
     update_counts(y,output_2,model,model_scores)
 
     # 128x64
     x_1 = audio_to_melspectrogram(x).reshape((-1,128,64,1))
-    model = ""
+    model = name_dict["128_x_64"]
     output = model.predict(x_1)[:,0][0]
     output_3 = label_binarizer.inverse_transform(output)
     update_counts(y,output_3,model,model_scores)
@@ -213,7 +218,7 @@ for i in range(len(validation_wav)):
 
     #OR
     #1 2
-    model = ""
+    model = model_dict["128_x_128_or_1_dimensional"]
     if (output_1 =="gun_shot" or output_2 =="gun_shot"):
         output = "gun_shot"
     else:
@@ -221,7 +226,7 @@ for i in range(len(validation_wav)):
     update_counts(y,output,model,model_scores)
 
     #1 3
-    model = ""
+    model = model_dict["128_x_64_or_1_dimensional"]
     if (output_1 =="gun_shot" or output_3 =="gun_shot"):
         output = "gun_shot"
     else:
@@ -229,7 +234,7 @@ for i in range(len(validation_wav)):
     update_counts(y,output,model,model_scores)
 
     #2 3
-    model = ""
+    model = model_dict["128_x_64_or_128_x_128"]
     if (output_2 =="gun_shot" or output_3 =="gun_shot"):
         output = "gun_shot"
     else:
@@ -239,7 +244,7 @@ for i in range(len(validation_wav)):
     #AND
 
     #1 2
-    model = ""
+    model = model_dict["128_x_128_and_1_dimensional"]
     if (output_1 =="gun_shot" and output_2 =="gun_shot"):
         output = "gun_shot"
     else:
@@ -247,7 +252,7 @@ for i in range(len(validation_wav)):
     update_counts(y,output,model,model_scores)
 
     #1 3
-    model = ""
+    model = model_dict["128_x_64_and_1_dimensional"]
     if (output_1 =="gun_shot" and output_3 =="gun_shot"):
         output = "gun_shot"
     else:
@@ -255,7 +260,7 @@ for i in range(len(validation_wav)):
     update_counts(y,output,model,model_scores)
 
     #2 3
-    model = ""
+    model = model_dict["128_x_64_and_128_x_128"]
     if (output_2 =="gun_shot" and output_3 =="gun_shot"):
         output = "gun_shot"
     else:
@@ -264,7 +269,7 @@ for i in range(len(validation_wav)):
 
 
     #MAJORITY
-    model = ""
+    model = model_dict["majority"]
     sum = 0
     for boolean_expression in [output_1,output_2,output_3]:
         if boolean_expression=="gunshot":
