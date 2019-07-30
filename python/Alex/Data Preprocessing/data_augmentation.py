@@ -63,7 +63,7 @@ MINIMUM_FREQUENCY = 20
 MAXIMUM_FREQUENCY = SAMPLE_RATE_PER_SECOND
 NUMBER_OF_MELS = 128
 NUMBER_OF_FFTS = NUMBER_OF_MELS * 20
-BASE_DIRECTORY = "/home/amorehe/Datasets/"
+BASE_DIRECTORY = "/home/alexm/Datasets/"
 DATA_CATEGORY = "training"
 
 
@@ -119,7 +119,7 @@ def add_background(sample, samples, labels, label_to_avoid):
     sample_index = np.where(samples == sample)[0][0]
     chosen_bg_sample = samples[np.random.randint(len(samples))]
     chosen_bg_sample_index = np.where(samples == chosen_bg_sample)[0][0]
-    while chosen_bg_sample_index == sample_index or labels[sample_index] == label_to_avoid:
+    while chosen_bg_sample_index == sample_index or labels[chosen_bg_sample_index] == label_to_avoid:
         print("Choosing another background sample...")
         chosen_bg_sample = samples[np.random.randint(len(samples))]
         chosen_bg_sample_index = np.where(samples == chosen_bg_sample)[0][0]
