@@ -65,7 +65,7 @@ labels = np.load("/home/alexm/Datasets/all_labels.npy")
 
 # Binarizing Labels #
 
-labels = np.array([("gun_shot" if label == 1 else "other") for label in labels])
+labels = np.array([("gun_shot" if label == "gun_shot" else "other") for label in labels])
 label_binarizer = LabelBinarizer()
 labels = label_binarizer.fit_transform(labels)
 labels = np.hstack((labels, 1 - labels))
