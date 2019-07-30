@@ -7,6 +7,7 @@ import pyaudio
 import librosa
 import logging
 import time
+import schedule
 import scipy.signal
 import numpy as np
 import tensorflow as tf
@@ -50,6 +51,7 @@ SMS_ALERTS_ENABLED = True
 ALERT_MESSAGE = "ALERT: A Gunshot Was Detected on "
 NETWORK_COVERAGE_TIMEOUT = 3600
 DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
+SCHEDULED_LOG_FILE_TRUNCATION_TIME = "00:00"
 sound_data = np.zeros(0, dtype = "float32")
 noise_sample_captured = False
 noise_sample = []
@@ -266,11 +268,15 @@ def create_gunshot_wav_file(microphone_data, index, timestamp, model_used = ""):
                             + str(index) + " ("
                             + str(timestamp) + ").wav", microphone_data, 22050)
 
+    
+# Log File Truncation Function #
+        
+def clear_log_file():
+    with open("output.log", 'w'):
+        pass
 
-# ### ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
 
-# In[ ]:
-
+# ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K" #
 
 def auc(y_true, y_pred):
     auc = tf.metrics.auc(y_true, y_pred)[1]
@@ -278,13 +284,10 @@ def auc(y_true, y_pred):
     return auc
 
 
-# ## Loading the Models
-
-# In[ ]:
-
+# Loading the Models #
     
 # Loads 128 x 64 Keras model from H5 file
-model_1 = keras.models.load_model("/home/pi/Datasets/RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+model_1 = keras.models.load_model("/home/pi/Datasets/128_64_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
 # Gets the input shape from the 128 x 64 Keras model
 input_shape_1 = (1, 128, 64, 1)
@@ -389,8 +392,14 @@ logger.debug("--- Listening to Audio Stream ---")
 
 ### Main (Audio Analysis) Thread
 
+# Starts the scheduler for clearing the primary log file
+schedule.every().day.at(SCHEDULED_LOG_FILE_TRUNCATION_TIME).do(clear_log_file)
+
 # This thread will run indefinitely
 while True:
+    # Refreshes the scheduler
+    schedule.run_pending()
+    
     # Gets a sample and its timestamp from the audio analysis queue
     microphone_data = np.array(audio_analysis_queue.get(), dtype = "float32")
     time_of_sample_occurrence = audio_analysis_queue.get()
