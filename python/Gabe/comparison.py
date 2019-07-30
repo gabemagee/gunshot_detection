@@ -129,6 +129,8 @@ validation_label = np.hstack((labels,1-labels))
 
 print(validation_label.shape)
 print(validation_label)
+for mdl in model_list:
+    print(name_dict[mdl])
 
 print("Finished loading data. Loading Models.")
 
@@ -140,20 +142,24 @@ for model_filename in os.listdir(models_dir):
     prep_model(models_dir+model_filename)
 
 to_append = []
-for model_1 in model_list[:2]:
-    for model_2 in model_list[2:]:
-        model_1_name = name_dict[model_1]
-        model_2_name = name_dict[model_2]
-        and_model_name = model_1_name+"_and_"+model_2_name
-        or_model_name = model_1_name+"_or_"+model_2_name
-        and_model = tf.keras.Model()
-        or_model = tf.keras.Model()
-        to_append.append(and_model)
-        to_append.append(or_model)
-        name_dict[and_model] = and_model_name
-        name_dict[or_model] = or_model_name
-        model_dict[and_model_name] = and_model
-        model_dict[or_model_name] = or_model
+
+
+from itertools import combinations 
+
+for model_1,model_2 in combinations(model_list, 2) :
+    model_1_name = name_dict[model_1]
+    model_2_name = name_dict[model_2]
+    and_model_name = model_1_name+"_and_"+model_2_name
+    or_model_name = model_1_name+"_or_"+model_2_name
+    and_model = tf.keras.Model()
+    or_model = tf.keras.Model()
+    to_append.append(and_model)
+    to_append.append(or_model)
+    name_dict[and_model] = and_model_name
+    name_dict[or_model] = or_model_name
+    model_dict[and_model_name] = and_model
+    model_dict[or_model_name] = or_model
+
 
 model_list.extend(to_append)
 
@@ -197,7 +203,6 @@ for i in range(len(validation_wav)):
         last = temp
         bar.update(last)
     x = validation_wav[i]
-    print(validation_label[:,0][i])
     y = label_binarizer.inverse_transform(validation_label[:,0][i])
 
 
