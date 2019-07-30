@@ -203,21 +203,21 @@ for i in range(len(validation_wav)):
 
     # 1D
     x_1 = x.reshape((-1, 44100, 1))
-    model = name_dict["1_dimensional"]
+    model = model_dict["1_dimensional"]
     output = model.predict(x_1)[:,0][0]
     output_1 = label_binarizer.inverse_transform(output)
     update_counts(y,output_1,model,model_scores)
 
     # 128x128
     x_1 = audio_to_melspectrogram(x,hop_length=345).reshape((-1,128,128,1))
-    model = name_dict["128_x_128"]
+    model = model_dict["128_x_128"]
     output = model.predict(x_1)[:,0][0]
     output_2 = label_binarizer.inverse_transform(output)
     update_counts(y,output_2,model,model_scores)
 
     # 128x64
     x_1 = audio_to_melspectrogram(x).reshape((-1,128,64,1))
-    model = name_dict["128_x_64"]
+    model = model_dict["128_x_64"]
     output = model.predict(x_1)[:,0][0]
     output_3 = label_binarizer.inverse_transform(output)
     update_counts(y,output_3,model,model_scores)
