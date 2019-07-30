@@ -120,6 +120,7 @@ def add_background(sample, samples, labels, label_to_avoid):
     chosen_bg_sample = samples[np.random.randint(len(samples))]
     chosen_bg_sample_index = np.where(samples == chosen_bg_sample)[0][0]
     while chosen_bg_sample_index == sample_index or labels[sample_index] == label_to_avoid:
+        print("Choosing another background sample...")
         chosen_bg_sample = samples[np.random.randint(len(samples))]
         chosen_bg_sample_index = np.where(samples == chosen_bg_sample)[0][0]
     ceil = max((chosen_bg_sample.shape[0] - sample.shape[0]), 1)
