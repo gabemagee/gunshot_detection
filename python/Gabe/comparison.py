@@ -124,6 +124,9 @@ labels = np.hstack((labels,1-labels))
 
 validation_label = np.array(labels)
 
+print(validation_label.shape)
+print(validation_label)
+
 print("Finished loading data. Loading Models.")
 
 
