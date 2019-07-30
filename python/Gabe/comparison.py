@@ -71,7 +71,7 @@ def f1_score(true_pos,true_neg,false_pos,false_neg):
     return 2*(rc * pr) / (rc + pr)
 
 def prep_model(file_path):
-    model = load_model(file_path)
+    model = load_model(file_path,custom_objects={"auc":auc})
     name_dict[model] = file_path.split("/")[-1].split(".")[0]
     model_list.append(model)
 
