@@ -122,7 +122,7 @@ label_binarizer = LabelBinarizer()
 labels = label_binarizer.fit_transform(labels)
 labels = np.hstack((labels,1-labels))
 
-validation_labels = np.array(labels)
+validation_label = np.array(labels)
 
 print("Finished loading data. Loading Models.")
 
