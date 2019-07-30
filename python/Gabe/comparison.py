@@ -117,7 +117,7 @@ sr = 22050
 input_shape = (128, 87, 1)
 
 
-labels = np.array([("gun_shot" if label ==1.0 else "other") for label in labels])
+labels = np.array([("gun_shot" if label =="gun_shot" else "other") for label in labels])
 label_binarizer = LabelBinarizer()
 labels = label_binarizer.fit_transform(labels)
 validation_label = np.hstack((labels,1-labels))
