@@ -144,7 +144,7 @@ for model_filename in os.listdir(models_dir):
 to_append = []
 
 
-from itertools import combinations 
+from itertools import combinations
 
 for model_1,model_2 in combinations(model_list, 2) :
     model_1_name = name_dict[model_1]
@@ -295,6 +295,11 @@ for i in range(len(validation_wav)):
 
 
 bar.finish()
+
+for model in model_list:
+    print(model,model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"])
+
+
 
 t = Texttable()
 table = []
