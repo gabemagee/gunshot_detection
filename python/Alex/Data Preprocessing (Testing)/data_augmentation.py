@@ -185,4 +185,4 @@ np.save(BASE_DIRECTORY + "augmented_" + DATA_CATEGORY + "_labels.npy", labels)
 
 
 print("Shape of samples array:", samples.shape)
-print("Shape of labels array:", labels.shape)
+print("Length of labels list:", len(labels))
