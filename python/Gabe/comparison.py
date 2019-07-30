@@ -170,13 +170,13 @@ for model in model_list:
 
 print("loaded models")
 
-metrics = [accuracy,precision,recall,f1_score]
+metrics = [accuracy,precision,recall,f1_score,IOU]
 
 name_dict[accuracy] = "accuracy"
 name_dict[precision] = "precision"
 name_dict[recall] = "recall"
 name_dict[f1_score] = "f1_score"
-name[IOU] = "IOU"
+name_dict[IOU] = "IOU"
 
 last = 0
 bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
