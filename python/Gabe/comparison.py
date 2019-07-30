@@ -109,6 +109,7 @@ print("Available gpus:",get_available_gpus(),". Loading Data.")
 data_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/ryan_model/data/"
 validation_wav = np.array(data_dir+"augmented_validation_samples.npy")
 labels = np.array(data_dir+"augmented_validation_labels.npy")
+print(labels)
 print(labels.shape)
 sample_rate_per_two_seconds = 44100
 number_of_classes = 2
