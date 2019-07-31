@@ -130,7 +130,7 @@ validation_label = np.hstack((labels,1-labels))
 print("Finished loading data. Loading Models.")
 
 for model_filename in os.listdir(tflite_models_dir):
-    interpreter = tf.contrib.lite.Interpreter(model_path=tflite_models_dir+model_filename)
+    interpreter = tf.lite.Interpreter(model_path=tflite_models_dir+model_filename)
     interpreter.allocate_tensors()
     model_list.append(interpreter)
     model_dict[model_filename.split(".")[0]] = interpreter
