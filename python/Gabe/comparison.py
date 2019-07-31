@@ -11,23 +11,34 @@ import keras
 import librosa
 import progressbar
 import pickle
-from keras.models import Sequential
+import sklearn
+
 from keras.layers import Conv1D, Conv2D, MaxPooling2D, GlobalAveragePooling1D, MaxPooling1D, Dense, Dropout, Activation, Flatten
-from keras import optimizers
-from keras.optimizers import Adam, SGD
 from sklearn import metrics
 from sklearn.preprocessing import LabelBinarizer
+from texttable import Texttable
+from itertools import combinations
 from tensorflow.python.client import device_lib
 from tensorflow.keras import Input, layers, optimizers, backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Dropout
-from texttable import Texttable
 
 
+model_list = []
+to_append = []
 
 name_dict = {}
-model_list = []
 model_dict = {}
+model_scores = {}
+
+sample_rate_per_two_seconds = 44100
+number_of_classes = 2
+sr = 22050
+
+data_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/ryan_model/data/"
+models_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/ryan_model/models/"
+
+
 
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
@@ -84,7 +95,6 @@ def IOU(true_pos,true_neg,false_pos,false_neg):
 
 
 def update_counts(y,output,model,model_scores):
-    #print(name_dict[model],model_scores[model])
     if y[0]=="gun_shot" and output[0]=="gun_shot":
         model_scores[model]["true_pos"] = model_scores[model]["true_pos"]+1
     elif y[0]=="gun_shot" and output[0]!="gun_shot":
@@ -97,54 +107,33 @@ def update_counts(y,output,model,model_scores):
 def tflite_predict(interpreter,input_data):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
-    #print(input_data.shape)
     input_data = np.array(input_data,dtype=np.float32)
     interpreter.set_tensor(input_details[0]['index'], input_data)
     interpreter.invoke()
     output_data = interpreter.get_tensor(output_details[0]['index'])
     return output_data
 
-print("Available gpus:",get_available_gpus(),". Loading Data.")
+#print("Available gpus:",get_available_gpus(),". Loading Data.")
 
 
 
-data_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/ryan_model/data/"
 validation_wav = np.load(data_dir+"augmented_validation_samples.npy")
 labels = np.load(data_dir+"augmented_validation_labels.npy")
-sample_rate_per_two_seconds = 44100
-number_of_classes = 2
-sr = 22050
-input_shape = (128, 87, 1)
 
-print(labels)
-
-print("----")
 labels = np.array([("gun_shot" if label =="gun_shot" else "other") for label in labels])
-
-print(labels)
 
 label_binarizer = LabelBinarizer()
 labels = label_binarizer.fit_transform(labels)
 validation_label = np.hstack((labels,1-labels))
 
-print(validation_label.shape)
-print(validation_label)
-for mdl in model_list:
-    print(name_dict[mdl])
-
 print("Finished loading data. Loading Models.")
 
 
 
-models_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/ryan_model/models/"
+
 
 for model_filename in os.listdir(models_dir):
     prep_model(models_dir+model_filename)
-
-to_append = []
-
-
-from itertools import combinations
 
 for model_1,model_2 in combinations(model_list, 2) :
     model_1_name = name_dict[model_1]
@@ -159,8 +148,6 @@ for model_1,model_2 in combinations(model_list, 2) :
     name_dict[or_model] = or_model_name
     model_dict[and_model_name] = and_model
     model_dict[or_model_name] = or_model
-
-
 model_list.extend(to_append)
 
 
@@ -169,12 +156,7 @@ name_dict[majority] = "majority"
 model_dict["majority"] = majority
 model_list.append(majority)
 
-for mdl in model_list:
-    print(name_dict[mdl])
 
-
-
-model_scores = {}
 for model in model_list:
     model_scores[model] = {}
     for fig in ["true_pos","true_neg","false_pos","false_neg"]:
@@ -312,7 +294,7 @@ for i in range(len(validation_wav)):
 
 bar.finish()
 
-import sklearn
+
 
 for model in model_list:
     print(model,model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"])

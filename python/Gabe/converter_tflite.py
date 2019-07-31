@@ -8,16 +8,11 @@ def auc(y_true, y_pred):
     return auc
 
 
-saved_model_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/spectrogram_training/models/"
-model = saved_model_dir+"spectrogram_gunshot_model_1.h5"
-converter = tf.lite.TFLiteConverter.from_keras_model_file(model)
-#converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_dir)
-tflite_model = converter.convert()
-open(saved_model_dir+"spectrogram_gunshot_model_1.tflite", "wb").write(tflite_model)
-print("done 1")
+saved_model_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/ryan_model/tflite_models/"
+model_directory = "/home/gamagee/workspace/gunshot_detection/REU_Data/ryan_model/models/"
 
-model = saved_model_dir+"gunshot_sound_model_1d.h5"
-converter = tf.lite.TFLiteConverter.from_keras_model_file(model,custom_objects={"auc":auc})
-#converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_dir)
-tflite_model = converter.convert()
-open(saved_model_dir+"gunshot_sound_model_1d.tflite", "wb").write(tflite_model)
+
+for model_filename in os.listdir(model_directory):
+    converter = tf.lite.TFLiteConverter.from_keras_model_file(model_directory+model_filename,custom_objects={"auc":auc})
+    tflite_model = converter.convert()
+    open(saved_model_dir+model_filename.split(".")[0]+".tflite", "wb").write(tflite_model)
