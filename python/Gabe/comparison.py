@@ -141,8 +141,7 @@ for model_filename in os.listdir(tflite_models_dir):
 for model_filename in os.listdir(models_dir):
     prep_model(models_dir+model_filename)
 """
-for model in model_list:
-    print(name_dict[model])
+
 
 #for combinations of different models
 for model_1,model_2 in combinations(model_list, 2) :
@@ -166,6 +165,8 @@ name_dict[majority] = "majority"
 model_dict["majority"] = majority
 model_list.append(majority)
 
+for model in model_list:
+    print(name_dict[model])
 
 for model in model_list:
     model_scores[model] = {}
