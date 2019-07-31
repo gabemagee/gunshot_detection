@@ -37,7 +37,7 @@ logger.addHandler(ch)
 AUDIO_FORMAT = pyaudio.paFloat32
 AUDIO_RATE = 44100
 NUMBER_OF_AUDIO_CHANNELS = 1
-AUDIO_DEVICE_INDEX = 1
+AUDIO_DEVICE_INDEX = 6
 NUMBER_OF_FRAMES_PER_BUFFER = 4410
 SAMPLE_DURATION = 2
 AUDIO_VOLUME_THRESHOLD = 0.01
@@ -48,7 +48,7 @@ MINIMUM_FREQUENCY = 20
 MAXIMUM_FREQUENCY = AUDIO_RATE // 2
 NUMBER_OF_MELS = 128
 NUMBER_OF_FFTS = NUMBER_OF_MELS * 20
-SMS_ALERTS_ENABLED = True
+SMS_ALERTS_ENABLED = False
 ALERT_MESSAGE = "ALERT: A Gunshot Was Detected on "
 NETWORK_COVERAGE_TIMEOUT = 3600
 DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
@@ -69,7 +69,7 @@ USING_2D_128_SPECTROGRAM_MODEL = True
 
 # Loading in Augmented Labels #
 
-labels = np.load("/home/pi/Datasets/all_labels.npy")
+labels = np.load("/home/alexm/Datasets/all_labels.npy")
 
 
 # Binarizing Labels #
@@ -272,15 +272,15 @@ def convert_audio_to_spectrogram(data):
 # Saves a two-second gunshot sample as a WAV file
 def create_gunshot_wav_file(microphone_data, index, timestamp, model_used = ""):
     if model_used == "2D 64":
-        librosa.output.write_wav("/home/pi/Gunshot Detection System Recordings/128 x 64 Gunshot Sound Sample #"
+        librosa.output.write_wav("/home/alexm/Gunshot Detection System Recordings/128 x 64 Gunshot Sound Sample #"
                                  + str(index) + " ("
                                  + str(timestamp) + ").wav", microphone_data, 22050)
     elif model_used == "2D 128":
-        librosa.output.write_wav("/home/pi/Gunshot Detection System Recordings/128 x 128 Gunshot Sound Sample #"
+        librosa.output.write_wav("/home/alexm/Gunshot Detection System Recordings/128 x 128 Gunshot Sound Sample #"
                                  + str(index) + " ("
                                  + str(timestamp) + ").wav", microphone_data, 22050)
     else:
-        librosa.output.write_wav("/home/pi/Gunshot Detection System Recordings/Gunshot Sound Sample #"
+        librosa.output.write_wav("/home/alexm/Gunshot Detection System Recordings/Gunshot Sound Sample #"
                                  + str(index) + " ("
                                  + str(timestamp) + ").wav", microphone_data, 22050)
 
@@ -304,21 +304,21 @@ def auc(y_true, y_pred):
 
 if USING_1D_TIME_SERIES_MODEL:
     # Loads 44100 x 1 Keras model from H5 file
-    model = keras.models.load_model("/home/pi/Datasets/RYAN_1D_model.h5", custom_objects = {"auc" : auc})
+    model = keras.models.load_model("/home/alexm/Datasets/RYAN_1D_model.h5", custom_objects = {"auc" : auc})
     
     # Sets the input shape for the model
     input_shape = (1, 44100, 1)
 
 elif USING_2D_64_SPECTROGRAM_MODEL and not USING_2D_128_SPECTROGRAM_MODEL:
     # Loads 128 x 64 Keras model from H5 file
-    model = keras.models.load_model("/home/pi/Datasets/128_64_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    model = keras.models.load_model("/home/alexm/Datasets/128_64_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
     
     # Sets the input shape for the model
     input_shape = (1, 128, 64, 1)
 
 elif USING_2D_128_SPECTROGRAM_MODEL and not USING_2D_64_SPECTROGRAM_MODEL:
     # Loads 128 x 128 Keras model from H5 file
-    model = keras.models.load_model("/home/pi/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    model = keras.models.load_model("/home/alexm/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
     
     # Sets the input shape for the model
     input_shape = (1, 128, 128, 1)
@@ -326,13 +326,13 @@ elif USING_2D_128_SPECTROGRAM_MODEL and not USING_2D_64_SPECTROGRAM_MODEL:
 elif USING_2D_64_SPECTROGRAM_MODEL and USING_2D_128_SPECTROGRAM_MODEL:
 
     # Loads 128 x 64 Keras model from H5 file
-    model_1 = keras.models.load_model("/home/pi/Datasets/128_64_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    model_1 = keras.models.load_model("/home/alexm/Datasets/128_64_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
     # Gets the input shape from the 128 x 64 Keras model
     input_shape_1 = (1, 128, 64, 1)
 
     # Loads 128 x 128 Keras model from H5 file
-    model_2 = keras.models.load_model("/home/pi/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+    model_2 = keras.models.load_model("/home/alexm/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
     # Gets the input shape from the 128 x 128 Keras model
     input_shape_2 = (1, 128, 128, 1)

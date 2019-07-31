@@ -54,8 +54,8 @@ DESIGNATED_ALERT_RECIPIENTS = ["8163449956", "9176202840", "7857642331"]
 SCHEDULED_LOG_FILE_TRUNCATION_TIME = "00:00"
 sound_data = np.zeros(0, dtype = "float32")
 noise_sample_captured = False
-noise_sample = []
 gunshot_sound_counter = 1
+noise_sample = []
 audio_analysis_queue = Queue()
 sms_alert_queue = Queue()
 
@@ -263,7 +263,7 @@ def convert_audio_to_spectrogram(data):
 # WAV File Composition Function #
 
 # Saves a two-second gunshot sample as a WAV file
-def create_gunshot_wav_file(microphone_data, index, timestamp, model_used = ""):
+def create_gunshot_wav_file(microphone_data, index, timestamp):
     librosa.output.write_wav("/home/alexm/Gunshot Detection System Recordings/Gunshot Sound Sample #"
                             + str(index) + " ("
                             + str(timestamp) + ").wav", microphone_data, 22050)
@@ -292,17 +292,23 @@ def auc(y_true, y_pred):
 # In[ ]:
 
     
+# Loads 44100 x 1 Keras model from H5 file
+model_1 = keras.models.load_model("/home/alexm/Datasets/RYAN_1D_model.h5", custom_objects = {"auc" : auc})
+    
+# Sets the input shape for the 44100 x 1 model
+input_shape_1 = (1, 44100, 1)
+
 # Loads 128 x 64 Keras model from H5 file
-model_1 = keras.models.load_model("/home/alexm/Datasets/128_64_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+model_2 = keras.models.load_model("/home/alexm/Datasets/128_64_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
 # Gets the input shape from the 128 x 64 Keras model
-input_shape_1 = (1, 128, 64, 1)
+input_shape_2 = (1, 128, 64, 1)
 
 # Loads 128 x 128 Keras model from H5 file
-model_2 = keras.models.load_model("/home/alexm/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+model_3 = keras.models.load_model("/home/alexm/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
 # Gets the input shape from the 128 x 128 Keras model
-input_shape_2 = (1, 128, 128, 1)
+input_shape_3 = (1, 128, 128, 1)
 
 
 ### --- ###
@@ -396,6 +402,7 @@ stream = pa.open(format=AUDIO_FORMAT,
 stream.start_stream()
 logger.debug("--- Listening to Audio Stream ---")
 
+
 ### Main (Audio Analysis) Thread
 
 # Starts the scheduler for clearing the primary log file
@@ -432,24 +439,36 @@ while True:
         modified_microphone_data = modified_microphone_data[:44100]
 
         # Passes an audio sample of an appropriate format into the model for inference
-        HOP_LENGTH = 345 * 2
-        processed_data_1 = convert_audio_to_spectrogram(data = modified_microphone_data)
+        processed_data_1 = modified_microphone_data
         processed_data_1 = processed_data_1.reshape(input_shape_1)
-            
-        HOP_LENGTH = 345
+
+        HOP_LENGTH = 345 * 2
         processed_data_2 = convert_audio_to_spectrogram(data = modified_microphone_data)
         processed_data_2 = processed_data_2.reshape(input_shape_2)
+            
+        HOP_LENGTH = 345
+        processed_data_3 = convert_audio_to_spectrogram(data = modified_microphone_data)
+        processed_data_3 = processed_data_3.reshape(input_shape_3)
 
         # Performs inference with the given Keras models
         probabilities_1 = model_1.predict(processed_data_1)
         probabilities_2 = model_2.predict(processed_data_2)
-        logger.debug("The 128 x 64 model-predicted probability values: " + str(probabilities_1[0]))
-        logger.debug("The 128 x 128 model-predicted probability values: " + str(probabilities_2[0]))
-        logger.debug("The 128 x 64 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_1[:, 0])[0])
-        logger.debug("The 128 x 128 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_2[:, 0])[0])
+        probabilities_3 = model_3.predict(processed_data_3)
+        logger.debug("The 44100 x 1 model-predicted probability values: " + str(probabilities_1[0]))
+        logger.debug("The 128 x 64 model-predicted probability values: " + str(probabilities_2[0]))
+        logger.debug("The 128 x 128 model-predicted probability values: " + str(probabilities_3[0]))
+        logger.debug("The 44100 x 1 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_1[:, 0])[0])
+        logger.debug("The 128 x 64 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_2[:, 0])[0])
+        logger.debug("The 128 x 128 model-predicted sample class: " + label_binarizer.inverse_transform(probabilities_3[:, 0])[0])
+        
+        # Records which models, if any, identified a gunshot
+        model_1_activated = probabilities_1[0][1] >= MODEL_CONFIDENCE_THRESHOLD
+        model_2_activated = probabilities_2[0][1] >= MODEL_CONFIDENCE_THRESHOLD
+        model_3_activated = probabilities_3[0][1] >= MODEL_CONFIDENCE_THRESHOLD
 
-        # Determines if a gunshot sound was detected by both models
-        if probabilities_1[0][1] >= MODEL_CONFIDENCE_THRESHOLD and probabilities_2[0][1] >= MODEL_CONFIDENCE_THRESHOLD:
+        # Majority Rules: Determines if a gunshot sound was detected by a majority of the models
+        if model_1_activated and model_2_activated or model_2_activated and model_3_activated or model_1_activated and model_3_activated:
+                
             # Sends out an SMS alert
             sms_alert_queue.put("Gunshot Detected")
 
