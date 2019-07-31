@@ -287,19 +287,19 @@ def auc(y_true, y_pred):
 # Loading the Models #
     
 # Loads 44100 x 1 Keras model from H5 file
-model_1 = keras.models.load_model("/home/alexm/Datasets/RYAN_1D_model.h5", custom_objects = {"auc" : auc})
+model_1 = keras.models.load_model("/home/pi/Datasets/RYAN_1D_model.h5", custom_objects = {"auc" : auc})
     
 # Sets the input shape for the 44100 x 1 model
 input_shape_1 = (1, 44100, 1)
 
 # Loads 128 x 64 Keras model from H5 file
-model_2 = keras.models.load_model("/home/alexm/Datasets/128_64_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+model_2 = keras.models.load_model("/home/pi/Datasets/128_64_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
 # Gets the input shape from the 128 x 64 Keras model
 input_shape_2 = (1, 128, 64, 1)
 
 # Loads 128 x 128 Keras model from H5 file
-model_3 = keras.models.load_model("/home/alexm/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+model_3 = keras.models.load_model("/home/pi/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
 
 # Gets the input shape from the 128 x 128 Keras model
 input_shape_3 = (1, 128, 128, 1)
@@ -461,9 +461,7 @@ while True:
         model_3_activated = probabilities_3[0][1] >= MODEL_CONFIDENCE_THRESHOLD
 
         # Majority Rules: Determines if a gunshot sound was detected by a majority of the models
-        if model_1_activated and model_2_activated
-            or model_2_activated and model_3_activated
-            or model_1_activated and model_3_activated:
+        if model_1_activated and model_2_activated or model_2_activated and model_3_activated or model_1_activated and model_3_activated:
                 
             # Sends out an SMS alert
             sms_alert_queue.put("Gunshot Detected")
