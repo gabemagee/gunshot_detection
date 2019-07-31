@@ -36,49 +36,38 @@ config.gpu_options.allow_growth=True
 sess = tf.Session(config=config)
 K.set_session(sess)
 
+'''
 samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_samples.npy")
 labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
 
 sample_weights = np.array(
     [1 for normally_recorded_sample in range(len(samples) - 660)] + [15 for raspberry_pi_recorded_sample in range(660)])
+'''
 
-labels = np.array([("gun_shot" if label == 1 else "other") for label in labels])
+train_wav = np.load(BASE_DIRECTORY + "augmented_training_samples.npy").reshape(-1, 44100, 1)
+test_wav = np.load(BASE_DIRECTORY + "augmented_testing_samples.npy").reshape(-1, 44100, 1)
+valid_wav = np.load(BASE_DIRECTORY + "augmented_validation_samples.npy").reshape(-1, 44100, 1)
+
+train_label = np.load(BASE_DIRECTORY + "augmented_training_labels.npy")
+test_label = np.load(BASE_DIRECTORY + "augmented_testing_labels.npy")
+valid_label = np.load(BASE_DIRECTORY + "augmented_validation_labels.npy")
+
+print("Successfully loaded all spectrograms and labels as NumPy arrays...")
+
 label_binarizer = LabelBinarizer()
-labels = label_binarizer.fit_transform(labels)
-labels = np.hstack((labels, 1 - labels))
 
-'''
-kf = KFold(n_splits=3, shuffle=True)
-for train_index, test_index in kf.split(samples):
-    print("TRAIN:", train_index, "TEST:", test_index)
-    train_wav, test_wav = samples[train_index], samples[test_index]
-    train_label, test_label = labels[train_index], labels[test_index]
-    break
+train_label = np.array([("gun_shot" if label == "gun_shot" else "other") for label in train_label])
+test_label = np.array([("gun_shot" if label == "gun_shot" else "other") for label in test_label])
+valid_label = np.array([("gun_shot" if label == "gun_shot" else "other") for label in valid_label])
 
-for test_index, valid_index in kf.split(test_wav):
-    print("TEST:", test_index, "VALID:", valid_index)
-    test_wav, valid_wav = test_wav[test_index], test_wav[valid_index]
-    test_label, valid_label = test_label[test_index], test_label[valid_index]
-    break
-'''
+train_label = label_binarizer.fit_transform(train_label)
+train_label = np.hstack((train_label, 1 - train_label))
 
+test_label = label_binarizer.fit_transform(test_label)
+test_label = np.hstack((test_label, 1 - test_label))
 
-all_index = np.arange(len(samples))
-train_index = np.load("training_set_indexes.npy")
-test_index = np.load("testing_set_indexes.npy")
-valid_index = np.delete(all_index, list(train_index) + list(test_index))
-
-print(train_index)
-print(test_index)
-print(valid_index)
-
-train_wav, test_wav, valid_wav = samples[train_index], samples[test_index], samples[valid_index]
-train_label, test_label, valid_label = labels[train_index], labels[test_index], labels[valid_index]
-train_weights, test_weights, valid_weights = sample_weights[train_index], sample_weights[test_index], sample_weights[valid_index]
-
-train_wav = train_wav.reshape(-1, 44100, 1)
-test_wav = test_wav.reshape(-1, 44100, 1)
-valid_wav = valid_wav.reshape(-1, 44100, 1)
+valid_label = label_binarizer.fit_transform(valid_label)
+valid_label = np.hstack((valid_label, 1 - valid_label))
 
 def auc(y_true, y_pred):
     auc = tf.metrics.auc(y_true, y_pred)[1]
@@ -87,8 +76,7 @@ def auc(y_true, y_pred):
 
 drop_out_rate = 0.25
 learning_rate = 0.001
-window = 8
-small_window = 4
+window = 16
 number_of_epochs = 100
 number_of_classes = 2
 batch_size = 32
@@ -97,11 +85,7 @@ input_shape = (44100, 1)
 input_tensor = Input(shape=input_shape)
 metrics = [auc, "accuracy"]
 
-
 # ## Model Architecture
-
-# In[ ]:
-
 
 x = layers.Conv1D(16, window, activation="relu", padding="same")(input_tensor)
 x = layers.BatchNormalization(axis=-1)(x)
@@ -110,14 +94,14 @@ x = layers.Dropout(rate=drop_out_rate)(x)
 
 x = layers.Conv1D(32, window, activation="relu", padding="same")(x)
 x = layers.BatchNormalization(axis=-1)(x)
-x = layers.Conv1D(32, small_window, activation="relu", padding="same")(x)
+x = layers.Conv1D(32, window, activation="relu", padding="same")(x)
 x = layers.BatchNormalization(axis=-1)(x)
 x = layers.MaxPool1D(8)(x)
 x = layers.Dropout(rate=drop_out_rate)(x)
 
 x = layers.Conv1D(64, window, activation="relu", padding="same")(x)
 x = layers.BatchNormalization(axis=-1)(x)
-x = layers.Conv1D(64, small_window, activation="relu", padding="same")(x)
+x = layers.Conv1D(64, window, activation="relu", padding="same")(x)
 x = layers.BatchNormalization(axis=-1)(x)
 x = layers.MaxPool1D(8)(x)
 x = layers.Dropout(rate=drop_out_rate)(x)
@@ -125,7 +109,7 @@ x = layers.Dropout(rate=drop_out_rate)(x)
 '''
 x = layers.Conv1D(128, window, activation="relu", padding="same")(x)
 x = layers.BatchNormalization(axis=-1)(x)
-x = layers.Conv1D(128, small_window, activation="relu", padding="same")(x)
+x = layers.Conv1D(128, window, activation="relu", padding="same")(x)
 x = layers.BatchNormalization(axis=-1)(x)
 x = layers.MaxPool1D(8)(x)
 x = layers.Dropout(rate=drop_out_rate)(x)
@@ -148,9 +132,6 @@ model.compile(optimizer=optimizer, loss=keras.losses.binary_crossentropy, metric
 
 
 # ## Configuring model properties
-
-# In[ ]:
-
 
 model_filename = BASE_DIRECTORY + "gunshot_1D_model.pkl"
 
@@ -184,7 +165,6 @@ History = model.fit(train_wav, train_label,
                     callbacks=model_callbacks,
                     verbose=1,
                     batch_size=batch_size,
-                    sample_weight=train_weights,
                     shuffle=True)
 
 model.load_weights(model_filename)

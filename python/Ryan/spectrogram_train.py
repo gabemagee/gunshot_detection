@@ -5,23 +5,14 @@
 
 # ### File Directory Libraries
 
-# In[ ]:
-
-
 import os
 
 # ### Math Libraries
-
-# In[ ]:
-
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 # ### Data Pre-Processing Libraries
-
-# In[ ]:
-
 
 import librosa
 import librosa.display
@@ -32,9 +23,6 @@ from sklearn.preprocessing import LabelBinarizer
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 # ### Deep Learning Libraries
-
-# In[ ]:
-
 
 import tensorflow as tf
 from tensorflow.keras import Input, layers, backend as K
@@ -56,82 +44,47 @@ SAMPLE_RATE_PER_SECOND = 22050
 SAMPLE_RATE_PER_TWO_SECONDS = 44100
 SOUND_FILE_ID = 0
 BASE_DIRECTORY = "/home/rjhosler/REU/Datasets/"
-samples = []
-labels = []
-sound_file_names = []
-sample_weights = []
 
 # ## Loading augmented NumPy files as NumPy arrays
 
-# In[ ]:
-
-
+'''
 samples = np.load(BASE_DIRECTORY + "gunshot_augmented_sample_spectrograms.npy")
 labels = np.load(BASE_DIRECTORY + "gunshot_augmented_sound_labels.npy")
+'''
+
+train_wav = np.load(BASE_DIRECTORY + "128_128_augmented_training_spectrograms.npy")
+test_wav = np.load(BASE_DIRECTORY + "128_128_augmented_testing_spectrograms.npy")
+valid_wav = np.load(BASE_DIRECTORY + "128_128_augmented_validation_spectrograms.npy")
+
+train_label = np.load(BASE_DIRECTORY + "augmented_training_labels.npy")
+test_label = np.load(BASE_DIRECTORY + "augmented_testing_labels.npy")
+valid_label = np.load(BASE_DIRECTORY + "augmented_validation_labels.npy")
 
 print("Successfully loaded all spectrograms and labels as NumPy arrays...")
-print("Type of the spectrograms array:", samples.dtype)
 
-# ## Instantiating a sample weights NumPy array
+label_binarizer = LabelBinarizer()
 
-# In[ ]:
+train_label = np.array([("gun_shot" if label == "gun_shot" else "other") for label in train_label])
+test_label = np.array([("gun_shot" if label == "gun_shot" else "other") for label in test_label])
+valid_label = np.array([("gun_shot" if label == "gun_shot" else "other") for label in valid_label])
 
+train_label = label_binarizer.fit_transform(train_label)
+train_label = np.hstack((train_label, 1 - train_label))
 
+test_label = label_binarizer.fit_transform(test_label)
+test_label = np.hstack((test_label, 1 - test_label))
+
+valid_label = label_binarizer.fit_transform(valid_label)
+valid_label = np.hstack((valid_label, 1 - valid_label))
+
+'''
 sample_weights = np.array(
     [1 for normally_recorded_sample in range(len(samples) - 660)] + [15 for raspberry_pi_recorded_sample in range(660)])
-#print("Shape of samples weights before splitting:", sample_weights.shape)
-
-# ## Restructuring the label data
-
-# In[ ]:
-
-
-labels = np.array([("gun_shot" if label == 1 else "other") for label in labels])
-label_binarizer = LabelBinarizer()
-labels = label_binarizer.fit_transform(labels)
-labels = np.hstack((labels, 1 - labels))
-
-# ### Debugging of the sample and label data's shape (optional)
-
-# In[ ]:
-
-
-#print("Shape of samples array:", samples.shape)
-#print("Shape of labels array:", labels.shape)
-
-# ## Arranging the data
-
-# In[ ]:
-
 '''
-kf = KFold(n_splits=3, shuffle=True)
-for train_index, test_index in kf.split(samples):
-    train_wav, test_wav = samples[train_index], samples[test_index]
-    train_label, test_label = labels[train_index], labels[test_index]
-    train_weights, test_weights = sample_weights[train_index], sample_weights[test_index]
-'''
-
-all_index = np.arange(len(samples))
-train_index = np.load("training_set_indexes.npy")
-test_index = np.load("testing_set_indexes.npy")
-valid_index = np.delete(all_index, list(train_index) + list(test_index))
-
-print(train_index)
-print(test_index)
-print(valid_index)
-
-train_wav, test_wav, valid_wav = samples[train_index], samples[test_index], samples[valid_index]
-train_label, test_label, valid_label = labels[train_index], labels[test_index], labels[valid_index]
-train_weights, test_weights, valid_weights = sample_weights[train_index], sample_weights[test_index], sample_weights[valid_index]
-
 
 # # Model
 
-
 # ## ROC (AUC) metric - Uses the import "from tensorflow.keras import backend as K"
-
-# In[ ]:
-
 
 def auc(y_true, y_pred):
     auc = tf.metrics.auc(y_true, y_pred)[1]
@@ -141,13 +94,9 @@ def auc(y_true, y_pred):
 
 # ## Model Parameters
 
-# In[ ]:
-
-
-number_of_epochs = 50
 batch_size = 32
 optimizer = Adam(lr=0.001)
-input_tensor = Input(shape=(128, 64, 1))
+input_tensor = Input(shape=(128, 128, 1))
 window = (4, 4)
 
 """ Step 2: Create the input and hidden layers """
@@ -155,7 +104,7 @@ window = (4, 4)
 # First Layer
 x = Conv2D(16, window, padding="same", activation="relu")(input_tensor)
 x = BatchNormalization(axis=-1)(x)
-x = MaxPooling2D(pool_size=(4, 2))(x)
+x = MaxPooling2D(pool_size=(4, 4))(x)
 x = Dropout(0.25)(x)
 
 # Second Layer: (CONV => RELU) * 2 => POOL
@@ -193,14 +142,6 @@ x = Flatten()(x)
 x = Dense(128, activation="relu")(x)
 x = BatchNormalization()(x)
 x = Dropout(0.5)(x)  # Increasing dropout here to prevent overfitting
-
-'''
-#Attention layer
-attention_probs = Dense(1024, activation='softmax', name='attention_vec')(x)
-attention_probs = Dropout(0.5)(attention_probs)
-attention_mul = multiply([x, attention_probs], name='attention_mul')
-attention_mul = Dense(256)(attention_mul)
-'''
 
 x = Dense(128, activation="relu")(x) 
 x = BatchNormalization()(x)
@@ -252,12 +193,11 @@ History = model.fit(train_wav, train_label,
                     callbacks=model_callbacks,
                     verbose=1,
                     batch_size=batch_size,
-                    sample_weight=train_weights,
                     shuffle=True)
 
 model.load_weights(model_filename)
 
-model.save(BASE_DIRECTORY + "CurrentModels/RYAN_smaller_spectrogram_model.h5")
+model.save(BASE_DIRECTORY + "CurrentModels/128_128_RYAN_spectrogram_model.h5")
 
 
 # ## Converting model to TensorFlow Lite format
@@ -270,9 +210,8 @@ open(model_name + ".tflite", "wb").write(tflite_model)
 '''
 # ### Debugging of incorrectly-labeled examples (optional)
 
-# In[ ]:
 
-model.load_weights(BASE_DIRECTORY + "CurrentModels/RYAN_smaller_spectrogram_model.h5")
+model.load_weights(BASE_DIRECTORY + "CurrentModels/128_128_RYAN_spectrogram_model.h5")
 
 y_test_pred = model.predict(valid_wav)
 y_predicted_classes_test = y_test_pred.argmax(axis=-1)
