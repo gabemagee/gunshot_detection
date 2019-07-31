@@ -236,7 +236,7 @@ for i in range(len(validation_wav)):
 
     #OR
     #1 2
-    model = model_dict["128_x_128_or_1_dimensional"]
+    model = model_dict["1_dimensional_or_128_x_128"]
     if (output_1[0] =="gun_shot" or output_2[0] =="gun_shot"):
         output = ["gun_shot"]
     else:
