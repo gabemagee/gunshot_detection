@@ -84,7 +84,7 @@ def IOU(true_pos,true_neg,false_pos,false_neg):
 
 
 def update_counts(y,output,model,model_scores):
-    print(name_dict[model],model_scores[model])
+    #print(name_dict[model],model_scores[model])
     if y[0]=="gun_shot" and output[0]=="gun_shot":
         model_scores[model]["true_pos"] = model_scores[model]["true_pos"]+1
     elif y[0]=="gun_shot" and output[0]!="gun_shot":
