@@ -334,7 +334,7 @@ l.append("AUC")
 for model in model_list:
     true_y = label_binarizer.inverse_transform(validation_label[:,0])
     predictions = label_binarizer.fit_transform(np.array(scores_models[model]))
-    predictions = np.hstack((predictions,1-predictions))
+
 
     score = sklearn.metrics.roc_auc_score(true_y,predictions)
     l.append(str(score))
