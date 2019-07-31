@@ -312,7 +312,7 @@ for i in range(len(validation_wav)):
 
 bar.finish()
 
-
+import sklearn
 
 for model in model_list:
     print(model,model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"])
