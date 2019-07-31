@@ -205,24 +205,28 @@ for i in range(len(validation_wav)):
     x_1 = x.reshape((-1, 44100, 1))
     #model = model_dict["1_dimensional"]
     #output = model.predict(x_1)[:,0][0]
-    interpreter = model_dict["1_dimensional"]
-    output = tflite_predict(interpreter,input_data)
+    model = model_dict["1_dimensional"]
+    output = tflite_predict(model,input_data)[:,0][0]
     output_1 = label_binarizer.inverse_transform(output)
     update_counts(y,output_1,model,model_scores)
     scores_models[model].append(output_1[0])
 
     # 128x128
     x_1 = audio_to_melspectrogram(x,hop_length=345).reshape((-1,128,128,1))
+    #model = model_dict["128_x_128"]
+    #output = model.predict(x_1)[:,0][0]
     model = model_dict["128_x_128"]
-    output = model.predict(x_1)[:,0][0]
+    output = tflite_predict(model,input_data)[:,0][0]
     output_2 = label_binarizer.inverse_transform(output)
     update_counts(y,output_2,model,model_scores)
     scores_models[model].append(output_2[0])
 
     # 128x64
     x_1 = audio_to_melspectrogram(x).reshape((-1,128,64,1))
+    #model = model_dict["128_x_64"]
+    #output = model.predict(x_1)[:,0][0]
     model = model_dict["128_x_64"]
-    output = model.predict(x_1)[:,0][0]
+    output = tflite_predict(model,input_data)[:,0][0]
     output_3 = label_binarizer.inverse_transform(output)
     update_counts(y,output_3,model,model_scores)
     scores_models[model].append(output_3[0])
