@@ -133,6 +133,7 @@ for model_filename in os.listdir(tflite_models_dir):
     interpreter = tf.contrib.lite.Interpreter(model_path=tflite_models_dir+model_filename)
     interpreter.allocate_tensors()
     model_list.append(interpreter)
+    model_dict[model_filename.split(".")[0]] = interpreter
     name_dict[interpreter] = model_filename.split(".")[0]
 
 
@@ -141,7 +142,7 @@ for model_filename in os.listdir(models_dir):
     prep_model(models_dir+model_filename)
 """
 
-
+#for combinations of different models
 for model_1,model_2 in combinations(model_list, 2) :
     model_1_name = name_dict[model_1]
     model_2_name = name_dict[model_2]
@@ -157,7 +158,7 @@ for model_1,model_2 in combinations(model_list, 2) :
     model_dict[or_model_name] = or_model
 model_list.extend(to_append)
 
-
+#majority rules model
 majority = tf.keras.Model()
 name_dict[majority] = "majority"
 model_dict["majority"] = majority
@@ -202,9 +203,10 @@ for i in range(len(validation_wav)):
 
     # 1D
     x_1 = x.reshape((-1, 44100, 1))
-    model = model_dict["1_dimensional"]
+    #model = model_dict["1_dimensional"]
     #output = model.predict(x_1)[:,0][0]
-    #output = 
+    interpreter = model_dict["1_dimensional"]
+    output = tflite_predict(interpreter,input_data)
     output_1 = label_binarizer.inverse_transform(output)
     update_counts(y,output_1,model,model_scores)
     scores_models[model].append(output_1[0])
