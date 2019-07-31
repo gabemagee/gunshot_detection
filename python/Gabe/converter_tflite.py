@@ -15,4 +15,6 @@ model_directory = "/home/gamagee/workspace/gunshot_detection/REU_Data/ryan_model
 for model_filename in os.listdir(model_directory):
     converter = tf.lite.TFLiteConverter.from_keras_model_file(model_directory+model_filename,custom_objects={"auc":auc})
     tflite_model = converter.convert()
-    open(saved_model_dir+model_filename.split(".")[0]+".tflite", "wb").write(tflite_model)
+    model = open(saved_model_dir+model_filename.split(".")[0]+".tflite", "wb")
+    model.write(tflite_model)
+    model.close()
