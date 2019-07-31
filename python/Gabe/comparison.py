@@ -195,8 +195,6 @@ bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'
 bar.start()
 bar.update(last)
 
-print(validation_label[:,0])
-
 for i in range(len(validation_wav)):
     temp = int(i*100/len(validation_wav))
     if temp> last:
@@ -232,25 +230,25 @@ for i in range(len(validation_wav)):
     #1 2
     model = model_dict["128_x_128_or_1_dimensional"]
     if (output_1[0] =="gun_shot" or output_2[0] =="gun_shot"):
-        output[0] = "gun_shot"
+        output = ["gun_shot"]
     else:
-        output[0] = "other"
+        output = ["other"]
     update_counts(y,output,model,model_scores)
 
     #1 3
     model = model_dict["128_x_64_or_1_dimensional"]
     if (output_1[0] =="gun_shot" or output_3[0] =="gun_shot"):
-        output[0] = "gun_shot"
+        output = ["gun_shot"]
     else:
-        output[0] = "other"
+        output = ["other"]
     update_counts(y,output,model,model_scores)
 
     #2 3
     model = model_dict["128_x_64_or_128_x_128"]
     if (output_2[0] =="gun_shot" or output_3[0] =="gun_shot"):
-        output[0] = "gun_shot"
+        output = ["gun_shot"]
     else:
-        output[0] = "other"
+        output = ["other"]
     update_counts(y,output,model,model_scores)
 
     #AND
@@ -258,25 +256,25 @@ for i in range(len(validation_wav)):
     #1 2
     model = model_dict["128_x_128_and_1_dimensional"]
     if (output_1[0] =="gun_shot" and output_2[0] =="gun_shot"):
-        output[0] = "gun_shot"
+        output = ["gun_shot"]
     else:
-        output[0] = "other"
+        output = ["other"]
     update_counts(y,output,model,model_scores)
 
     #1 3
     model = model_dict["128_x_64_and_1_dimensional"]
     if (output_1[0] =="gun_shot" and output_3[0] =="gun_shot"):
-        output[0] = "gun_shot"
+        output = ["gun_shot"]
     else:
-        output[0] = "other"
+        output = ["other"]
     update_counts(y,output,model,model_scores)
 
     #2 3
     model = model_dict["128_x_64_and_128_x_128"]
     if (output_2[0] =="gun_shot" and output_3[0] =="gun_shot"):
-        output[0] = "gun_shot"
+        output = ["gun_shot"]
     else:
-        output[0] = "other"
+        output = ["other"]
     update_counts(y,output,model,model_scores)
 
 
@@ -287,9 +285,9 @@ for i in range(len(validation_wav)):
         if boolean_expression[0]=="gun_shot":
             sum = sum + 1
     if sum>1:
-        output[0] = "gun_shot"
+        output = ["gun_shot"]
     else:
-        output[0] = "other"
+        output = ["other"]
     update_counts(y,output,model,model_scores)
 
 
