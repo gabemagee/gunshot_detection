@@ -13,6 +13,7 @@ import progressbar
 import pickle
 import sklearn
 
+
 from keras.layers import Conv1D, Conv2D, MaxPooling2D, GlobalAveragePooling1D, MaxPooling1D, Dense, Dropout, Activation, Flatten
 from sklearn import metrics
 from sklearn.preprocessing import LabelBinarizer
@@ -37,7 +38,7 @@ sr = 22050
 
 data_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/ryan_model/data/"
 models_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/ryan_model/models/"
-
+tflite_models_dir = "/home/gamagee/workspace/gunshot_detection/REU_Data/ryan_model/tflite_models/"
 
 
 def get_available_gpus():
@@ -128,12 +129,18 @@ validation_label = np.hstack((labels,1-labels))
 
 print("Finished loading data. Loading Models.")
 
+for model_filename in os.listdir(tflite_models_dir):
+    interpreter = tf.contrib.lite.Interpreter(model_path=tflite_models_dir+model_filename)
+    interpreter.allocate_tensors()
+    model_list.append(interpreter)
+    name_dict[interpreter] = model_filename.split(".")[0]
 
 
-
-
+"""
 for model_filename in os.listdir(models_dir):
     prep_model(models_dir+model_filename)
+"""
+
 
 for model_1,model_2 in combinations(model_list, 2) :
     model_1_name = name_dict[model_1]
@@ -196,7 +203,8 @@ for i in range(len(validation_wav)):
     # 1D
     x_1 = x.reshape((-1, 44100, 1))
     model = model_dict["1_dimensional"]
-    output = model.predict(x_1)[:,0][0]
+    #output = model.predict(x_1)[:,0][0]
+    #output = 
     output_1 = label_binarizer.inverse_transform(output)
     update_counts(y,output_1,model,model_scores)
     scores_models[model].append(output_1[0])
@@ -323,3 +331,9 @@ for model in model_list:
 table.append(l)
 t.add_rows(table)
 print(t.draw())
+
+
+with open('/REU_Data/ryan_model/people.csv', 'w') as writeFile:
+    writer = csv.writer(writeFile)
+    writer.writerows(table)
+writeFile.close()
