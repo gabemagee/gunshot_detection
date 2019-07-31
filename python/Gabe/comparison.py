@@ -190,6 +190,14 @@ name_dict[recall] = "recall"
 name_dict[f1_score] = "f1_score"
 name_dict[IOU] = "IOU"
 
+scores_models = {}
+
+for model in model_list:
+    scores_models[model] = []
+
+print("warning")
+print(label_binarizer.inverse_transform(validation_label[:,0]))
+
 last = 0
 bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
 bar.start()
@@ -210,6 +218,7 @@ for i in range(len(validation_wav)):
     output = model.predict(x_1)[:,0][0]
     output_1 = label_binarizer.inverse_transform(output)
     update_counts(y,output_1,model,model_scores)
+    scores_models[model] = output_1[0]
 
     # 128x128
     x_1 = audio_to_melspectrogram(x,hop_length=345).reshape((-1,128,128,1))
@@ -217,6 +226,7 @@ for i in range(len(validation_wav)):
     output = model.predict(x_1)[:,0][0]
     output_2 = label_binarizer.inverse_transform(output)
     update_counts(y,output_2,model,model_scores)
+    scores_models[model] = output_2[0]
 
     # 128x64
     x_1 = audio_to_melspectrogram(x).reshape((-1,128,64,1))
@@ -224,7 +234,7 @@ for i in range(len(validation_wav)):
     output = model.predict(x_1)[:,0][0]
     output_3 = label_binarizer.inverse_transform(output)
     update_counts(y,output_3,model,model_scores)
-
+    scores_models[model] = output_3[0]
 
     #OR
     #1 2
@@ -234,6 +244,8 @@ for i in range(len(validation_wav)):
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
+    scores_models[model] = output[0]
+
 
     #1 3
     model = model_dict["128_x_64_or_1_dimensional"]
@@ -242,6 +254,9 @@ for i in range(len(validation_wav)):
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
+    scores_models[model] = output[0]
+
+
 
     #2 3
     model = model_dict["128_x_64_or_128_x_128"]
@@ -250,6 +265,8 @@ for i in range(len(validation_wav)):
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
+    scores_models[model] = output[0]
+
 
     #AND
 
@@ -260,6 +277,7 @@ for i in range(len(validation_wav)):
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
+    scores_models[model] = output[0]
 
     #1 3
     model = model_dict["128_x_64_and_1_dimensional"]
@@ -268,6 +286,7 @@ for i in range(len(validation_wav)):
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
+    scores_models[model] = output[0]
 
     #2 3
     model = model_dict["128_x_64_and_128_x_128"]
@@ -276,7 +295,7 @@ for i in range(len(validation_wav)):
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
-
+    scores_models[model] = output[0]
 
     #MAJORITY
     model = model_dict["majority"]
@@ -289,10 +308,14 @@ for i in range(len(validation_wav)):
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
-
+    scores_models[model] = output[0]
 
 
 bar.finish()
+for model in model_list:
+    predictions = scores_models[model]
+    sklearn.metrics.roc_auc_score()
+
 
 for model in model_list:
     print(model,model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"])
