@@ -84,7 +84,7 @@ def IOU(true_pos,true_neg,false_pos,false_neg):
 
 
 def update_counts(y,output,model,model_scores):
-    #print(name_dict[model],model_scores[model])
+    print(name_dict[model],model_scores[model])
     if y[0]=="gun_shot" and output[0]=="gun_shot":
         model_scores[model]["true_pos"] = model_scores[model]["true_pos"]+1
     elif y[0]=="gun_shot" and output[0]!="gun_shot":
@@ -231,52 +231,52 @@ for i in range(len(validation_wav)):
     #OR
     #1 2
     model = model_dict["128_x_128_or_1_dimensional"]
-    if (output_1 =="gun_shot" or output_2 =="gun_shot"):
-        output = "gun_shot"
+    if (output_1[0] =="gun_shot" or output_2[0] =="gun_shot"):
+        output[0] = "gun_shot"
     else:
-        output = "other"
+        output[0] = "other"
     update_counts(y,output,model,model_scores)
 
     #1 3
     model = model_dict["128_x_64_or_1_dimensional"]
-    if (output_1 =="gun_shot" or output_3 =="gun_shot"):
-        output = "gun_shot"
+    if (output_1[0] =="gun_shot" or output_3[0] =="gun_shot"):
+        output[0] = "gun_shot"
     else:
-        output = "other"
+        output[0] = "other"
     update_counts(y,output,model,model_scores)
 
     #2 3
     model = model_dict["128_x_64_or_128_x_128"]
-    if (output_2 =="gun_shot" or output_3 =="gun_shot"):
-        output = "gun_shot"
+    if (output_2[0] =="gun_shot" or output_3[0] =="gun_shot"):
+        output[0] = "gun_shot"
     else:
-        output = "other"
+        output[0] = "other"
     update_counts(y,output,model,model_scores)
 
     #AND
 
     #1 2
     model = model_dict["128_x_128_and_1_dimensional"]
-    if (output_1 =="gun_shot" and output_2 =="gun_shot"):
-        output = "gun_shot"
+    if (output_1[0] =="gun_shot" and output_2[0] =="gun_shot"):
+        output[0] = "gun_shot"
     else:
-        output = "other"
+        output[0] = "other"
     update_counts(y,output,model,model_scores)
 
     #1 3
     model = model_dict["128_x_64_and_1_dimensional"]
-    if (output_1 =="gun_shot" and output_3 =="gun_shot"):
-        output = "gun_shot"
+    if (output_1[0] =="gun_shot" and output_3[0] =="gun_shot"):
+        output[0] = "gun_shot"
     else:
-        output = "other"
+        output[0] = "other"
     update_counts(y,output,model,model_scores)
 
     #2 3
     model = model_dict["128_x_64_and_128_x_128"]
-    if (output_2 =="gun_shot" and output_3 =="gun_shot"):
-        output = "gun_shot"
+    if (output_2[0] =="gun_shot" and output_3[0] =="gun_shot"):
+        output[0] = "gun_shot"
     else:
-        output = "other"
+        output[0] = "other"
     update_counts(y,output,model,model_scores)
 
 
@@ -284,12 +284,12 @@ for i in range(len(validation_wav)):
     model = model_dict["majority"]
     sum = 0
     for boolean_expression in [output_1,output_2,output_3]:
-        if boolean_expression=="gunshot":
+        if boolean_expression[0]=="gun_shot":
             sum = sum + 1
     if sum>1:
-        output = "gun_shot"
+        output[0] = "gun_shot"
     else:
-        output = "other"
+        output[0] = "other"
     update_counts(y,output,model,model_scores)
 
 
