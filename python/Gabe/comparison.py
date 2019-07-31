@@ -195,8 +195,7 @@ scores_models = {}
 for model in model_list:
     scores_models[model] = []
 
-print("warning")
-print(label_binarizer.inverse_transform(validation_label[:,0]))
+
 
 last = 0
 bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
@@ -312,9 +311,7 @@ for i in range(len(validation_wav)):
 
 
 bar.finish()
-for model in model_list:
-    predictions = scores_models[model]
-    sklearn.metrics.roc_auc_score()
+
 
 
 for model in model_list:
@@ -332,5 +329,13 @@ for metric in metrics:
     for model in model_list:
         l.append(metric(model_scores[model]["true_pos"],model_scores[model]["true_neg"],model_scores[model]["false_pos"],model_scores[model]["false_neg"]))
     table.append(l)
+l = []
+l.append("AUC")
+for model in model_list:
+    true_y = label_binarizer.inverse_transform(validation_label[:,0])
+    predictions = np.array(scores_models[model])
+    score = sklearn.metrics.roc_auc_score(true_y,predictions)
+    l.append(str(score))
+table.append(l)
 t.add_rows(table)
 print(t.draw())
