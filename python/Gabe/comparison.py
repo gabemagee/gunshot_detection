@@ -269,7 +269,7 @@ for i in range(len(validation_wav)):
     #AND
 
     #1 2
-    model = model_dict["128_x_128_and_1_dimensional"]
+    model = model_dict["1_dimensional_and_128_x_128"]
     if (output_1[0] =="gun_shot" and output_2[0] =="gun_shot"):
         output = ["gun_shot"]
     else:
