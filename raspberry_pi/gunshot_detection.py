@@ -287,22 +287,31 @@ def auc(y_true, y_pred):
 # Loading the Models #
     
 # Loads 44100 x 1 Keras model from H5 file
-model_1 = keras.models.load_model("/home/pi/Datasets/RYAN_1D_model.h5", custom_objects = {"auc" : auc})
+interpreter_1 = tf.lite.Interpreter(model_path = "/home/pi/Models/1D.tflite")
+interpreter_1.allocate_tensors()
     
 # Sets the input shape for the 44100 x 1 model
-input_shape_1 = (1, 44100, 1)
+input_details_1 = interpreter_1.get_input_details()
+output_details_1 = interpreter_1.get_output_details()
+input_shape_1 = input_details_1[0]['shape']
 
 # Loads 128 x 64 Keras model from H5 file
-model_2 = keras.models.load_model("/home/pi/Datasets/128_64_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+interpreter_2 = tf.lite.Interpreter(model_path = "/home/pi/Models/128_x_64_2D.tflite")
+interpreter_2.allocate_tensors()
 
 # Gets the input shape from the 128 x 64 Keras model
-input_shape_2 = (1, 128, 64, 1)
+input_details_2 = interpreter_2.get_input_details()
+output_details_2 = interpreter_2.get_output_details()
+input_shape_2 = input_details_2[0]['shape']
 
 # Loads 128 x 128 Keras model from H5 file
-model_3 = keras.models.load_model("/home/pi/Datasets/128_128_RYAN_smaller_spectrogram_model.h5", custom_objects = {"auc" : auc})
+interpreter_3 = tf.lite.Interpreter(model_path = "/home/pi/Models/128_x_128_2D.tflite")
+interpreter_3.allocate_tensors()
 
 # Gets the input shape from the 128 x 128 Keras model
-input_shape_3 = (1, 128, 128, 1)
+input_details_3 = interpreter_3.get_input_details()
+output_details_3 = interpreter_3.get_output_details()
+input_shape_3 = input_details_3[0]['shape']
 
 
 ### --- ###
@@ -444,10 +453,19 @@ while True:
         processed_data_3 = convert_audio_to_spectrogram(data = modified_microphone_data)
         processed_data_3 = processed_data_3.reshape(input_shape_3)
 
-        # Performs inference with the given Keras models
-        probabilities_1 = model_1.predict(processed_data_1)
-        probabilities_2 = model_2.predict(processed_data_2)
-        probabilities_3 = model_3.predict(processed_data_3)
+        # Performs inference with the instantiated TensorFlow Lite models
+        interpreter_1.set_tensor(input_details_1[0]['index'], processed_data_1)
+        interpreter_1.invoke()
+        probabilities_1 = interpreter_1.get_tensor(output_details_1[0]['index'])
+        
+        interpreter_2.set_tensor(input_details_2[0]['index'], processed_data_2)
+        interpreter_2.invoke()
+        probabilities_2 = interpreter_2.get_tensor(output_details_2[0]['index'])
+        
+        interpreter_3.set_tensor(input_details_3[0]['index'], processed_data_3)
+        interpreter_3.invoke()
+        probabilities_3 = interpreter_3.get_tensor(output_details_3[0]['index'])
+        
         logger.debug("The 44100 x 1 model-predicted probability values: " + str(probabilities_1[0]))
         logger.debug("The 128 x 64 model-predicted probability values: " + str(probabilities_2[0]))
         logger.debug("The 128 x 128 model-predicted probability values: " + str(probabilities_3[0]))
