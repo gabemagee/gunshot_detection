@@ -316,9 +316,9 @@ input_shape_3 = input_details_3[0]['shape']
 
 ### --- ###
 
-# Multithreaded Inference: A callback thread adds two second samples of microphone data to the audio analysis
-# queue; The main thread, an audio analysis thread, detects the presence of gunshot sounds in samples retrieved from
-# the audio analysis queue; And an SMS alert thread dispatches groups of messages to designated recipients.
+# Multithreaded Inference: A callback thread adds two-second samples of microphone data to an audio analysis
+# queue; the main thread, an audio analysis thread, detects the presence of gunshot sounds in samples retrieved from
+# the audio analysis queue; and an SMS alert thread dispatches groups of messages to designated recipients.
 
 ### --- ###
 
@@ -406,7 +406,7 @@ stream.start_stream()
 logger.debug("--- Listening to Audio Stream ---")
 
 
-### Main (Audio Analysis) Thread
+### Audio Analysis Thread
 
 # Starts the scheduler for clearing the primary log file
 schedule.every().day.at(SCHEDULED_LOG_FILE_TRUNCATION_TIME).do(clear_log_file)
