@@ -96,13 +96,13 @@ def IOU(true_pos,true_neg,false_pos,false_neg):
 
 
 def update_counts(y,output,model,model_scores):
-    if y[0]=="gun_shot" and output[0]=="gun_shot":
+    if y[0]=="fireworks" and output[0]=="fireworks":
         model_scores[model]["true_pos"] = model_scores[model]["true_pos"]+1
-    elif y[0]=="gun_shot" and output[0]!="gun_shot":
+    elif y[0]=="fireworks" and output[0]!="fireworks":
         model_scores[model]["false_neg"] = model_scores[model]["false_neg"]+1
-    elif y[0]!="gun_shot" and output[0]=="gun_shot":
+    elif y[0]!="fireworks" and output[0]=="fireworks":
         model_scores[model]["false_pos"] = model_scores[model]["false_pos"]+1
-    elif y[0]!="gun_shot" and output[0]!="gun_shot":
+    elif y[0]!="fireworks" and output[0]!="fireworks":
         model_scores[model]["true_neg"] = model_scores[model]["true_neg"]+1
 
 def tflite_predict(interpreter,input_data):
@@ -125,7 +125,7 @@ for i in range(len(labels)):
     if (labels[i]=="fireworks"):
         print(i)
 
-labels = np.array([("gun_shot" if label =="gun_shot" else "other") for label in labels])
+labels = np.array([("fireworks" if label =="fireworks" else "other") for label in labels])
 
 label_binarizer = LabelBinarizer()
 labels = label_binarizer.fit_transform(labels)
@@ -241,8 +241,8 @@ for i in range(len(validation_wav)):
     #OR
     #1 2
     model = model_dict["1_dimensional_or_128_x_128"]
-    if (output_1[0] =="gun_shot" or output_2[0] =="gun_shot"):
-        output = ["gun_shot"]
+    if (output_1[0] =="fireworks" or output_2[0] =="fireworks"):
+        output = ["fireworks"]
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
@@ -251,8 +251,8 @@ for i in range(len(validation_wav)):
 
     #1 3
     model = model_dict["128_x_64_or_1_dimensional"]
-    if (output_1[0] =="gun_shot" or output_3[0] =="gun_shot"):
-        output = ["gun_shot"]
+    if (output_1[0] =="fireworks" or output_3[0] =="fireworks"):
+        output = ["fireworks"]
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
@@ -262,8 +262,8 @@ for i in range(len(validation_wav)):
 
     #2 3
     model = model_dict["128_x_64_or_128_x_128"]
-    if (output_2[0] =="gun_shot" or output_3[0] =="gun_shot"):
-        output = ["gun_shot"]
+    if (output_2[0] =="fireworks" or output_3[0] =="fireworks"):
+        output = ["fireworks"]
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
@@ -274,8 +274,8 @@ for i in range(len(validation_wav)):
 
     #1 2
     model = model_dict["1_dimensional_and_128_x_128"]
-    if (output_1[0] =="gun_shot" and output_2[0] =="gun_shot"):
-        output = ["gun_shot"]
+    if (output_1[0] =="fireworks" and output_2[0] =="fireworks"):
+        output = ["fireworks"]
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
@@ -283,8 +283,8 @@ for i in range(len(validation_wav)):
 
     #1 3
     model = model_dict["128_x_64_and_1_dimensional"]
-    if (output_1[0] =="gun_shot" and output_3[0] =="gun_shot"):
-        output = ["gun_shot"]
+    if (output_1[0] =="fireworks" and output_3[0] =="fireworks"):
+        output = ["fireworks"]
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
@@ -292,8 +292,8 @@ for i in range(len(validation_wav)):
 
     #2 3
     model = model_dict["128_x_64_and_128_x_128"]
-    if (output_2[0] =="gun_shot" and output_3[0] =="gun_shot"):
-        output = ["gun_shot"]
+    if (output_2[0] =="fireworks" and output_3[0] =="fireworks"):
+        output = ["fireworks"]
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
@@ -303,10 +303,10 @@ for i in range(len(validation_wav)):
     model = model_dict["majority"]
     sum = 0
     for boolean_expression in [output_1,output_2,output_3]:
-        if boolean_expression[0]=="gun_shot":
+        if boolean_expression[0]=="fireworks":
             sum = sum + 1
     if sum>1:
-        output = ["gun_shot"]
+        output = ["fireworks"]
     else:
         output = ["other"]
     update_counts(y,output,model,model_scores)
