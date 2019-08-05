@@ -143,18 +143,19 @@ validation_label = np.hstack((labels,1-labels))
 
 print("Finished loading data. Loading Models.")
 
+"""
 for model_filename in os.listdir(tflite_models_dir):
     interpreter = tf.lite.Interpreter(model_path=tflite_models_dir+model_filename)
     interpreter.allocate_tensors()
     model_list.append(interpreter)
     model_dict[model_filename.split(".")[0]] = interpreter
     name_dict[interpreter] = model_filename.split(".")[0]
-
-
 """
+
+
 for model_filename in os.listdir(models_dir):
     prep_model(models_dir+model_filename)
-"""
+
 
 
 #for combinations of different models
@@ -220,30 +221,27 @@ for i in range(len(validation_wav)):
 
     # 1D
     x_1 = x.reshape((-1, 44100, 1))
-    #model = model_dict["1_dimensional"]
-    #output = model.predict(x_1)[:,0][0]
     model = model_dict["1_dimensional"]
-    output = tflite_predict(model,x_1)[0]
+    output = model.predict(x_1)[:,0][0]
+    #output = tflite_predict(model,x_1)[0]
     output_1 = label_binarizer.inverse_transform(output)
     update_counts(y,output_1,model,model_scores)
     scores_models[model].append(output_1[0])
 
     # 128x128
     x_1 = audio_to_melspectrogram(x,hop_length=345).reshape((-1,128,128,1))
-    #model = model_dict["128_x_128"]
-    #output = model.predict(x_1)[:,0][0]
     model = model_dict["128_x_128"]
-    output = tflite_predict(model,x_1)[0]
+    output = model.predict(x_1)[:,0][0]
+    #output = tflite_predict(model,x_1)[0]
     output_2 = label_binarizer.inverse_transform(output)
     update_counts(y,output_2,model,model_scores)
     scores_models[model].append(output_2[0])
 
     # 128x64
     x_1 = audio_to_melspectrogram(x).reshape((-1,128,64,1))
-    #model = model_dict["128_x_64"]
-    #output = model.predict(x_1)[:,0][0]
     model = model_dict["128_x_64"]
-    output = tflite_predict(model,x_1)[0]
+    output = model.predict(x_1)[:,0][0]
+    #output = tflite_predict(model,x_1)[0]
     output_3 = label_binarizer.inverse_transform(output)
     update_counts(y,output_3,model,model_scores)
     scores_models[model].append(output_3[0])
