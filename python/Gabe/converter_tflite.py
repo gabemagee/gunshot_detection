@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras import Input, layers, optimizers, backend as K
+from tensorflow.keras import backend as K
 import os
 
 def auc(y_true, y_pred):
