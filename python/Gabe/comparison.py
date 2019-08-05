@@ -122,7 +122,7 @@ validation_wav = np.load(data_dir+"augmented_validation_samples.npy")
 labels = np.load(data_dir+"augmented_validation_labels.npy")
 
 for i in range(len(labels)):
-    if (labels[i]=="firework"):
+    if (labels[i]=="fireworks"):
         print(i)
 
 labels = np.array([("gun_shot" if label =="gun_shot" else "other") for label in labels])
