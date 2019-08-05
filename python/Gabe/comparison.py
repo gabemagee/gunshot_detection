@@ -121,11 +121,10 @@ def tflite_predict(interpreter,input_data):
 validation_wav = np.load(data_dir+"augmented_validation_samples.npy")
 labels = np.load(data_dir+"augmented_validation_labels.npy")
 
-for i in range(len(labels)):
-    if (labels[i]=="fireworks"):
-        print(i)
+for i in labels:
+    print(i)
 
-labels = np.array([("fireworks" if label =="fireworks" else "other") for label in labels])
+labels = np.array([("gun_shot" if label =="gun_shot" else "other") for label in labels])
 
 label_binarizer = LabelBinarizer()
 labels = label_binarizer.fit_transform(labels)
@@ -206,7 +205,7 @@ for i in range(len(validation_wav)):
         bar.update(last)
     x = validation_wav[i]
     y = label_binarizer.inverse_transform(validation_label[:,0][i])
-
+    print(y)
 
     # 1D
     x_1 = x.reshape((-1, 44100, 1))
