@@ -217,7 +217,6 @@ for i in range(len(validation_wav)):
         bar.update(last)
     x = validation_wav[i]
     y = label_binarizer.inverse_transform(validation_label[:,0][i])
-    print(y)
 
     # 1D
     x_1 = x.reshape((-1, 44100, 1))
@@ -248,7 +247,7 @@ for i in range(len(validation_wav)):
 
     #OR
     #1 2
-    model = model_dict["1_dimensional_or_128_x_128"]
+    model = model_dict["128_x_128_or_1_dimensional"]
     if (output_1[0] =="gun_shot" or output_2[0] =="gun_shot"):
         output = ["gun_shot"]
     else:
@@ -281,7 +280,7 @@ for i in range(len(validation_wav)):
     #AND
 
     #1 2
-    model = model_dict["1_dimensional_and_128_x_128"]
+    model = model_dict["128_x_128_and_1_dimensional"]
     if (output_1[0] =="gun_shot" and output_2[0] =="gun_shot"):
         output = ["gun_shot"]
     else:
