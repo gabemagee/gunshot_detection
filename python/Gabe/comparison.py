@@ -121,11 +121,12 @@ def tflite_predict(interpreter,input_data):
 validation_wav = np.load(data_dir+"augmented_validation_samples.npy")
 labels = np.load(data_dir+"augmented_validation_labels.npy")
 
+target_label = "fireworks"
 labels_2 = []
 v_samp = []
 index = 0
 for i in labels:
-    if i == "gun_shot" or i == "fireworks":
+    if i == "gun_shot" or i == target_label:
         print(i)
         labels_2.append(i)
         v_samp.append(validation_wav[index])
