@@ -8,3 +8,6 @@ Our short message service (SMS) pipeline for detecting gunshots was deployed on 
 
 ### Models
 We trained three different models on a set of nearly 60,000 two-second audio samples to distinguish gunshots from other noises. The first model was a one-dimensional convolutional neural network that takes a two-second time sequence of audio as input. The second and third models were two-dimensional convolutional neural network that takes a spectrogram of a two-second audio sample as input. For inference in practice, the decision on a sample's class was reached by majority-rules consensus between the three models.
+
+### Dataset
+Our training features and samples along with our trained models can be found on [Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/2KI6IH).
