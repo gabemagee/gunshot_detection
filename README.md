@@ -11,3 +11,19 @@ We trained three different models on a set of nearly 60,000 two-second audio sam
 
 ### Dataset
 Our training features and samples along with our trained models can be found on [Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/2KI6IH).
+
+### Citation
+This repository contains the source code accompanying the paper [Low Cost Gunshot Detection using Deep Learning on the Raspberry Pi](https://ieeexplore.ieee.org/abstract/document/9006456).
+
+Please cite as:
+```
+@INPROCEEDINGS{9006456,
+  author={A. {Morehead} and L. {Ogden} and G. {Magee} and R. {Hosler} and B. {White} and G. {Mohler}},
+  booktitle={2019 IEEE International Conference on Big Data (Big Data)}, 
+  title={Low Cost Gunshot Detection using Deep Learning on the Raspberry Pi}, 
+  year={2019},
+  volume={},
+  number={},
+  pages={3038-3044},
+  doi={10.1109/BigData47090.2019.9006456}}
+ ```
