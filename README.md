@@ -22,8 +22,6 @@ Please cite as:
   booktitle={2019 IEEE International Conference on Big Data (Big Data)}, 
   title={Low Cost Gunshot Detection using Deep Learning on the Raspberry Pi}, 
   year={2019},
-  volume={},
-  number={},
   pages={3038-3044},
   doi={10.1109/BigData47090.2019.9006456}}
  ```
